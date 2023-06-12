@@ -1,0 +1,100 @@
+name: flow
+
+steps:
+  init:
+    next:
+      default: intro
+
+  end:
+    action: Text
+    parameters:
+      texts:
+        - 😉 Pesquisa finalizada
+
+  error:
+    action: Text
+    parameters:
+      texts:
+        - 😕 Desculpe, não pude encontrar nada...
+
+  intro:
+    action: Text
+    next:
+      default: commands
+    parameters:
+      texts:
+        - 👋🏻 Olá visitante
+        - ""
+        - 🤖 Encontre animes e mangas com o Animei Bot
+
+  commands:
+    action: Button
+    next:
+      Mangas: mangaInput
+      Animes: animeAlert
+      default: nocommand
+    parameters:
+      texts:
+        - "Selecione o que deseja procurar 👇🏻"
+      buttons:
+        - Mangas
+        - Animes
+
+  nocommand:
+    action: Text
+    next:
+      default: commands
+    parameters:
+      texts:
+        - 😵 Desculpe, valor inválido
+
+  animeAlert:
+    action: Text
+    next:
+      default: commands
+    parameters:
+      texts:
+        - 😢 Infelizmente a pesquisa por animes ainda não está disponível. Por favor, selecione outra opção
+
+  mangaInput:
+    action: Input
+    next:
+      .+ [0-9]{1,}: manga
+      default: mangaInputError
+    parameters:
+      texts:
+        - 🤩 Certo, vamos procurar pelo seu manga!
+        - ""
+        - 🤔 Qual o nome e capítulo?
+
+  mangaInputError:
+    action: Input
+    next:
+      .+ [0-9]{1,}: manga
+      default: mangaInputError
+    parameters:
+      texts:
+        - 😕 Desculpe, não entendi o que quis dizer.
+        - ""
+        - "Escreva novamente, mas nesse modelo:"
+        - ""
+        - "👉🏻 Exemplo: Naruto 1"
+
+  manga:
+    action: Input
+    next:
+      \/stop: stop
+      default: end
+    parameters:
+      texts:
+        - 🔎 Iniciando a procura...
+        - ""
+        - ❌ Caso deseje cancelar a pesquisa, digite /stop
+
+  stop:
+    action: Text
+    next:
+      default: end
+    parameters:
+      texts:
+        - "Parando a pesquisa"

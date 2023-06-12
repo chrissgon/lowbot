@@ -1,0 +1,57 @@
+name: flow
+
+steps:
+  init:
+    next:
+      default: audio
+
+  audio:
+    next:
+      default: button
+    action: Audio
+    parameters:
+      audio: ./mocks/music.mp3
+
+  button:
+    next:
+      default: document
+    action: Button
+    parameters:
+      buttons:
+        - yes
+        - no
+
+  document:
+    next:
+      default: image
+    action: Document
+    parameters:
+      document: ./mocks/features.txt
+
+  image:
+    next:
+      default: text
+    action: Image
+    parameters:
+      image: ./mocks/image.jpg
+
+  text:
+    next:
+      default: video
+    action: Text
+    parameters:
+      texts:
+        - texts
+
+  video:
+    next:
+      default: end
+    action: Video
+    parameters:
+      video: ./mocks/video.mp4
+
+  end:
+    action: Text
+    parameters:
+      texts:
+        - end

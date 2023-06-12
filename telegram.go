@@ -1,0 +1,133 @@
+package lowbot
+
+import (
+	"fmt"
+	"os"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+)
+
+type Telegram struct {
+	conn *tgbotapi.BotAPI
+}
+
+func (tg *Telegram) SendAudio(in Interaction) error {
+	file := tg.getRequestFileDate(in.Parameters.Audio)
+
+	_, err := tg.conn.Send(tgbotapi.NewAudio(StringToInt64(in.SessionID), file))
+
+	if err != nil {
+		return err
+	}
+
+	return tg.SendText(in)
+}
+
+func (tg *Telegram) SendButton(in Interaction) error {
+	button := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tg.getButtons(in)...,
+		),
+	)
+
+	message := tgbotapi.NewMessage(StringToInt64(in.SessionID), in.Parameters.Text)
+	message.ReplyMarkup = button
+
+	_, err := tg.conn.Send(message)
+	return err
+}
+
+func (*Telegram) getButtons(in Interaction) (buttons []tgbotapi.InlineKeyboardButton) {
+	for _, button := range in.Parameters.Buttons {
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(button, button))
+	}
+	return
+}
+
+func (tg *Telegram) SendDocument(in Interaction) error {
+	file := tg.getRequestFileDate(in.Parameters.Document)
+
+	_, err := tg.conn.Send(tgbotapi.NewDocument(StringToInt64(in.SessionID), file))
+
+	if err != nil {
+		return err
+	}
+
+	return tg.SendText(in)
+}
+
+func (tg *Telegram) SendImage(in Interaction) error {
+	file := tg.getRequestFileDate(in.Parameters.Image)
+
+	_, err := tg.conn.Send(tgbotapi.NewPhoto(StringToInt64(in.SessionID), file))
+
+	if err != nil {
+		return err
+	}
+
+	return tg.SendText(in)
+}
+
+func (tg *Telegram) SendText(in Interaction) error {
+	_, err := tg.conn.Send(tgbotapi.NewMessage(StringToInt64(in.SessionID), in.Parameters.Text))
+	return err
+}
+
+func (tg *Telegram) SendVideo(in Interaction) error {
+	file := tg.getRequestFileDate(in.Parameters.Video)
+
+	_, err := tg.conn.Send(tgbotapi.NewVideo(StringToInt64(in.SessionID), file))
+
+	if err != nil {
+		return err
+	}
+
+	return tg.SendText(in)
+}
+
+func (tg *Telegram) Next(in chan Interaction) {
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+
+	updates := tg.conn.GetUpdatesChan(u)
+
+	for update := range updates {
+		var i Interaction
+
+		if update.Message != nil {
+			i = NewInteractionMessageText(Int64ToString(update.Message.Chat.ID), update.Message.Text)
+		}
+
+		if update.CallbackQuery != nil {
+			i = NewInteractionMessageText(Int64ToString(update.CallbackQuery.From.ID), update.CallbackData())
+		}
+
+		in <- i
+	}
+}
+
+func (*Telegram) getRequestFileDate(str string) (file tgbotapi.RequestFileData) {
+	file = tgbotapi.FilePath(str)
+
+	if IsURL(str) {
+		file = tgbotapi.FileURL(str)
+	}
+	return
+}
+
+func NewTelegram() (Channel, error) {
+	token := os.Getenv("TELEGRAM_TOKEN")
+
+	if token == "" {
+		return nil, fmt.Errorf("not found TELEGRAM_TOKEN")
+	}
+
+	conn, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_TOKEN"))
+	conn.Debug = false
+
+	if err != nil {
+		return nil, fmt.Errorf("error NewTelegram")
+	}
+
+	return &Telegram{conn: conn}, nil
+}
