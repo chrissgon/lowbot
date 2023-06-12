@@ -12,15 +12,13 @@ type Telegram struct {
 }
 
 func (tg *Telegram) SendAudio(in Interaction) error {
+	tg.SendText(in)
+
 	file := tg.getRequestFileDate(in.Parameters.Audio)
 
 	_, err := tg.conn.Send(tgbotapi.NewAudio(StringToInt64(in.SessionID), file))
 
-	if err != nil {
-		return err
-	}
-
-	return tg.SendText(in)
+	return err
 }
 
 func (tg *Telegram) SendButton(in Interaction) error {
@@ -45,27 +43,23 @@ func (*Telegram) getButtons(in Interaction) (buttons []tgbotapi.InlineKeyboardBu
 }
 
 func (tg *Telegram) SendDocument(in Interaction) error {
+	tg.SendText(in)
+
 	file := tg.getRequestFileDate(in.Parameters.Document)
 
 	_, err := tg.conn.Send(tgbotapi.NewDocument(StringToInt64(in.SessionID), file))
 
-	if err != nil {
-		return err
-	}
-
-	return tg.SendText(in)
+	return err
 }
 
 func (tg *Telegram) SendImage(in Interaction) error {
+	tg.SendText(in)
+
 	file := tg.getRequestFileDate(in.Parameters.Image)
 
 	_, err := tg.conn.Send(tgbotapi.NewPhoto(StringToInt64(in.SessionID), file))
 
-	if err != nil {
-		return err
-	}
-
-	return tg.SendText(in)
+	return err
 }
 
 func (tg *Telegram) SendText(in Interaction) error {
@@ -74,15 +68,13 @@ func (tg *Telegram) SendText(in Interaction) error {
 }
 
 func (tg *Telegram) SendVideo(in Interaction) error {
+	tg.SendText(in)
+
 	file := tg.getRequestFileDate(in.Parameters.Video)
 
 	_, err := tg.conn.Send(tgbotapi.NewVideo(StringToInt64(in.SessionID), file))
 
-	if err != nil {
-		return err
-	}
-
-	return tg.SendText(in)
+	return err
 }
 
 func (tg *Telegram) Next(in chan Interaction) {

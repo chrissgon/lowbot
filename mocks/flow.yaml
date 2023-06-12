@@ -20,6 +20,8 @@ steps:
       buttons:
         - yes
         - no
+      texts:
+        - buttons here
 
   document:
     next:

@@ -76,6 +76,14 @@ func (step *Step) AddResponse(in Interaction) {
 	step.Responses = append(step.Responses, in)
 }
 
+func (step *Step) GetLastResponse() Interaction {
+	return step.Responses[len(step.Responses)-1]
+}
+
+func (step *Step) GetLastResponseText() string {
+	return step.Responses[len(step.Responses)-1].Parameters.Text
+}
+
 func NewFlow(path string) (Flow, error) {
 	flow := Flow{}
 	bytes, err := ioutil.ReadFile(path)

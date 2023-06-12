@@ -1,6 +1,9 @@
 package lowbot
 
-import "testing"
+import (
+	"sync"
+	"testing"
+)
 
 func TestStartBot(t *testing.T) {
 	SetCustomActions(ActionsMap{
@@ -9,9 +12,15 @@ func TestStartBot(t *testing.T) {
 		},
 	})
 
-	base, _ := NewFlow("./mocks/button.yaml")
-	channel, _ := NewDiscord()
+	base, _ := NewFlow("./mocks/flow.yaml")
+	discord, _ := NewDiscord()
+	telegram, _ := NewTelegram()
 	persist, _ := NewLocalPersist()
 
-	go StartBot(base, channel, persist)
+	go StartBot(base, discord, persist)
+	go StartBot(base, telegram, persist)
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	wg.Wait()
 }

@@ -130,6 +130,7 @@ func NewMock() Flow {
 				Action: "Button",
 				Parameters: StepParameters{
 					Buttons: []string{"yes", "no"},
+					Texts: []string{"buttons here"},
 				},
 			},
 			"document": {
