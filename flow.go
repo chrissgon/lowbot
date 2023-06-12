@@ -46,8 +46,8 @@ func (flow *Flow) Next(in Interaction) *Step {
 		matched, _ := regexp.MatchString(pattern, in.Parameters.Text)
 
 		if matched {
-			flow.Current.AddResponse(in)
 			flow.Current = flow.Steps[next]
+			flow.Current.AddResponse(in)
 			return flow.Current
 		}
 	}
