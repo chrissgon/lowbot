@@ -14,6 +14,7 @@ var actions = ActionsMap{
 	"Input":    ActionInput,
 	"Text":     ActionText,
 	"Video":    ActionVideo,
+	"Wait":     ActionWait,
 }
 
 func SetCustomActions(custom ActionsMap) {
@@ -96,4 +97,8 @@ func ActionText(sessionID string, channel Channel, step *Step) (bool, error) {
 func ActionVideo(sessionID string, channel Channel, step *Step) (bool, error) {
 	err := channel.SendVideo(NewInteractionMessageVideo(sessionID, step.Parameters.Video, ParseTemplate(step.Parameters.Texts)))
 	return GetActionReturn(step.Action, true, err)
+}
+
+func ActionWait(sessionID string, channel Channel, step *Step) (bool, error) {
+	return GetActionReturn(step.Action, false, nil)
 }
