@@ -69,9 +69,9 @@ func MyNewPersist () lowbot.Persist {
   // implements Persist
 }
 
-// And you can pass in the StartBot
 flow, _ := lowbot.NewFlow("your_flow.yaml")
 
+// And you can pass in the StartBot
 lowbot.StartBot(flow, MyNewChannel(), MyNewPersist())
 ```
 
