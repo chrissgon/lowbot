@@ -2,6 +2,7 @@ package lowbot
 
 import (
 	"fmt"
+	"time"
 )
 
 var Debug = true
@@ -11,6 +12,10 @@ func StartBot(base Flow, channel Channel, persist Persist) error {
 	ins := make(chan Interaction)
 
 	go channel.Next(ins)
+
+	if Debug {
+		fmt.Println("Bot is now running. Press CTRL-C to exit.")
+	}
 
 	for in := range ins {
 		flow, err := persist.Get(in.SessionID)
@@ -22,7 +27,7 @@ func StartBot(base Flow, channel Channel, persist Persist) error {
 		err = runAction(flow, channel, in)
 
 		if Debug {
-			fmt.Printf("lowbot: %v\n", err)
+			fmt.Printf("%v: <%v> %v\n", time.Now().UTC(), in.SessionID, err)
 		}
 
 		persist.Set(in.SessionID, flow)

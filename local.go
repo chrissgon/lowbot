@@ -38,10 +38,12 @@ func (loc *Local) Get(sessionID string) (*Flow, error) {
 func (loc *Local) Set(sessionID string, flow *Flow) error {
 	loc.Sessions[sessionID] = flow
 
-	go func() {
-		file, _ := json.MarshalIndent(loc, "", " ")
-		ioutil.WriteFile("./local.json", file, 0644)
-	}()
+	if AutoLoad {
+		go func() {
+			file, _ := json.MarshalIndent(loc, "", " ")
+			ioutil.WriteFile("./local.json", file, 0644)
+		}()
+	}
 
 	return nil
 }
