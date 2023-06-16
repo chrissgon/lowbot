@@ -1,0 +1,25 @@
+name: hello
+
+steps:
+  init:
+    next:
+      default: input
+
+  input:
+    action: Input
+    next:
+      default: custom
+    parameters:
+      texts:
+        - 👋 Hi. What is your name?
+
+  custom:
+    action: TextUsername
+    next:
+      default: end
+    parameters:
+      texts:
+        - Nice to meet you %v
+
+  end:
+    action: Wait

@@ -1,0 +1,67 @@
+# O "name" define o nome do fluxo
+name: lowbot
+
+# O "steps" indica as etapas do fluxo
+steps:
+  # O "init" é a etapa inicial
+  # Ela apenas indica o início do fluxo
+  init:
+    # O "next" escolhe a próxima etapa
+    # O valor "default" é obrigatório
+    next:
+      default: intro
+
+  intro:
+    # A "action" define a ação que a etapa vai realizar
+    # A action "Button" envia texto e botões para o usuário
+    action: Button
+    # No "parameters" definimos informações adicionais para a "action"
+    parameters:
+      # O "texts" informa os textos
+      texts:
+        - 👋🏻 Olá, bem vindo ao tutorial do lowbot 🤖
+        - Conseguiu entender a explicação?
+      # O "buttons" informa os botões (Sim, Não)
+      buttons:
+        - Sim
+        - Não
+    # O "next" consegue definir a próxima etapa com base na resposta
+    # O "default" indica a próxima etapa por padrão
+    next:
+      Sim: agradecimento
+      Não: desculpas
+      default: errado
+
+  agradecimento:
+    # A action "Text" apenas envia um texto
+    action: Text
+    parameters:
+      texts:
+        - 🤩 Que incrível!
+        - 📚 Confira nossa documentação em https://github.com/chrissgon/lowbot
+    next:
+      default: end
+
+  desculpas:
+    action: Text
+    parameters:
+      texts:
+        - 🥹 Que pena. Nesse caso você poderia me ajudar?
+        - 😅 Comente no artigo sua crítica, vou me esforçar para acertar na próxima!
+    next:
+      default: end
+
+  errado:
+    action: Text
+    parameters:
+      texts:
+        - 😕 Desculpe, não entendi!
+    next:
+      default: intro
+    
+  # A etapa "end" indica o fim do fluxo
+  end:
+    action: Text
+    parameters:
+      texts:
+        - 👋🏻 Agradeço a atenção, até logo!

@@ -1,0 +1,68 @@
+name: dungeon
+
+steps:
+  init:
+    next:
+      default: intro
+  
+  intro:
+    action: Button
+    next:
+      Right: minotaur
+      default: found
+    parameters:
+      texts:
+        - 👋 Hello, you are an explorer and got lost in a dungeon. 
+        - 💀 Try to find your way out alive.
+        - ""
+        - Choose one of the paths below. 👇🏻
+      buttons:
+        - Right
+        - Left
+
+  minotaur:
+    action: Button
+    next:
+      Archery 🏹: minotaurKillYou
+      Sword 🗡: minotaurDead
+    parameters:
+      texts:
+        - 😱 Ooh no, you found a minotaur
+        - ""
+        - Choose a weapon to defend yourself. 👇🏻
+      buttons:
+        - Archery 🏹
+        - Sword 🗡
+
+  minotaurKillYou:
+    action: Text
+    next:
+      default: end
+    parameters:
+      texts:
+        - Ooh no, the minotaur is immune to arrows. 🏹
+        - You were killed by the minotaur. 💀
+  
+  minotaurDead:
+    action: Text
+    next:
+      default: found
+    parameters:
+      texts:
+        - You cut off the Minotaur's head. 🐎
+        - ""
+        - You are a brave warrior. 💪🏻
+
+  found:
+    action: Text
+    next:
+      default: end
+    parameters:
+      texts:
+        - You entered the exit. Congratulations! 🥳🥳
+
+  end:
+    action: Text
+    parameters:
+      texts:
+        - The adventure is over...

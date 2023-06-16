@@ -1,0 +1,37 @@
+name: pingpong
+
+steps:
+  init:
+    next:
+      default: alert
+
+  alert:
+    action: Text
+    next:
+      default: wait
+    parameters:
+      texts:
+        - send "ping" or "pong"
+
+  wait:
+    action: Wait
+    next:
+      ping: pong
+      pong: ping
+      default: alert
+
+  ping:
+    action: Text
+    next:
+      default: wait
+    parameters:
+      texts:
+        - Ping!
+
+  pong:
+    action: Text
+    next:
+      default: wait
+    parameters:
+      texts:
+        - Pong!
