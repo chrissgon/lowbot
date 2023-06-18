@@ -38,15 +38,15 @@ func startFlow(sessionID string, flow Flow) *Flow {
 }
 
 func processStep(flow *Flow, channel Channel, in Interaction) error {
-	next, err := runAction(flow.Next(in), channel)
+	next, err := RunAction(flow.Next(in), channel)
 
 	if Debug {
 		fmt.Printf("%v: <%v> Action%s %v\n", time.Now().UTC(), in.SessionID, flow.Current.Action, err)
 	}
 
 	if err != nil {
-		runActionError(flow, channel)
-		runAction(flow.End(), channel)
+		RunActionError(flow, channel)
+		RunAction(flow.End(), channel)
 		return NewError("RunAction", err)
 	}
 
