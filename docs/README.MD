@@ -1,4 +1,4 @@
-# Documentation
+#  Documentation 📚
 
 - [Understanding the Flows](#understanding-the-flows)
   - [Actions and Parameters](#actions-and-parameters)
@@ -154,7 +154,7 @@ If you need custom actions, you can create and define them with the SetCustomAct
 
 ```go
 lowbot.SetCustomActions(lowbot.ActionsMap{
-    "Custom": funcfunc(flow *Flow, channel Channel) (bool, error) {
+    "Custom": func(flow *lowbot.Flow, channel lowbot.Channel) (bool, error) {
         // your rules
         next := false
         err := nil
