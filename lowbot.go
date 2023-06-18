@@ -6,7 +6,6 @@ import (
 )
 
 var Debug = true
-// var AutoLoad = true
 
 func StartBot(base Flow, channel Channel, persist Persist) error {
 	ins := make(chan Interaction)
