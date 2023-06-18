@@ -6,7 +6,7 @@ import (
 )
 
 var Debug = true
-var AutoLoad = true
+// var AutoLoad = true
 
 func StartBot(base Flow, channel Channel, persist Persist) error {
 	ins := make(chan Interaction)
@@ -21,37 +21,38 @@ func StartBot(base Flow, channel Channel, persist Persist) error {
 		flow, err := persist.Get(in.SessionID)
 
 		if err != nil || flow.IsEnd() {
-			flow = startFlow(base)
+			flow = startFlow(in.SessionID, base)
 		}
 
-		err = runAction(flow, channel, in)
+		err = processStep(flow, channel, in)
 
-		if Debug {
-			fmt.Printf("%v: <%v> %v\n", time.Now().UTC(), in.SessionID, err)
-		}
-
-		persist.Set(in.SessionID, flow)
+		persist.Set(flow)
 	}
 
 	return nil
 }
 
-func startFlow(flow Flow) *Flow {
+func startFlow(sessionID string, flow Flow) *Flow {
 	flow.Start()
+	flow.SessionID = sessionID
 	return &flow
 }
 
-func runAction(flow *Flow, channel Channel, i Interaction) error {
-	next, err := RunAction(i.SessionID, channel, flow.Next(i))
+func processStep(flow *Flow, channel Channel, in Interaction) error {
+	next, err := runAction(flow.Next(in), channel)
+
+	if Debug {
+		fmt.Printf("%v: <%v> Action%s %v\n", time.Now().UTC(), in.SessionID, flow.Current.Action, err)
+	}
 
 	if err != nil {
-		RunActionError(i.SessionID, channel, flow)
-		RunAction(i.SessionID, channel, flow.End())
+		runActionError(flow, channel)
+		runAction(flow.End(), channel)
 		return NewError("RunAction", err)
 	}
 
 	if next {
-		return runAction(flow, channel, i)
+		return processStep(flow, channel, in)
 	}
 
 	return err

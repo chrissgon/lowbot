@@ -1,25 +1,25 @@
 # Documentation
 
-- [Understanding the Flows 🛣️](#understanding-the-flows-🛣️)
+- [Understanding the Flows](#understanding-the-flows)
   - [Actions and Parameters](#actions-and-parameters)
-  - [Next](#next)
-  - [Custom Actions](#actions)
-- [Implementing the Channels 🚛]()
-  - [Telegram]()
-  - [Discord]()
-- [Implementing the Persists 🗃️]()
+  - [Action Function](#action-function)
+  - [Custom Actions](#custom-actions)
+- [Implementing the Channels](#implementing-the-channels)
+  - [Supported Channels](#supported-channels)
+- [Implementing the Persists](#implementing-the-persists)
+  - [Supported Persists](#supported-persists)
 - [Examples](https://github.com/chrissgon/lowbot/tree/main/docs/examples)
 
-# Understanding the Flows 🛣️
+# Understanding the Flows
 
-The `flow` defines the user's path through the bot. 🚶🏻
+The `flow` defines the user's path through the bot. 🛣️
 
 It has `steps` that specify the details of each step.
 
 Each step has mandatory values, and they are:
 
-- `action`: Defines the action taken;
-- `parameters`: Additional information about `action`;
+- `action`: Defines the action taken.
+- `parameters`: Additional information about `action`.
 - `next`: Informs the next step.
 
 The flow must be written in a YAML file, here is an example: 👇🏻
@@ -44,7 +44,7 @@ steps:
 
 Now let's understand about each of the values mentioned. 🤩
 
-## Actions and Parameters
+## Actions and Parametersi
 
 The `action` are functions that contain business rules.
 
@@ -130,4 +130,93 @@ parameters:
 action: Wait
 ```
 
-## Parameters
+## Action Function
+
+Now that we understand that the `action` is a function, and that we need to tell the `step` which action will be performed, let's understand better its signature.
+
+```go
+func (flow *Flow, channel Channel) (bool, error) {}
+```
+
+The `action` function receive two parameters:
+
+- `flow`: Flow pointer.
+- `channel`: Communication Channel.
+
+The function should return two values:
+
+- `bool`: Indicates whether the flow should proceed to the next step or wait.
+- `error`: Indicates if an error occurred when executing the action.
+
+## Custom Actions
+
+If you need custom actions, you can create and define them with the SetCustomActions function.
+
+```go
+lowbot.SetCustomActions(lowbot.ActionsMap{
+    "Custom": funcfunc(flow *Flow, channel Channel) (bool, error) {
+        // your rules
+        next := false
+        err := nil
+        return next, err
+    },
+})
+```
+
+The definition in the flow YAML file: 👇🏻
+
+```yaml
+action: Custom
+```
+
+# Implementing the Channels
+
+LowBot provides an interface to channels that you can implement. 🚛
+
+```go
+type Channel interface {
+	SendAudio(Interaction) error
+	SendButton(Interaction) error
+	SendDocument(Interaction) error
+	SendImage(Interaction) error
+	SendText(Interaction) error
+	SendVideo(Interaction) error
+	Next(chan Interaction)
+}
+```
+
+The `Send` methods receive an `Interaction` and should return an `error`.
+
+The `Next` method receive a `chan` of `Interaction`, which is filled with the messages
+
+## Supported Channels
+
+|     | Channel  | Requirements     | Function      |
+| --- | -------- | ---------------- | ------------- |
+| ✅  | Telegram | `TELEGRAM_TOKEN` | `NewTelegram` |
+| ✅  | Discord  | `DISCORD_TOKEN`  | `NewDiscord`  |
+
+# Implementing the Persists
+
+LowBot provides an interface to persist that you can implement. 🗃️
+
+```go
+type Persist interface {
+	Set(flow *Flow) error
+	Get(sessionID string) (*Flow, error)
+}
+```
+
+The `Set` method receive an `Flow` and should return an `error`.
+
+The `Get` method receive the `SessionID` of `Flow`, and should return a `Flow` and `error`.
+
+## Supported Persists
+
+|     | Channel | Requirements | Function          |
+| --- | ------- | ------------ | ----------------- |
+| ✅  | Local   | -            | `NewLocalPersist` |
+
+# Examples
+
+You can see some examples in [examples](https://github.com/chrissgon/lowbot/tree/main/docs/examples) folder.

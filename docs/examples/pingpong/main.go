@@ -5,8 +5,8 @@ import (
 )
 
 func main() {
-	// disable auto load persist
-	lowbot.AutoLoad = false
+	// disable local persistence
+	lowbot.EnableLocalPersist = false
 
 	// make a flow
 	flow, _ := lowbot.NewFlow("./flow.yaml")

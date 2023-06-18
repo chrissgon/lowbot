@@ -11,6 +11,8 @@ type Local struct {
 	Sessions map[string]*Flow
 }
 
+var EnableLocalPersist = true
+
 func (loc *Local) Load() error {
 	file, err := os.Open("./local.json")
 
@@ -35,10 +37,10 @@ func (loc *Local) Get(sessionID string) (*Flow, error) {
 	return flow, nil
 }
 
-func (loc *Local) Set(sessionID string, flow *Flow) error {
-	loc.Sessions[sessionID] = flow
+func (loc *Local) Set(flow *Flow) error {
+	loc.Sessions[flow.SessionID] = flow
 
-	if AutoLoad {
+	if EnableLocalPersist {
 		go func() {
 			file, _ := json.MarshalIndent(loc, "", " ")
 			ioutil.WriteFile("./local.json", file, 0644)
@@ -51,7 +53,7 @@ func (loc *Local) Set(sessionID string, flow *Flow) error {
 func NewLocalPersist() (Persist, error) {
 	loc := &Local{Sessions: map[string]*Flow{}}
 
-	if AutoLoad {
+	if EnableLocalPersist {
 		return loc, loc.Load()
 	}
 

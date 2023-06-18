@@ -4,17 +4,17 @@ import (
 	"fmt"
 )
 
-type ActionsMap map[string]func(sessionID string, channel Channel, step *Step) (bool, error)
+type ActionsMap map[string]func(flow *Flow, channel Channel) (bool, error)
 
 var actions = ActionsMap{
-	"Audio":    ActionAudio,
-	"Button":   ActionButton,
-	"Document": ActionDocument,
-	"Image":    ActionImage,
-	"Input":    ActionInput,
-	"Text":     ActionText,
-	"Video":    ActionVideo,
-	"Wait":     ActionWait,
+	"Audio":    actionAudio,
+	"Button":   actionButton,
+	"Document": actionDocument,
+	"Image":    actionImage,
+	"Input":    actionInput,
+	"Text":     actionText,
+	"Video":    actionVideo,
+	"Wait":     actionWait,
 }
 
 func SetCustomActions(custom ActionsMap) {
@@ -23,7 +23,13 @@ func SetCustomActions(custom ActionsMap) {
 	}
 }
 
-func RunAction(sessionID string, channel Channel, step *Step) (bool, error) {
+func runAction(flow *Flow, channel Channel) (bool, error) {
+	if flow == nil {
+		return false, nil
+	}
+
+	step := flow.Current
+
 	if step == nil {
 		return false, nil
 	}
@@ -34,10 +40,10 @@ func RunAction(sessionID string, channel Channel, step *Step) (bool, error) {
 		return false, NewError("RunAction", fmt.Errorf("not found action: %s", step.Action))
 	}
 
-	return action(sessionID, channel, step)
+	return action(flow, channel)
 }
 
-func RunActionError(sessionID string, channel Channel, flow *Flow) (bool, error) {
+func runActionError(flow *Flow, channel Channel) (bool, error) {
 	if flow == nil {
 		return false, NewError("RunActionError", fmt.Errorf("nil flow"))
 	}
@@ -54,51 +60,51 @@ func RunActionError(sessionID string, channel Channel, flow *Flow) (bool, error)
 		return false, NewError("RunActionError", fmt.Errorf("not found action: %s", step.Action))
 	}
 
-	return action(sessionID, channel, step)
+	return action(flow, channel)
 }
 
-func GetActionReturn(name string, next bool, err error) (bool, error) {
-	if err != nil {
-		return next, NewError("Action"+name, err)
-	}
-	return next, nil
+func actionAudio(flow *Flow, channel Channel) (bool, error) {
+	step := flow.Current
+	err := channel.SendAudio(NewInteractionMessageAudio(flow.SessionID, step.Parameters.Audio, ParseTemplate(step.Parameters.Texts)))
+	return true, err
 }
 
-func ActionAudio(sessionID string, channel Channel, step *Step) (bool, error) {
-	err := channel.SendAudio(NewInteractionMessageAudio(sessionID, step.Parameters.Audio, ParseTemplate(step.Parameters.Texts)))
-	return GetActionReturn(step.Action, true, err)
+func actionButton(flow *Flow, channel Channel) (bool, error) {
+	step := flow.Current
+	err := channel.SendButton(NewInteractionMessageButton(flow.SessionID, step.Parameters.Buttons, ParseTemplate(step.Parameters.Texts)))
+	return false, err
 }
 
-func ActionButton(sessionID string, channel Channel, step *Step) (bool, error) {
-	err := channel.SendButton(NewInteractionMessageButton(sessionID, step.Parameters.Buttons, ParseTemplate(step.Parameters.Texts)))
-	return GetActionReturn(step.Action, false, err)
+func actionDocument(flow *Flow, channel Channel) (bool, error) {
+	step := flow.Current
+	err := channel.SendDocument(NewInteractionMessageDocument(flow.SessionID, step.Parameters.Document, ParseTemplate(step.Parameters.Texts)))
+	return true, err
 }
 
-func ActionDocument(sessionID string, channel Channel, step *Step) (bool, error) {
-	err := channel.SendDocument(NewInteractionMessageDocument(sessionID, step.Parameters.Document, ParseTemplate(step.Parameters.Texts)))
-	return GetActionReturn(step.Action, true, err)
+func actionImage(flow *Flow, channel Channel) (bool, error) {
+	step := flow.Current
+	err := channel.SendImage(NewInteractionMessageImage(flow.SessionID, step.Parameters.Image, ParseTemplate(step.Parameters.Texts)))
+	return true, err
 }
 
-func ActionImage(sessionID string, channel Channel, step *Step) (bool, error) {
-	err := channel.SendImage(NewInteractionMessageImage(sessionID, step.Parameters.Image, ParseTemplate(step.Parameters.Texts)))
-	return GetActionReturn(step.Action, true, err)
+func actionInput(flow *Flow, channel Channel) (bool, error) {
+	step := flow.Current
+	err := channel.SendText(NewInteractionMessageText(flow.SessionID, ParseTemplate(step.Parameters.Texts)))
+	return false, err
 }
 
-func ActionInput(sessionID string, channel Channel, step *Step) (bool, error) {
-	err := channel.SendText(NewInteractionMessageText(sessionID, ParseTemplate(step.Parameters.Texts)))
-	return GetActionReturn(step.Action, false, err)
+func actionText(flow *Flow, channel Channel) (bool, error) {
+	step := flow.Current
+	err := channel.SendText(NewInteractionMessageText(flow.SessionID, ParseTemplate(step.Parameters.Texts)))
+	return true, err
 }
 
-func ActionText(sessionID string, channel Channel, step *Step) (bool, error) {
-	err := channel.SendText(NewInteractionMessageText(sessionID, ParseTemplate(step.Parameters.Texts)))
-	return GetActionReturn(step.Action, true, err)
+func actionVideo(flow *Flow, channel Channel) (bool, error) {
+	step := flow.Current
+	err := channel.SendVideo(NewInteractionMessageVideo(flow.SessionID, step.Parameters.Video, ParseTemplate(step.Parameters.Texts)))
+	return true, err
 }
 
-func ActionVideo(sessionID string, channel Channel, step *Step) (bool, error) {
-	err := channel.SendVideo(NewInteractionMessageVideo(sessionID, step.Parameters.Video, ParseTemplate(step.Parameters.Texts)))
-	return GetActionReturn(step.Action, true, err)
-}
-
-func ActionWait(sessionID string, channel Channel, step *Step) (bool, error) {
-	return GetActionReturn(step.Action, false, nil)
+func actionWait(flow *Flow, channel Channel) (bool, error) {
+	return false, nil
 }

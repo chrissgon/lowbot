@@ -9,9 +9,10 @@ import (
 )
 
 type Flow struct {
-	Name    string `yaml:"name"`
-	Steps   Steps  `yaml:"steps"`
-	Current *Step
+	SessionID string
+	Name      string `yaml:"name"`
+	Steps     Steps  `yaml:"steps"`
+	Current   *Step
 }
 
 type Step struct {
@@ -37,7 +38,7 @@ func (flow *Flow) Start() {
 	flow.Current = flow.Steps["init"]
 }
 
-func (flow *Flow) Next(in Interaction) *Step {
+func (flow *Flow) Next(in Interaction) *Flow {
 	if flow.NoHasNext() {
 		return nil
 	}
@@ -48,22 +49,22 @@ func (flow *Flow) Next(in Interaction) *Step {
 		if matched {
 			flow.Current = flow.Steps[next]
 			flow.Current.AddResponse(in)
-			return flow.Current
+			return flow
 		}
 	}
 
 	flow.Current = flow.Steps[flow.Current.Next["default"]]
 	flow.Current.AddResponse(in)
-	return flow.Current
+	return flow
 }
 
 func (flow *Flow) NoHasNext() bool {
 	return flow.Current.Next == nil
 }
 
-func (flow *Flow) End() *Step {
+func (flow *Flow) End() *Flow {
 	flow.Current = flow.Steps["end"]
-	return flow.Current
+	return flow
 }
 
 func (flow *Flow) IsEnd() bool {

@@ -7,8 +7,8 @@ import (
 )
 
 func main() {
-	// disable auto load persist
-	lowbot.AutoLoad = false
+	// disable local persistence
+	lowbot.EnableLocalPersist = false
 
 	// make a flow
 	flow, _ := lowbot.NewFlow("./flow.yaml")
@@ -21,12 +21,13 @@ func main() {
 
 	// set custom actions
 	lowbot.SetCustomActions(lowbot.ActionsMap{
-		"TextUsername": func(sessionID string, channel lowbot.Channel, step *lowbot.Step) (bool, error) {
+		"TextUsername": func(flow *lowbot.Flow, channel lowbot.Channel) (bool, error) {
+			step := flow.Current
 			template := lowbot.ParseTemplate(step.Parameters.Texts)
 			templateWithUsername := fmt.Sprintf(template, step.GetLastResponseText())
-			in := lowbot.NewInteractionMessageText(sessionID, templateWithUsername)
+			in := lowbot.NewInteractionMessageText(flow.SessionID, templateWithUsername)
 			err := channel.SendText(in)
-			return lowbot.GetActionReturn(step.Action, true, err)
+			return true, err
 		},
 	})
 
