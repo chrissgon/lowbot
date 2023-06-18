@@ -1,4 +1,4 @@
-#  Documentation 📚
+# Documentation 📚
 
 - [Understanding the Flows](#understanding-the-flows)
   - [Actions and Parameters](#actions-and-parameters)
@@ -153,14 +153,15 @@ The function should return two values:
 If you need custom actions, you can create and define them with the SetCustomActions function.
 
 ```go
-lowbot.SetCustomActions(lowbot.ActionsMap{
+myActions := lowbot.ActionsMap{
     "Custom": func(flow *lowbot.Flow, channel lowbot.Channel) (bool, error) {
         // your rules
         next := false
-        err := nil
-        return next, err
+        return next, nil
     },
-})
+}
+
+lowbot.SetCustomActions(myActions)
 ```
 
 The definition in the flow YAML file: 👇🏻

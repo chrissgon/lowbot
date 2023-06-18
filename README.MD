@@ -41,13 +41,14 @@ Start a bot with Discord and custom actions
 import "github.com/chrissgon/lowbot"
 
 myActions := lowbot.ActionsMap{
-    "Custom": func(sessionID string, channel lowbot.Channel, step *lowbot.Step) (bool, error) {
+    "Custom": func(flow *lowbot.Flow, channel lowbot.Channel) (bool, error) {
         // your rules
-        return true, nil
+        next := false
+        return next, nil
     },
 }
 
-SetCustomActions(myActions)
+lowbot.SetCustomActions(myActions)
 
 flow, _ := lowbot.NewFlow("your_flow.yaml")
 channel, _ := lowbot.NewDiscord()
@@ -75,9 +76,9 @@ flow, _ := lowbot.NewFlow("your_flow.yaml")
 lowbot.StartBot(flow, MyNewChannel(), MyNewPersist())
 ```
 
-## 📚 Examples
+## 📚 Documentation
 
-View more examples in [docs](https://github.com/chrissgon/lowbot/tree/main/docs) folder.
+Read all documentation in [docs](https://github.com/chrissgon/lowbot/tree/main/docs) folder.
 
 ## 🌎 Global Variables
 
