@@ -86,7 +86,7 @@ When you run this project, you can adjusts the following environment variables.
 
 `Debug`: Show debug => `default: true`
 
-`AutoLoad`: Automatic loading of local sessions at startup => `default: true`
+`EnableLocalPersist`: Enable local persist => `default: true`
 
 ## 🔒 Environment Variables
 
