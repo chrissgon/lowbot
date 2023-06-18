@@ -44,7 +44,7 @@ steps:
 
 Now let's understand about each of the values mentioned. 🤩
 
-## Actions and Parametersi
+## Actions and Parameters
 
 The `action` are functions that contain business rules.
 
