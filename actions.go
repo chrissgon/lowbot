@@ -23,7 +23,7 @@ func SetCustomActions(custom ActionsMap) {
 	}
 }
 
-func runAction(flow *Flow, channel Channel) (bool, error) {
+func RunAction(flow *Flow, channel Channel) (bool, error) {
 	if flow == nil {
 		return false, nil
 	}
@@ -43,7 +43,7 @@ func runAction(flow *Flow, channel Channel) (bool, error) {
 	return action(flow, channel)
 }
 
-func runActionError(flow *Flow, channel Channel) (bool, error) {
+func RunActionError(flow *Flow, channel Channel) (bool, error) {
 	if flow == nil {
 		return false, NewError("RunActionError", fmt.Errorf("nil flow"))
 	}
