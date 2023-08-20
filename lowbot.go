@@ -23,7 +23,7 @@ func StartBot(base Flow, channel Channel, persist Persist) error {
 			flow = startFlow(in.SessionID, base)
 		}
 
-		err = processStep(flow, channel, in)
+		processStep(flow, channel, in)
 
 		persist.Set(flow)
 	}
