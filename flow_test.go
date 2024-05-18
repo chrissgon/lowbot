@@ -13,7 +13,7 @@ func TestNewFlow(t *testing.T) {
 		t.Error(err)
 	}
 
-	if !reflect.DeepEqual(expect, have) {
+	if !reflect.DeepEqual(expect, *have) {
 		t.Errorf(FormatTestError(expect, have))
 	}
 }
