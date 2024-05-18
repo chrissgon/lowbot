@@ -1,6 +1,6 @@
 module github.com/chrissgon/lowbot
 
-go 1.19
+go 1.22.3
 
 require (
 	github.com/bwmarrin/discordgo v0.27.1

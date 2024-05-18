@@ -1,7 +1,7 @@
 package lowbot
 
 import (
-	"io/ioutil"
+	"os"
 	"reflect"
 	"regexp"
 
@@ -33,6 +33,19 @@ type StepParameters struct {
 }
 
 type Steps map[string]*Step
+
+func NewFlow(path string) (Flow, error) {
+	flow := Flow{}
+	bytes, err := os.ReadFile(path)
+
+	if err != nil {
+		return flow, err
+	}
+
+	err = yaml.Unmarshal(bytes, &flow)
+
+	return flow, err
+}
 
 func (flow *Flow) Start() {
 	flow.Current = flow.Steps["init"]
@@ -83,17 +96,4 @@ func (step *Step) GetLastResponse() Interaction {
 
 func (step *Step) GetLastResponseText() string {
 	return step.Responses[len(step.Responses)-1].Parameters.Text
-}
-
-func NewFlow(path string) (Flow, error) {
-	flow := Flow{}
-	bytes, err := ioutil.ReadFile(path)
-
-	if err != nil {
-		return flow, err
-	}
-
-	err = yaml.Unmarshal(bytes, &flow)
-
-	return flow, err
 }

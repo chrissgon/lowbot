@@ -1,32 +1,33 @@
 package lowbot
 
 import (
-	"fmt"
-	"time"
+	"log"
 )
 
 var Debug = true
 
 func StartBot(base Flow, channel Channel, persist Persist) error {
-	ins := make(chan Interaction)
+	interactions := make(chan Interaction)
 
-	go channel.Next(ins)
+	go channel.Next(interactions)
 
 	if Debug {
-		fmt.Println("Bot is now running. Press CTRL-C to exit.")
+		log.Println("Bot is now running. Press CTRL-C to exit.")
 	}
 
-	for in := range ins {
-		flow, err := persist.Get(in.SessionID)
+	for interaction := range interactions {
+		flow, err := persist.Get(interaction.SessionID)
 
 		if err != nil || flow.IsEnd() {
-			flow = startFlow(in.SessionID, base)
+			flow = startFlow(interaction.SessionID, base)
 		}
 
-		processStep(flow, channel, in)
+		processStep(flow, channel, interaction)
 
 		persist.Set(flow)
 	}
+
+	close(interactions)
 
 	return nil
 }
@@ -41,7 +42,7 @@ func processStep(flow *Flow, channel Channel, in Interaction) error {
 	next, err := RunAction(flow.Next(in), channel)
 
 	if Debug {
-		fmt.Printf("%v: <%v> Action%s %v\n", time.Now().UTC(), in.SessionID, flow.Current.Action, err)
+		log.Printf("SessionID:<%v> Action:<%s> ERR:%v\n", in.SessionID, flow.Current.Action, err)
 	}
 
 	if err != nil {

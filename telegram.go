@@ -1,7 +1,6 @@
 package lowbot
 
 import (
-	"fmt"
 	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -104,6 +103,7 @@ func (*Telegram) getRequestFileDate(str string) (file tgbotapi.RequestFileData) 
 	if IsURL(str) {
 		file = tgbotapi.FileURL(str)
 	}
+	
 	return
 }
 
@@ -111,14 +111,14 @@ func NewTelegram() (Channel, error) {
 	token := os.Getenv("TELEGRAM_TOKEN")
 
 	if token == "" {
-		return nil, fmt.Errorf("not found TELEGRAM_TOKEN")
+		return nil, NewError("NewTelegram", ERR_UNKNOWN_TELEGRAM_TOKEN)
 	}
 
-	conn, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_TOKEN"))
+	conn, err := tgbotapi.NewBotAPI(token)
 	conn.Debug = false
 
 	if err != nil {
-		return nil, fmt.Errorf("error NewTelegram")
+		return nil, NewError("NewTelegram", err)
 	}
 
 	return &Telegram{conn: conn}, nil

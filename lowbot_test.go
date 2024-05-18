@@ -15,8 +15,12 @@ func TestStartBot(t *testing.T) {
 
 	base, _ := NewFlow("./mocks/flow.yaml")
 	// discord, _ := NewDiscord()
-	telegram, _ := NewTelegram()
+	telegram, err := NewTelegram()
 	persist, _ := NewLocalPersist()
+	
+	if err != nil{
+		t.Fatal(err)
+	}
 
 	// go StartBot(base, discord, persist)
 	go StartBot(base, telegram, persist)

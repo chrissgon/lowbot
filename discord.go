@@ -2,7 +2,6 @@ package lowbot
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -15,7 +14,6 @@ type Discord struct {
 }
 
 func (ds *Discord) Next(in chan Interaction) {
-
 	ds.conn.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if m.Author.ID == s.State.User.ID {
 			return
@@ -142,13 +140,13 @@ func NewDiscord() (Channel, error) {
 	token := os.Getenv("DISCORD_TOKEN")
 
 	if token == "" {
-		return nil, fmt.Errorf("not found DISCORD_TOKEN")
+		return nil, NewError("NewDiscord", ERR_UNKNOWN_DISCORD_TOKEN)
 	}
 
 	conn, err := discordgo.New("Bot " + token)
 
 	if err != nil {
-		return nil, fmt.Errorf("error NewDiscord")
+		return nil, err
 	}
 
 	return &Discord{conn: conn}, nil

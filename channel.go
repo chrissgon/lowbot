@@ -23,7 +23,7 @@ type InteractionType string
 
 const (
 	MESSAGE InteractionType = "message"
-	EVENT                   = "event"
+	EVENT   InteractionType = "event"
 )
 
 func NewInteractionMessageAudio(sessionID string, audio string, text string) Interaction {
