@@ -15,11 +15,6 @@ steps:
 
   custom:
     action: TextUsername
-    next:
-      default: end
     parameters:
       texts:
         - Nice to meet you %v
-
-  end:
-    action: Wait

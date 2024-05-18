@@ -59,7 +59,7 @@ steps:
     next:
       default: intro
     
-  # A etapa "end" indica o fim do fluxo
+  # A etapa "end" indica o fim do fluxo, pois não possui "next"
   end:
     action: Text
     parameters:
