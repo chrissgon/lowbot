@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-var Debug = true
+var Debug = false
 
 func StartBot(base *Flow, channel Channel, persist Persist) error {
 	interactions := make(chan *Interaction)

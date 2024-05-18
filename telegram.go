@@ -1,13 +1,26 @@
 package lowbot
 
 import (
-	"os"
-
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type Telegram struct {
 	conn *tgbotapi.BotAPI
+}
+
+func NewTelegram(token string) (Channel, error) {
+	if token == "" {
+		return nil, ERR_UNKNOWN_TELEGRAM_TOKEN
+	}
+
+	conn, err := tgbotapi.NewBotAPI(token)
+	conn.Debug = false
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &Telegram{conn: conn}, nil
 }
 
 func (tg *Telegram) SendAudio(interaction *Interaction) error {
@@ -103,23 +116,6 @@ func (*Telegram) getRequestFileDate(str string) (file tgbotapi.RequestFileData) 
 	if IsURL(str) {
 		file = tgbotapi.FileURL(str)
 	}
-	
+
 	return
-}
-
-func NewTelegram() (Channel, error) {
-	token := os.Getenv("TELEGRAM_TOKEN")
-
-	if token == "" {
-		return nil, ERR_UNKNOWN_TELEGRAM_TOKEN
-	}
-
-	conn, err := tgbotapi.NewBotAPI(token)
-	conn.Debug = false
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &Telegram{conn: conn}, nil
 }

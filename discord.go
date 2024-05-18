@@ -12,6 +12,20 @@ type Discord struct {
 	conn *discordgo.Session
 }
 
+func NewDiscord(token string) (Channel, error) {
+	if token == "" {
+		return nil, ERR_UNKNOWN_DISCORD_TOKEN
+	}
+
+	conn, err := discordgo.New("Bot " + token)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &Discord{conn: conn}, nil
+}
+
 func (ds *Discord) Next(in chan *Interaction) {
 	ds.conn.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if m.Author.ID == s.State.User.ID {
@@ -133,20 +147,4 @@ func (ds *Discord) SendFile(sessionID, text, path string) error {
 	})
 
 	return err
-}
-
-func NewDiscord() (Channel, error) {
-	token := os.Getenv("DISCORD_TOKEN")
-
-	if token == "" {
-		return nil, ERR_UNKNOWN_DISCORD_TOKEN
-	}
-
-	conn, err := discordgo.New("Bot " + token)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &Discord{conn: conn}, nil
 }
