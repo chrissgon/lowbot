@@ -7,7 +7,7 @@ type Channel interface {
 	SendImage(*Interaction) error
 	SendText(*Interaction) error
 	SendVideo(*Interaction) error
-	Next(chan Interaction)
+	Next(chan *Interaction)
 }
 
 type Interaction struct {

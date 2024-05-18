@@ -19,7 +19,7 @@ type Step struct {
 	Action     string            `yaml:"action"`
 	Next       map[string]string `yaml:"next"`
 	Parameters StepParameters    `yaml:"parameters"`
-	Responses  []Interaction
+	Responses  []*Interaction
 }
 
 type StepParameters struct {
@@ -51,7 +51,7 @@ func (flow *Flow) Start() {
 	flow.Current = flow.Steps["init"]
 }
 
-func (flow *Flow) Next(in Interaction) *Flow {
+func (flow *Flow) Next(in *Interaction) *Flow {
 	if flow.NoHasNext() {
 		return nil
 	}
@@ -86,11 +86,11 @@ func (flow *Flow) IsEnd() bool {
 	return reflect.DeepEqual(endStep, flow.Current)
 }
 
-func (step *Step) AddResponse(in Interaction) {
+func (step *Step) AddResponse(in *Interaction) {
 	step.Responses = append(step.Responses, in)
 }
 
-func (step *Step) GetLastResponse() Interaction {
+func (step *Step) GetLastResponse() *Interaction {
 	return step.Responses[len(step.Responses)-1]
 }
 

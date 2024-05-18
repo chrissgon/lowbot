@@ -7,7 +7,7 @@ import (
 var Debug = true
 
 func StartBot(base Flow, channel Channel, persist Persist) error {
-	interactions := make(chan Interaction)
+	interactions := make(chan *Interaction)
 
 	go channel.Next(interactions)
 
@@ -38,7 +38,7 @@ func startFlow(sessionID string, flow Flow) *Flow {
 	return &flow
 }
 
-func processStep(flow *Flow, channel Channel, in Interaction) error {
+func processStep(flow *Flow, channel Channel, in *Interaction) error {
 	next, err := RunAction(flow.Next(in), channel)
 
 	if Debug {

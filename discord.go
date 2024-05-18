@@ -12,17 +12,17 @@ type Discord struct {
 	conn *discordgo.Session
 }
 
-func (ds *Discord) Next(in chan Interaction) {
+func (ds *Discord) Next(in chan *Interaction) {
 	ds.conn.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if m.Author.ID == s.State.User.ID {
 			return
 		}
 
-		in <- *NewInteractionMessageText(m.ChannelID, m.Content)
+		in <- NewInteractionMessageText(m.ChannelID, m.Content)
 	})
 	ds.conn.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		ds.RespondInteraction(i.Interaction)
-		in <- *NewInteractionMessageText(i.ChannelID, i.Interaction.MessageComponentData().CustomID)
+		in <- NewInteractionMessageText(i.ChannelID, i.Interaction.MessageComponentData().CustomID)
 	})
 
 	ds.conn.Identify.Intents = discordgo.IntentsGuildMessages

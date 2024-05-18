@@ -76,7 +76,7 @@ func (tg *Telegram) SendVideo(in *Interaction) error {
 	return err
 }
 
-func (tg *Telegram) Next(in chan Interaction) {
+func (tg *Telegram) Next(in chan *Interaction) {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
@@ -93,7 +93,7 @@ func (tg *Telegram) Next(in chan Interaction) {
 			i = NewInteractionMessageText(Int64ToString(update.CallbackQuery.From.ID), update.CallbackData())
 		}
 
-		in <- *i
+		in <- i
 	}
 }
 
