@@ -80,31 +80,6 @@ func TestAddResponseValue(t *testing.T) {
 	}
 }
 
-func TestEndFlow(t *testing.T) {
-	flow, _ := NewFlow("./mocks/flow.yaml")
-	flow.End()
-
-	expect := flow.Steps["end"]
-	have := flow.Current
-
-	if !reflect.DeepEqual(expect, have) {
-		t.Errorf(FormatTestError(expect, have))
-	}
-}
-
-func TestIsEndFlow(t *testing.T) {
-	flow, _ := NewFlow("./mocks/flow.yaml")
-
-	flow.Current = flow.Steps["end"]
-
-	expect := true
-	have := flow.IsEnd()
-
-	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
-	}
-}
-
 func NewMock() Flow {
 	return Flow{
 		Name: "flow",

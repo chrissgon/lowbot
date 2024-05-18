@@ -2,7 +2,6 @@ package lowbot
 
 import (
 	"os"
-	"reflect"
 	"regexp"
 
 	"gopkg.in/yaml.v3"
@@ -36,11 +35,11 @@ type Steps map[string]*Step
 
 func NewFlow(path string) (*Flow, error) {
 	bytes, err := os.ReadFile(path)
-	
+
 	if err != nil {
 		return nil, err
 	}
-	
+
 	flow := &Flow{}
 
 	err = yaml.Unmarshal(bytes, flow)
@@ -48,47 +47,56 @@ func NewFlow(path string) (*Flow, error) {
 	return flow, err
 }
 
-func (flow *Flow) Start() {
-	flow.Current = flow.Steps["init"]
+func (flow *Flow) Start() error {
+	step, exists := flow.Steps["init"]
+
+	if !exists {
+		return ERR_UNKNOWN_INIT_STEP
+	}
+
+	flow.Current = step
+
+	return nil
 }
 
-func (flow *Flow) Next(in *Interaction) *Flow {
+func (flow *Flow) Next(interaction *Interaction) error {
 	if flow.NoHasNext() {
-		return nil
+		return ERR_UNKNOWN_NEXT_STEP
 	}
 
 	for pattern, next := range flow.Current.Next {
-		matched, _ := regexp.MatchString(pattern, in.Parameters.Text)
+		matched, err := regexp.MatchString(pattern, interaction.Parameters.Text)
+
+		if err != nil {
+			return ERR_PATTERN_NEXT_STEP
+		}
 
 		if matched {
 			flow.Current = flow.Steps[next]
-			flow.Current.AddResponse(in)
-			return flow
+			flow.Current.AddResponse(interaction)
+
+			return nil
 		}
 	}
 
-	flow.Current = flow.Steps[flow.Current.Next["default"]]
-	flow.Current.AddResponse(in)
-	return flow
+	next, exists := flow.Current.Next["default"]
+
+	if !exists {
+		return ERR_UNKNOWN_DEFAULT_STEP
+	}
+
+	flow.Current = flow.Steps[next]
+	flow.Current.AddResponse(interaction)
+
+	return nil
 }
 
 func (flow *Flow) NoHasNext() bool {
 	return flow.Current.Next == nil
 }
 
-func (flow *Flow) End() *Flow {
-	flow.Current = flow.Steps["end"]
-	return flow
-}
-
-func (flow *Flow) IsEnd() bool {
-	endStep := flow.Steps["end"]
-
-	return reflect.DeepEqual(endStep, flow.Current)
-}
-
-func (step *Step) AddResponse(in *Interaction) {
-	step.Responses = append(step.Responses, in)
+func (step *Step) AddResponse(interaction *Interaction) {
+	step.Responses = append(step.Responses, interaction)
 }
 
 func (step *Step) GetLastResponse() *Interaction {

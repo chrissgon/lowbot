@@ -3,7 +3,7 @@ package lowbot
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 )
 
@@ -22,7 +22,7 @@ func (loc *Local) Load() error {
 
 	defer file.Close()
 
-	bytes, _ := ioutil.ReadAll(file)
+	bytes, _ := io.ReadAll(file)
 
 	return json.Unmarshal(bytes, loc)
 }
@@ -43,7 +43,7 @@ func (loc *Local) Set(flow *Flow) error {
 	if EnableLocalPersist {
 		go func() {
 			file, _ := json.MarshalIndent(loc, "", " ")
-			ioutil.WriteFile("./local.json", file, 0644)
+			os.WriteFile("./local.json", file, 0644)
 		}()
 	}
 

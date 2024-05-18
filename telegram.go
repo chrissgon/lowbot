@@ -10,73 +10,73 @@ type Telegram struct {
 	conn *tgbotapi.BotAPI
 }
 
-func (tg *Telegram) SendAudio(in *Interaction) error {
-	tg.SendText(in)
+func (tg *Telegram) SendAudio(interaction *Interaction) error {
+	tg.SendText(interaction)
 
-	file := tg.getRequestFileDate(in.Parameters.Audio)
+	file := tg.getRequestFileDate(interaction.Parameters.Audio)
 
-	_, err := tg.conn.Send(tgbotapi.NewAudio(StringToInt64(in.SessionID), file))
+	_, err := tg.conn.Send(tgbotapi.NewAudio(StringToInt64(interaction.SessionID), file))
 
 	return err
 }
 
-func (tg *Telegram) SendButton(in *Interaction) error {
+func (tg *Telegram) SendButton(interaction *Interaction) error {
 	button := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tg.getButtons(in)...,
+			tg.getButtons(interaction)...,
 		),
 	)
 
-	message := tgbotapi.NewMessage(StringToInt64(in.SessionID), in.Parameters.Text)
+	message := tgbotapi.NewMessage(StringToInt64(interaction.SessionID), interaction.Parameters.Text)
 	message.ReplyMarkup = button
 
 	_, err := tg.conn.Send(message)
 	return err
 }
 
-func (*Telegram) getButtons(in *Interaction) (buttons []tgbotapi.InlineKeyboardButton) {
-	for _, button := range in.Parameters.Buttons {
+func (*Telegram) getButtons(interaction *Interaction) (buttons []tgbotapi.InlineKeyboardButton) {
+	for _, button := range interaction.Parameters.Buttons {
 		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(button, button))
 	}
 	return
 }
 
-func (tg *Telegram) SendDocument(in *Interaction) error {
-	tg.SendText(in)
+func (tg *Telegram) SendDocument(interaction *Interaction) error {
+	tg.SendText(interaction)
 
-	file := tg.getRequestFileDate(in.Parameters.Document)
+	file := tg.getRequestFileDate(interaction.Parameters.Document)
 
-	_, err := tg.conn.Send(tgbotapi.NewDocument(StringToInt64(in.SessionID), file))
-
-	return err
-}
-
-func (tg *Telegram) SendImage(in *Interaction) error {
-	tg.SendText(in)
-
-	file := tg.getRequestFileDate(in.Parameters.Image)
-
-	_, err := tg.conn.Send(tgbotapi.NewPhoto(StringToInt64(in.SessionID), file))
+	_, err := tg.conn.Send(tgbotapi.NewDocument(StringToInt64(interaction.SessionID), file))
 
 	return err
 }
 
-func (tg *Telegram) SendText(in *Interaction) error {
-	_, err := tg.conn.Send(tgbotapi.NewMessage(StringToInt64(in.SessionID), in.Parameters.Text))
-	return err
-}
+func (tg *Telegram) SendImage(interaction *Interaction) error {
+	tg.SendText(interaction)
 
-func (tg *Telegram) SendVideo(in *Interaction) error {
-	tg.SendText(in)
+	file := tg.getRequestFileDate(interaction.Parameters.Image)
 
-	file := tg.getRequestFileDate(in.Parameters.Video)
-
-	_, err := tg.conn.Send(tgbotapi.NewVideo(StringToInt64(in.SessionID), file))
+	_, err := tg.conn.Send(tgbotapi.NewPhoto(StringToInt64(interaction.SessionID), file))
 
 	return err
 }
 
-func (tg *Telegram) Next(in chan *Interaction) {
+func (tg *Telegram) SendText(interaction *Interaction) error {
+	_, err := tg.conn.Send(tgbotapi.NewMessage(StringToInt64(interaction.SessionID), interaction.Parameters.Text))
+	return err
+}
+
+func (tg *Telegram) SendVideo(interaction *Interaction) error {
+	tg.SendText(interaction)
+
+	file := tg.getRequestFileDate(interaction.Parameters.Video)
+
+	_, err := tg.conn.Send(tgbotapi.NewVideo(StringToInt64(interaction.SessionID), file))
+
+	return err
+}
+
+func (tg *Telegram) Next(interaction chan *Interaction) {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
@@ -93,7 +93,7 @@ func (tg *Telegram) Next(in chan *Interaction) {
 			i = NewInteractionMessageText(Int64ToString(update.CallbackQuery.From.ID), update.CallbackData())
 		}
 
-		in <- i
+		interaction <- i
 	}
 }
 
@@ -111,14 +111,14 @@ func NewTelegram() (Channel, error) {
 	token := os.Getenv("TELEGRAM_TOKEN")
 
 	if token == "" {
-		return nil, NewError("NewTelegram", ERR_UNKNOWN_TELEGRAM_TOKEN)
+		return nil, ERR_UNKNOWN_TELEGRAM_TOKEN
 	}
 
 	conn, err := tgbotapi.NewBotAPI(token)
 	conn.Debug = false
 
 	if err != nil {
-		return nil, NewError("NewTelegram", err)
+		return nil, err
 	}
 
 	return &Telegram{conn: conn}, nil

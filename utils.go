@@ -28,7 +28,3 @@ func IsURL(str string) bool {
 	matched, _ := regexp.MatchString(`^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$`, str)
 	return matched
 }
-
-func NewError(fn string, err error) error {
-	return fmt.Errorf("%s: %w", fn, err)
-}

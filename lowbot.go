@@ -1,6 +1,7 @@
 package lowbot
 
 import (
+	"fmt"
 	"log"
 )
 
@@ -19,9 +20,9 @@ func StartBot(base *Flow, channel Channel, persist Persist) error {
 	for interaction := range interactions {
 		flow, err := persist.Get(interaction.SessionID)
 
-		flowNotExistsOrIsEnded := err != nil || flow.IsEnd()
+		flowNotExistsOrWasFinished := err != nil || flow.NoHasNext()
 
-		if flowNotExistsOrIsEnded {
+		if flowNotExistsOrWasFinished {
 			flow = startFlow(interaction.SessionID, *base)
 		}
 
@@ -29,7 +30,6 @@ func StartBot(base *Flow, channel Channel, persist Persist) error {
 
 		persist.Set(flow)
 	}
-
 
 	return nil
 }
@@ -40,22 +40,30 @@ func startFlow(sessionID string, flow Flow) *Flow {
 	return &flow
 }
 
-func processStep(flow *Flow, channel Channel, in *Interaction) error {
-	next, err := RunAction(flow.Next(in), channel)
+func processStep(flow *Flow, channel Channel, interaction *Interaction) error {
+	err := flow.Next(interaction)
 
-	if Debug {
-		log.Printf("SessionID:<%v> Action:<%s> ERR:%v\n", in.SessionID, flow.Current.Action, err)
-	}
+	printLog(fmt.Sprintf("SessionID:<%v> Action:<%s> ERR: %v\n", interaction.SessionID, flow.Current.Action, err))
 
 	if err != nil {
-		RunActionError(flow, channel)
-		RunAction(flow.End(), channel)
-		return NewError("RunAction", err)
+		return err
 	}
 
-	if next {
-		return processStep(flow, channel, in)
+	wait, err := RunAction(flow, channel)
+
+	if err != nil {
+		return err
 	}
 
-	return err
+	if wait {
+		return err
+	}
+
+	return processStep(flow, channel, interaction)
+}
+
+func printLog(msg string) {
+	if Debug {
+		log.Print(msg)
+	}
 }

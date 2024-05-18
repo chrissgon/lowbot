@@ -46,22 +46,22 @@ func (ds *Discord) RespondInteraction(in *discordgo.Interaction) {
 	)
 }
 
-func (ds *Discord) SendAudio(in *Interaction) error {
-	return ds.SendFile(in.SessionID, in.Parameters.Text, in.Parameters.Audio)
+func (ds *Discord) SendAudio(interaction *Interaction) error {
+	return ds.SendFile(interaction.SessionID, interaction.Parameters.Text, interaction.Parameters.Audio)
 }
 
-func (ds *Discord) SendButton(in *Interaction) error {
-	_, err := ds.conn.ChannelMessageSendComplex(in.SessionID, &discordgo.MessageSend{
-		Content: in.Parameters.Text,
+func (ds *Discord) SendButton(interaction *Interaction) error {
+	_, err := ds.conn.ChannelMessageSendComplex(interaction.SessionID, &discordgo.MessageSend{
+		Content: interaction.Parameters.Text,
 		Components: []discordgo.MessageComponent{
-			discordgo.ActionsRow{Components: ds.getButtons(in)},
+			discordgo.ActionsRow{Components: ds.getButtons(interaction)},
 		},
 	})
 	return err
 }
 
-func (ds *Discord) getButtons(in *Interaction) (buttons []discordgo.MessageComponent) {
-	for _, button := range in.Parameters.Buttons {
+func (ds *Discord) getButtons(interaction *Interaction) (buttons []discordgo.MessageComponent) {
+	for _, button := range interaction.Parameters.Buttons {
 		buttons = append(buttons, discordgo.Button{
 			Label:    button,
 			Style:    discordgo.PrimaryButton,
@@ -72,41 +72,41 @@ func (ds *Discord) getButtons(in *Interaction) (buttons []discordgo.MessageCompo
 	return
 }
 
-func (ds *Discord) SendDocument(in *Interaction) error {
-	return ds.SendFile(in.SessionID, in.Parameters.Text, in.Parameters.Document)
+func (ds *Discord) SendDocument(interaction *Interaction) error {
+	return ds.SendFile(interaction.SessionID, interaction.Parameters.Text, interaction.Parameters.Document)
 }
 
-func (ds *Discord) SendImage(in *Interaction) error {
-	if !IsURL(in.Parameters.Image) {
-		return ds.SendFile(in.SessionID, in.Parameters.Text, in.Parameters.Image)
+func (ds *Discord) SendImage(interaction *Interaction) error {
+	if !IsURL(interaction.Parameters.Image) {
+		return ds.SendFile(interaction.SessionID, interaction.Parameters.Text, interaction.Parameters.Image)
 	}
 
-	_, err := ds.conn.ChannelMessageSendComplex(in.SessionID, &discordgo.MessageSend{
-		Content: in.Parameters.Text,
+	_, err := ds.conn.ChannelMessageSendComplex(interaction.SessionID, &discordgo.MessageSend{
+		Content: interaction.Parameters.Text,
 		Embed: &discordgo.MessageEmbed{
 			Image: &discordgo.MessageEmbedImage{
-				URL: in.Parameters.Image,
+				URL: interaction.Parameters.Image,
 			},
 		},
 	})
 	return err
 }
 
-func (ds *Discord) SendText(in *Interaction) error {
-	_, err := ds.conn.ChannelMessageSend(in.SessionID, in.Parameters.Text)
+func (ds *Discord) SendText(interaction *Interaction) error {
+	_, err := ds.conn.ChannelMessageSend(interaction.SessionID, interaction.Parameters.Text)
 	return err
 }
 
-func (ds *Discord) SendVideo(in *Interaction) error {
-	if !IsURL(in.Parameters.Video) {
-		return ds.SendFile(in.SessionID, in.Parameters.Text, in.Parameters.Video)
+func (ds *Discord) SendVideo(interaction *Interaction) error {
+	if !IsURL(interaction.Parameters.Video) {
+		return ds.SendFile(interaction.SessionID, interaction.Parameters.Text, interaction.Parameters.Video)
 	}
 
-	_, err := ds.conn.ChannelMessageSendComplex(in.SessionID, &discordgo.MessageSend{
-		Content: in.Parameters.Text,
+	_, err := ds.conn.ChannelMessageSendComplex(interaction.SessionID, &discordgo.MessageSend{
+		Content: interaction.Parameters.Text,
 		Embed: &discordgo.MessageEmbed{
 			Video: &discordgo.MessageEmbedVideo{
-				URL: in.Parameters.Video,
+				URL: interaction.Parameters.Video,
 			},
 		},
 	})
@@ -139,7 +139,7 @@ func NewDiscord() (Channel, error) {
 	token := os.Getenv("DISCORD_TOKEN")
 
 	if token == "" {
-		return nil, NewError("NewDiscord", ERR_UNKNOWN_DISCORD_TOKEN)
+		return nil, ERR_UNKNOWN_DISCORD_TOKEN
 	}
 
 	conn, err := discordgo.New("Bot " + token)
