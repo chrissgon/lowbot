@@ -2,7 +2,6 @@ package lowbot
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -19,11 +18,11 @@ func (ds *Discord) Next(in chan Interaction) {
 			return
 		}
 
-		in <- NewInteractionMessageText(m.ChannelID, m.Content)
+		in <- *NewInteractionMessageText(m.ChannelID, m.Content)
 	})
 	ds.conn.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		ds.RespondInteraction(i.Interaction)
-		in <- NewInteractionMessageText(i.ChannelID, i.Interaction.MessageComponentData().CustomID)
+		in <- *NewInteractionMessageText(i.ChannelID, i.Interaction.MessageComponentData().CustomID)
 	})
 
 	ds.conn.Identify.Intents = discordgo.IntentsGuildMessages
@@ -47,11 +46,11 @@ func (ds *Discord) RespondInteraction(in *discordgo.Interaction) {
 	)
 }
 
-func (ds *Discord) SendAudio(in Interaction) error {
+func (ds *Discord) SendAudio(in *Interaction) error {
 	return ds.SendFile(in.SessionID, in.Parameters.Text, in.Parameters.Audio)
 }
 
-func (ds *Discord) SendButton(in Interaction) error {
+func (ds *Discord) SendButton(in *Interaction) error {
 	_, err := ds.conn.ChannelMessageSendComplex(in.SessionID, &discordgo.MessageSend{
 		Content: in.Parameters.Text,
 		Components: []discordgo.MessageComponent{
@@ -61,7 +60,7 @@ func (ds *Discord) SendButton(in Interaction) error {
 	return err
 }
 
-func (ds *Discord) getButtons(in Interaction) (buttons []discordgo.MessageComponent) {
+func (ds *Discord) getButtons(in *Interaction) (buttons []discordgo.MessageComponent) {
 	for _, button := range in.Parameters.Buttons {
 		buttons = append(buttons, discordgo.Button{
 			Label:    button,
@@ -73,11 +72,11 @@ func (ds *Discord) getButtons(in Interaction) (buttons []discordgo.MessageCompon
 	return
 }
 
-func (ds *Discord) SendDocument(in Interaction) error {
+func (ds *Discord) SendDocument(in *Interaction) error {
 	return ds.SendFile(in.SessionID, in.Parameters.Text, in.Parameters.Document)
 }
 
-func (ds *Discord) SendImage(in Interaction) error {
+func (ds *Discord) SendImage(in *Interaction) error {
 	if !IsURL(in.Parameters.Image) {
 		return ds.SendFile(in.SessionID, in.Parameters.Text, in.Parameters.Image)
 	}
@@ -93,12 +92,12 @@ func (ds *Discord) SendImage(in Interaction) error {
 	return err
 }
 
-func (ds *Discord) SendText(in Interaction) error {
+func (ds *Discord) SendText(in *Interaction) error {
 	_, err := ds.conn.ChannelMessageSend(in.SessionID, in.Parameters.Text)
 	return err
 }
 
-func (ds *Discord) SendVideo(in Interaction) error {
+func (ds *Discord) SendVideo(in *Interaction) error {
 	if !IsURL(in.Parameters.Video) {
 		return ds.SendFile(in.SessionID, in.Parameters.Text, in.Parameters.Video)
 	}
@@ -116,7 +115,7 @@ func (ds *Discord) SendVideo(in Interaction) error {
 }
 
 func (ds *Discord) SendFile(sessionID, text, path string) error {
-	file, err := ioutil.ReadFile(path)
+	file, err := os.ReadFile(path)
 
 	if err != nil {
 		return err

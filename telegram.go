@@ -10,7 +10,7 @@ type Telegram struct {
 	conn *tgbotapi.BotAPI
 }
 
-func (tg *Telegram) SendAudio(in Interaction) error {
+func (tg *Telegram) SendAudio(in *Interaction) error {
 	tg.SendText(in)
 
 	file := tg.getRequestFileDate(in.Parameters.Audio)
@@ -20,7 +20,7 @@ func (tg *Telegram) SendAudio(in Interaction) error {
 	return err
 }
 
-func (tg *Telegram) SendButton(in Interaction) error {
+func (tg *Telegram) SendButton(in *Interaction) error {
 	button := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tg.getButtons(in)...,
@@ -34,14 +34,14 @@ func (tg *Telegram) SendButton(in Interaction) error {
 	return err
 }
 
-func (*Telegram) getButtons(in Interaction) (buttons []tgbotapi.InlineKeyboardButton) {
+func (*Telegram) getButtons(in *Interaction) (buttons []tgbotapi.InlineKeyboardButton) {
 	for _, button := range in.Parameters.Buttons {
 		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(button, button))
 	}
 	return
 }
 
-func (tg *Telegram) SendDocument(in Interaction) error {
+func (tg *Telegram) SendDocument(in *Interaction) error {
 	tg.SendText(in)
 
 	file := tg.getRequestFileDate(in.Parameters.Document)
@@ -51,7 +51,7 @@ func (tg *Telegram) SendDocument(in Interaction) error {
 	return err
 }
 
-func (tg *Telegram) SendImage(in Interaction) error {
+func (tg *Telegram) SendImage(in *Interaction) error {
 	tg.SendText(in)
 
 	file := tg.getRequestFileDate(in.Parameters.Image)
@@ -61,12 +61,12 @@ func (tg *Telegram) SendImage(in Interaction) error {
 	return err
 }
 
-func (tg *Telegram) SendText(in Interaction) error {
+func (tg *Telegram) SendText(in *Interaction) error {
 	_, err := tg.conn.Send(tgbotapi.NewMessage(StringToInt64(in.SessionID), in.Parameters.Text))
 	return err
 }
 
-func (tg *Telegram) SendVideo(in Interaction) error {
+func (tg *Telegram) SendVideo(in *Interaction) error {
 	tg.SendText(in)
 
 	file := tg.getRequestFileDate(in.Parameters.Video)
@@ -83,7 +83,7 @@ func (tg *Telegram) Next(in chan Interaction) {
 	updates := tg.conn.GetUpdatesChan(u)
 
 	for update := range updates {
-		var i Interaction
+		var i *Interaction
 
 		if update.Message != nil {
 			i = NewInteractionMessageText(Int64ToString(update.Message.Chat.ID), update.Message.Text)
@@ -93,7 +93,7 @@ func (tg *Telegram) Next(in chan Interaction) {
 			i = NewInteractionMessageText(Int64ToString(update.CallbackQuery.From.ID), update.CallbackData())
 		}
 
-		in <- i
+		in <- *i
 	}
 }
 

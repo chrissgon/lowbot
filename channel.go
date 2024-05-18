@@ -1,12 +1,12 @@
 package lowbot
 
 type Channel interface {
-	SendAudio(Interaction) error
-	SendButton(Interaction) error
-	SendDocument(Interaction) error
-	SendImage(Interaction) error
-	SendText(Interaction) error
-	SendVideo(Interaction) error
+	SendAudio(*Interaction) error
+	SendButton(*Interaction) error
+	SendDocument(*Interaction) error
+	SendImage(*Interaction) error
+	SendText(*Interaction) error
+	SendVideo(*Interaction) error
 	Next(chan Interaction)
 }
 
@@ -26,8 +26,8 @@ const (
 	EVENT   InteractionType = "event"
 )
 
-func NewInteractionMessageAudio(sessionID string, audio string, text string) Interaction {
-	return Interaction{
+func NewInteractionMessageAudio(sessionID string, audio string, text string) *Interaction {
+	return &Interaction{
 		SessionID: sessionID,
 		Type:      MESSAGE,
 		Parameters: InteractionParameters{
@@ -37,8 +37,8 @@ func NewInteractionMessageAudio(sessionID string, audio string, text string) Int
 	}
 }
 
-func NewInteractionMessageButton(sessionID string, buttons []string, text string) Interaction {
-	return Interaction{
+func NewInteractionMessageButton(sessionID string, buttons []string, text string) *Interaction {
+	return &Interaction{
 		SessionID: sessionID,
 		Type:      MESSAGE,
 		Parameters: InteractionParameters{
@@ -48,8 +48,8 @@ func NewInteractionMessageButton(sessionID string, buttons []string, text string
 	}
 }
 
-func NewInteractionMessageDocument(sessionID string, document string, text string) Interaction {
-	return Interaction{
+func NewInteractionMessageDocument(sessionID string, document string, text string) *Interaction {
+	return &Interaction{
 		SessionID: sessionID,
 		Type:      MESSAGE,
 		Parameters: InteractionParameters{
@@ -59,8 +59,8 @@ func NewInteractionMessageDocument(sessionID string, document string, text strin
 	}
 }
 
-func NewInteractionMessageImage(sessionID string, image string, text string) Interaction {
-	return Interaction{
+func NewInteractionMessageImage(sessionID string, image string, text string) *Interaction {
+	return &Interaction{
 		SessionID: sessionID,
 		Type:      MESSAGE,
 		Parameters: InteractionParameters{
@@ -70,8 +70,8 @@ func NewInteractionMessageImage(sessionID string, image string, text string) Int
 	}
 }
 
-func NewInteractionMessageText(sessionID string, text string) Interaction {
-	return Interaction{
+func NewInteractionMessageText(sessionID string, text string) *Interaction {
+	return &Interaction{
 		SessionID: sessionID,
 		Type:      MESSAGE,
 		Parameters: InteractionParameters{
@@ -80,8 +80,8 @@ func NewInteractionMessageText(sessionID string, text string) Interaction {
 	}
 }
 
-func NewInteractionMessageVideo(sessionID string, video string, text string) Interaction {
-	return Interaction{
+func NewInteractionMessageVideo(sessionID string, video string, text string) *Interaction {
+	return &Interaction{
 		SessionID: sessionID,
 		Type:      MESSAGE,
 		Parameters: InteractionParameters{
