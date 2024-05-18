@@ -34,15 +34,16 @@ type StepParameters struct {
 
 type Steps map[string]*Step
 
-func NewFlow(path string) (Flow, error) {
-	flow := Flow{}
+func NewFlow(path string) (*Flow, error) {
 	bytes, err := os.ReadFile(path)
-
+	
 	if err != nil {
-		return flow, err
+		return nil, err
 	}
+	
+	flow := &Flow{}
 
-	err = yaml.Unmarshal(bytes, &flow)
+	err = yaml.Unmarshal(bytes, flow)
 
 	return flow, err
 }

@@ -6,8 +6,9 @@ import (
 
 var Debug = true
 
-func StartBot(base Flow, channel Channel, persist Persist) error {
+func StartBot(base *Flow, channel Channel, persist Persist) error {
 	interactions := make(chan *Interaction)
+	defer close(interactions)
 
 	go channel.Next(interactions)
 
@@ -18,8 +19,10 @@ func StartBot(base Flow, channel Channel, persist Persist) error {
 	for interaction := range interactions {
 		flow, err := persist.Get(interaction.SessionID)
 
-		if err != nil || flow.IsEnd() {
-			flow = startFlow(interaction.SessionID, base)
+		flowNotExistsOrIsEnded := err != nil || flow.IsEnd()
+
+		if flowNotExistsOrIsEnded {
+			flow = startFlow(interaction.SessionID, *base)
 		}
 
 		processStep(flow, channel, interaction)
@@ -27,7 +30,6 @@ func StartBot(base Flow, channel Channel, persist Persist) error {
 		persist.Set(flow)
 	}
 
-	close(interactions)
 
 	return nil
 }
