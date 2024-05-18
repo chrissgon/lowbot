@@ -67,10 +67,10 @@ func TestAddResponse(t *testing.T) {
 
 }
 func TestAddResponseValue(t *testing.T) {
-	in := NewInteractionMessageText(SESSIONID, "Response")
+	in := *NewInteractionMessageText(SESSIONID, "Response")
 	flow, _ := NewFlow("./mocks/flow.yaml")
 	flow.Start()
-	flow.Next(*in)
+	flow.Next(in)
 
 	expect := in
 	have := flow.Current.Responses[0]

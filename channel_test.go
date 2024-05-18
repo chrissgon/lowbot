@@ -25,7 +25,7 @@ func TestNewInteractionMessageAudio(t *testing.T) {
 			Audio: AUDIO,
 		},
 	}
-	have := NewInteractionMessageAudio(SESSIONID, AUDIO, TEXT)
+	have := *NewInteractionMessageAudio(SESSIONID, AUDIO, TEXT)
 
 	if !reflect.DeepEqual(expect, have) {
 		t.Errorf(FormatTestError(expect, have))
@@ -41,7 +41,7 @@ func TestNewInteractionMessageButton(t *testing.T) {
 			Buttons: BUTTONS,
 		},
 	}
-	have := NewInteractionMessageButton(SESSIONID, BUTTONS, TEXT)
+	have := *NewInteractionMessageButton(SESSIONID, BUTTONS, TEXT)
 
 	if !reflect.DeepEqual(expect, have) {
 		t.Errorf(FormatTestError(expect, have))
@@ -57,7 +57,7 @@ func TestNewInteractionMessageDocument(t *testing.T) {
 			Document: DOCUMENT,
 		},
 	}
-	have := NewInteractionMessageDocument(SESSIONID, DOCUMENT, TEXT)
+	have := *NewInteractionMessageDocument(SESSIONID, DOCUMENT, TEXT)
 
 	if !reflect.DeepEqual(expect, have) {
 		t.Errorf(FormatTestError(expect, have))
@@ -73,7 +73,7 @@ func TestNewInteractionMessageImage(t *testing.T) {
 			Image: IMAGE,
 		},
 	}
-	have := NewInteractionMessageImage(SESSIONID, IMAGE, TEXT)
+	have := *NewInteractionMessageImage(SESSIONID, IMAGE, TEXT)
 
 	if !reflect.DeepEqual(expect, have) {
 		t.Errorf(FormatTestError(expect, have))
@@ -88,7 +88,7 @@ func TestNewInteractionMessageText(t *testing.T) {
 			Text: TEXT,
 		},
 	}
-	have := NewInteractionMessageText(SESSIONID, TEXT)
+	have := *NewInteractionMessageText(SESSIONID, TEXT)
 
 	if !reflect.DeepEqual(expect, have) {
 		t.Errorf(FormatTestError(expect, have))
@@ -104,7 +104,7 @@ func TestNewInteractionMessageVideo(t *testing.T) {
 			Video: VIDEO,
 		},
 	}
-	have := NewInteractionMessageVideo(SESSIONID, VIDEO, TEXT)
+	have := *NewInteractionMessageVideo(SESSIONID, VIDEO, TEXT)
 
 	if !reflect.DeepEqual(expect, have) {
 		t.Errorf(FormatTestError(expect, have))
