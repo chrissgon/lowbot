@@ -1,6 +1,9 @@
 package lowbot
 
-type Channel interface {
+import "github.com/google/uuid"
+
+type IChannel interface {
+	ChannelID() uuid.UUID
 	SendAudio(*Interaction) error
 	SendButton(*Interaction) error
 	SendDocument(*Interaction) error
@@ -11,10 +14,10 @@ type Channel interface {
 }
 
 type Interaction struct {
-	SessionID  string                `json:"sessionID"`
-	Type       InteractionType       `json:"type"`
-	Parameters InteractionParameters `json:"parameters"`
-	Custom     map[string]any        `json:"custom"`
+	SessionID  string
+	Type       InteractionType
+	Parameters InteractionParameters
+	Custom     map[string]any
 }
 
 type InteractionParameters StepParameters
@@ -22,14 +25,19 @@ type InteractionParameters StepParameters
 type InteractionType string
 
 const (
-	MESSAGE InteractionType = "message"
-	EVENT   InteractionType = "event"
+	MESSAGE_AUDIO    InteractionType = "audio"
+	MESSAGE_BUTTON   InteractionType = "button"
+	MESSAGE_DOCUMENT InteractionType = "document"
+	MESSAGE_IMAGE    InteractionType = "image"
+	MESSAGE_TEXT     InteractionType = "text"
+	MESSAGE_VIDEO    InteractionType = "video"
+	EVENT_TYPING     InteractionType = "typing"
 )
 
 func NewInteractionMessageAudio(sessionID string, audio string, text string) *Interaction {
 	return &Interaction{
 		SessionID: sessionID,
-		Type:      MESSAGE,
+		Type:      MESSAGE_AUDIO,
 		Parameters: InteractionParameters{
 			Text:  text,
 			Audio: audio,
@@ -40,7 +48,7 @@ func NewInteractionMessageAudio(sessionID string, audio string, text string) *In
 func NewInteractionMessageButton(sessionID string, buttons []string, text string) *Interaction {
 	return &Interaction{
 		SessionID: sessionID,
-		Type:      MESSAGE,
+		Type:      MESSAGE_BUTTON,
 		Parameters: InteractionParameters{
 			Text:    text,
 			Buttons: buttons,
@@ -51,7 +59,7 @@ func NewInteractionMessageButton(sessionID string, buttons []string, text string
 func NewInteractionMessageDocument(sessionID string, document string, text string) *Interaction {
 	return &Interaction{
 		SessionID: sessionID,
-		Type:      MESSAGE,
+		Type:      MESSAGE_DOCUMENT,
 		Parameters: InteractionParameters{
 			Text:     text,
 			Document: document,
@@ -62,7 +70,7 @@ func NewInteractionMessageDocument(sessionID string, document string, text strin
 func NewInteractionMessageImage(sessionID string, image string, text string) *Interaction {
 	return &Interaction{
 		SessionID: sessionID,
-		Type:      MESSAGE,
+		Type:      MESSAGE_IMAGE,
 		Parameters: InteractionParameters{
 			Text:  text,
 			Image: image,
@@ -73,7 +81,7 @@ func NewInteractionMessageImage(sessionID string, image string, text string) *In
 func NewInteractionMessageText(sessionID string, text string) *Interaction {
 	return &Interaction{
 		SessionID: sessionID,
-		Type:      MESSAGE,
+		Type:      MESSAGE_TEXT,
 		Parameters: InteractionParameters{
 			Text: text,
 		},
@@ -83,7 +91,7 @@ func NewInteractionMessageText(sessionID string, text string) *Interaction {
 func NewInteractionMessageVideo(sessionID string, video string, text string) *Interaction {
 	return &Interaction{
 		SessionID: sessionID,
-		Type:      MESSAGE,
+		Type:      MESSAGE_VIDEO,
 		Parameters: InteractionParameters{
 			Text:  text,
 			Video: video,

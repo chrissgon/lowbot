@@ -6,13 +6,16 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/google/uuid"
 )
 
-type Discord struct {
-	conn *discordgo.Session
+type DiscordChannel struct {
+	channelID uuid.UUID
+	conn      *discordgo.Session
 }
 
-func NewDiscord(token string) (Channel, error) {
+
+func NewDiscordChannel(token string) (IChannel, error) {
 	if token == "" {
 		return nil, ERR_UNKNOWN_DISCORD_TOKEN
 	}
@@ -23,10 +26,17 @@ func NewDiscord(token string) (Channel, error) {
 		return nil, err
 	}
 
-	return &Discord{conn: conn}, nil
+	return &DiscordChannel{
+		channelID: uuid.New(),
+		conn:      conn,
+	}, nil
 }
 
-func (ds *Discord) Next(in chan *Interaction) {
+func (ds *DiscordChannel) ChannelID() uuid.UUID {
+	return ds.channelID
+}
+
+func (ds *DiscordChannel) Next(in chan *Interaction) {
 	ds.conn.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if m.Author.ID == s.State.User.ID {
 			return
@@ -53,18 +63,18 @@ func (ds *Discord) Next(in chan *Interaction) {
 	ds.conn.Close()
 }
 
-func (ds *Discord) RespondInteraction(in *discordgo.Interaction) {
+func (ds *DiscordChannel) RespondInteraction(in *discordgo.Interaction) {
 	ds.conn.InteractionRespond(in, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{Content: ""}},
 	)
 }
 
-func (ds *Discord) SendAudio(interaction *Interaction) error {
+func (ds *DiscordChannel) SendAudio(interaction *Interaction) error {
 	return ds.SendFile(interaction.SessionID, interaction.Parameters.Text, interaction.Parameters.Audio)
 }
 
-func (ds *Discord) SendButton(interaction *Interaction) error {
+func (ds *DiscordChannel) SendButton(interaction *Interaction) error {
 	_, err := ds.conn.ChannelMessageSendComplex(interaction.SessionID, &discordgo.MessageSend{
 		Content: interaction.Parameters.Text,
 		Components: []discordgo.MessageComponent{
@@ -74,7 +84,7 @@ func (ds *Discord) SendButton(interaction *Interaction) error {
 	return err
 }
 
-func (ds *Discord) getButtons(interaction *Interaction) (buttons []discordgo.MessageComponent) {
+func (ds *DiscordChannel) getButtons(interaction *Interaction) (buttons []discordgo.MessageComponent) {
 	for _, button := range interaction.Parameters.Buttons {
 		buttons = append(buttons, discordgo.Button{
 			Label:    button,
@@ -86,11 +96,11 @@ func (ds *Discord) getButtons(interaction *Interaction) (buttons []discordgo.Mes
 	return
 }
 
-func (ds *Discord) SendDocument(interaction *Interaction) error {
+func (ds *DiscordChannel) SendDocument(interaction *Interaction) error {
 	return ds.SendFile(interaction.SessionID, interaction.Parameters.Text, interaction.Parameters.Document)
 }
 
-func (ds *Discord) SendImage(interaction *Interaction) error {
+func (ds *DiscordChannel) SendImage(interaction *Interaction) error {
 	if !IsURL(interaction.Parameters.Image) {
 		return ds.SendFile(interaction.SessionID, interaction.Parameters.Text, interaction.Parameters.Image)
 	}
@@ -106,12 +116,12 @@ func (ds *Discord) SendImage(interaction *Interaction) error {
 	return err
 }
 
-func (ds *Discord) SendText(interaction *Interaction) error {
+func (ds *DiscordChannel) SendText(interaction *Interaction) error {
 	_, err := ds.conn.ChannelMessageSend(interaction.SessionID, interaction.Parameters.Text)
 	return err
 }
 
-func (ds *Discord) SendVideo(interaction *Interaction) error {
+func (ds *DiscordChannel) SendVideo(interaction *Interaction) error {
 	if !IsURL(interaction.Parameters.Video) {
 		return ds.SendFile(interaction.SessionID, interaction.Parameters.Text, interaction.Parameters.Video)
 	}
@@ -128,7 +138,7 @@ func (ds *Discord) SendVideo(interaction *Interaction) error {
 	return err
 }
 
-func (ds *Discord) SendFile(sessionID, text, path string) error {
+func (ds *DiscordChannel) SendFile(sessionID, text, path string) error {
 	file, err := os.ReadFile(path)
 
 	if err != nil {

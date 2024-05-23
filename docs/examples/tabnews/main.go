@@ -7,16 +7,16 @@ import (
 )
 
 func main() {
-	// Desabilita persistência local
-	lowbot.EnableLocalPersist = false
-
 	// Cria um fluxo
 	flow, _ := lowbot.NewFlow("./flow.yaml")
 	// Cria um canal (Usaremos o Telegram)
-	channel, _ := lowbot.NewTelegram(os.Getenv("TELEGRAM_TOKEN"))
+	channel, _ := lowbot.NewTelegramChannel(os.Getenv("TELEGRAM_TOKEN"))
 	// Cria uma persistência
-	persist, _ := lowbot.NewLocalPersist()
+	persist, _ := lowbot.NewMemoryFlowPersist()
 
-	// Inicia o bot
-	lowbot.StartBot(flow, channel, persist)
+	// make consumer
+	consumer := lowbot.NewJourneyConsumer(flow, persist)
+
+	// start consumer
+	lowbot.StartConsumer(consumer, channel)
 }

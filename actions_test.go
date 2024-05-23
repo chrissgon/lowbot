@@ -19,7 +19,7 @@ func TestActionNames(t *testing.T) {
 func TestSetCustomActions(t *testing.T) {
 	name := "Custom"
 	SetCustomActions(ActionsMap{
-		name: func(flow *Flow, channel Channel) (bool, error) { return true, nil },
+		name: func(flow *Flow, channel IChannel) (bool, error) { return true, nil },
 	})
 
 	_, exists := actions[name]

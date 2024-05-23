@@ -4,20 +4,15 @@ import (
 	"os"
 
 	"github.com/chrissgon/lowbot"
+	"github.com/sashabaranov/go-openai"
 )
 
 func main() {
-	// make a flow
-	flow, _ := lowbot.NewFlow("./flow.yaml")
-
 	// make a channel. In this exemple is Telegram
 	channel, _ := lowbot.NewTelegramChannel(os.Getenv("TELEGRAM_TOKEN"))
 
-	// make a persist
-	persist, _ := lowbot.NewMemoryFlowPersist()
-
 	// make consumer
-	consumer := lowbot.NewJourneyConsumer(flow, persist)
+	consumer, _ := lowbot.NewChatGPTConsumer(os.Getenv("CHATGPT_TOKEN"), openai.GPT3Dot5Turbo)
 
 	// start bot
 	lowbot.StartConsumer(consumer, channel)

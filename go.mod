@@ -5,6 +5,8 @@ go 1.22.3
 require (
 	github.com/bwmarrin/discordgo v0.27.1
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
+	github.com/google/uuid v1.6.0
+	github.com/sashabaranov/go-openai v1.24.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 

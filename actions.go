@@ -1,6 +1,6 @@
 package lowbot
 
-type ActionsMap map[string]func(flow *Flow, channel Channel) (bool, error)
+type ActionsMap map[string]func(flow *Flow, channel IChannel) (bool, error)
 
 var actions = ActionsMap{
 	"Audio":    ActionAudio,
@@ -19,7 +19,7 @@ func SetCustomActions(custom ActionsMap) {
 	}
 }
 
-func RunAction(flow *Flow, channel Channel) (bool, error) {
+func RunAction(flow *Flow, channel IChannel) (bool, error) {
 	if flow == nil {
 		return false, ERR_NIL_FLOW
 	}
@@ -39,48 +39,48 @@ func RunAction(flow *Flow, channel Channel) (bool, error) {
 	return action(flow, channel)
 }
 
-func ActionAudio(flow *Flow, channel Channel) (bool, error) {
+func ActionAudio(flow *Flow, channel IChannel) (bool, error) {
 	step := flow.Current
 	err := channel.SendAudio(NewInteractionMessageAudio(flow.SessionID, step.Parameters.Audio, ParseTemplate(step.Parameters.Texts)))
 	return false, err
 }
 
-func ActionButton(flow *Flow, channel Channel) (bool, error) {
+func ActionButton(flow *Flow, channel IChannel) (bool, error) {
 	step := flow.Current
 	err := channel.SendButton(NewInteractionMessageButton(flow.SessionID, step.Parameters.Buttons, ParseTemplate(step.Parameters.Texts)))
 	return true, err
 }
 
-func ActionDocument(flow *Flow, channel Channel) (bool, error) {
+func ActionDocument(flow *Flow, channel IChannel) (bool, error) {
 	step := flow.Current
 	err := channel.SendDocument(NewInteractionMessageDocument(flow.SessionID, step.Parameters.Document, ParseTemplate(step.Parameters.Texts)))
 	return false, err
 }
 
-func ActionImage(flow *Flow, channel Channel) (bool, error) {
+func ActionImage(flow *Flow, channel IChannel) (bool, error) {
 	step := flow.Current
 	err := channel.SendImage(NewInteractionMessageImage(flow.SessionID, step.Parameters.Image, ParseTemplate(step.Parameters.Texts)))
 	return false, err
 }
 
-func ActionInput(flow *Flow, channel Channel) (bool, error) {
+func ActionInput(flow *Flow, channel IChannel) (bool, error) {
 	step := flow.Current
 	err := channel.SendText(NewInteractionMessageText(flow.SessionID, ParseTemplate(step.Parameters.Texts)))
 	return true, err
 }
 
-func ActionText(flow *Flow, channel Channel) (bool, error) {
+func ActionText(flow *Flow, channel IChannel) (bool, error) {
 	step := flow.Current
 	err := channel.SendText(NewInteractionMessageText(flow.SessionID, ParseTemplate(step.Parameters.Texts)))
 	return false, err
 }
 
-func ActionVideo(flow *Flow, channel Channel) (bool, error) {
+func ActionVideo(flow *Flow, channel IChannel) (bool, error) {
 	step := flow.Current
 	err := channel.SendVideo(NewInteractionMessageVideo(flow.SessionID, step.Parameters.Video, ParseTemplate(step.Parameters.Texts)))
 	return false, err
 }
 
-func ActionWait(flow *Flow, channel Channel) (bool, error) {
+func ActionWait(flow *Flow, channel IChannel) (bool, error) {
 	return true, nil
 }

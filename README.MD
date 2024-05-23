@@ -29,7 +29,7 @@ Start a bot with Telegram and local persist
 import "github.com/chrissgon/lowbot"
 
 flow, _ := lowbot.NewFlow("your_flow.yaml")
-channel, _ := lowbot.NewTelegram()
+channel, _ := lowbot.NewTelegram("your_telegram_token")
 persist, _ := lowbot.NewLocalPersist()
 
 lowbot.StartBot(flow, channel, persist)
@@ -41,10 +41,10 @@ Start a bot with Discord and custom actions
 import "github.com/chrissgon/lowbot"
 
 myActions := lowbot.ActionsMap{
-    "Custom": func(flow *lowbot.Flow, channel lowbot.Channel) (bool, error) {
+    "Custom": func(flow *lowbot.Flow, channel lowbot.IChannel) (bool, error) {
         // your rules
-        next := false
-        return next, nil
+        wait := true
+        return wait, nil
     },
 }
 
@@ -62,7 +62,7 @@ You can create your Channel or Persist by implementing their interfaces
 ```golang
 import "github.com/chrissgon/lowbot"
 
-func MyNewChannel () lowbot.Channel {
+func MyNewChannel () lowbot.IChannel {
   // implements Channel
 }
 

@@ -22,16 +22,22 @@ type Step struct {
 }
 
 type StepParameters struct {
-	Audio    string   `yaml:"audio" json:"audio"`
-	Buttons  []string `yaml:"buttons" json:"buttons"`
-	Document string   `yaml:"document" json:"document"`
-	Image    string   `yaml:"image" json:"image"`
-	Text     string   `yaml:"text" json:"text"`
-	Texts    []string `yaml:"texts"`
-	Video    string   `yaml:"video" json:"video"`
+	Audio    string         `yaml:"audio"`
+	Buttons  []string       `yaml:"buttons"`
+	Document string         `yaml:"document"`
+	Image    string         `yaml:"image"`
+	Text     string         `yaml:"text"`
+	Texts    []string       `yaml:"texts"`
+	Video    string         `yaml:"video"`
+	Custom   map[string]any `yaml:"custom"`
 }
 
 type Steps map[string]*Step
+
+type FlowPersist interface {
+	Set(flow *Flow) error
+	Get(sessionID string) (*Flow, error)
+}
 
 func NewFlow(path string) (*Flow, error) {
 	bytes, err := os.ReadFile(path)
@@ -64,6 +70,18 @@ func (flow *Flow) Next(interaction *Interaction) error {
 		return ERR_UNKNOWN_NEXT_STEP
 	}
 
+	err := flow.setNextFlow(interaction)
+
+	if err != nil {
+		return err
+	}
+
+	flow.Current.AddResponse(interaction)
+
+	return nil
+}
+
+func (flow *Flow) setNextFlow(interaction *Interaction) error {
 	for pattern, next := range flow.Current.Next {
 		matched, err := regexp.MatchString(pattern, interaction.Parameters.Text)
 
@@ -73,7 +91,6 @@ func (flow *Flow) Next(interaction *Interaction) error {
 
 		if matched {
 			flow.Current = flow.Steps[next]
-			flow.Current.AddResponse(interaction)
 
 			return nil
 		}
@@ -86,7 +103,6 @@ func (flow *Flow) Next(interaction *Interaction) error {
 	}
 
 	flow.Current = flow.Steps[next]
-	flow.Current.AddResponse(interaction)
 
 	return nil
 }

@@ -8,21 +8,18 @@ import (
 )
 
 func main() {
-	// disable local persistence
-	lowbot.EnableLocalPersist = false
-
 	// make a flow
 	flow, _ := lowbot.NewFlow("./flow.yaml")
 
 	// make a channel. In this exemple is Telegram
-	channel, _ := lowbot.NewTelegram(os.Getenv("TELEGRAM_TOKEN"))
+	channel, _ := lowbot.NewTelegramChannel(os.Getenv("TELEGRAM_TOKEN"))
 
 	// make a persist
-	persist, _ := lowbot.NewLocalPersist()
+	persist, _ := lowbot.NewMemoryFlowPersist()
 
 	// set custom actions
 	lowbot.SetCustomActions(lowbot.ActionsMap{
-		"TextUsername": func(flow *lowbot.Flow, channel lowbot.Channel) (bool, error) {
+		"TextUsername": func(flow *lowbot.Flow, channel lowbot.IChannel) (bool, error) {
 			step := flow.Current
 			template := lowbot.ParseTemplate(step.Parameters.Texts)
 			templateWithUsername := fmt.Sprintf(template, step.GetLastResponseText())
@@ -32,6 +29,9 @@ func main() {
 		},
 	})
 
-	// start bot
-	lowbot.StartBot(flow, channel, persist)
+	// make consumer
+	consumer := lowbot.NewJourneyConsumer(flow, persist)
+
+	// start consumer
+	lowbot.StartConsumer(consumer, channel)
 }

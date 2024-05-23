@@ -50,19 +50,19 @@ The `action` are functions that contain business rules.
 
 LowBot implements standard `actions` with common rules.
 
-In addition to the business rule, each action needs to inform whether it should continue to the next step, or wait for an interaction from the user.
+In addition to the business rule, each action needs to inform whether it should wait for an interaction from the user, or continue to the next step.
 
 Each `action` has additional data that is entered in `parameters`.
 
-| Action                               | Description            | Parameter  | Type       | Next ? |
+| Action                               | Description            | Parameter  | Type       | Wait ? |
 | ------------------------------------ | ---------------------- | ---------- | ---------- | ------ |
-| [Text](#example-action-text)         | Send texts             | `texts`    | `[]string` | ✅     |
-| [Image](#example-action-image)       | Send image             | `image`    | `string`   | ✅     |
-| [Video](#example-action-video)       | Send video             | `video`    | `string`   | ✅     |
-| [Document](#example-action-document) | Send document          | `document` | `string`   | ✅     |
-| [Input](#example-action-input)       | Send texts             | `input`    | `string`   | ❌     |
-| [Button](#example-action-button)     | Send texts and buttons | `buttons`  | `[]string` | ❌     |
-| [Wait](#example-action-wait)         | Only wait              | -          | -          | ❌     |
+| [Text](#example-action-text)         | Send texts             | `texts`    | `[]string` | ❌     |
+| [Image](#example-action-image)       | Send image             | `image`    | `string`   | ❌     |
+| [Video](#example-action-video)       | Send video             | `video`    | `string`   | ❌     |
+| [Document](#example-action-document) | Send document          | `document` | `string`   | ❌     |
+| [Input](#example-action-input)       | Send texts             | `input`    | `string`   | ✅     |
+| [Button](#example-action-button)     | Send texts and buttons | `buttons`  | `[]string` | ✅     |
+| [Wait](#example-action-wait)         | Only wait              | -          | -          | ✅     |
 
 ### Example Action Text
 
@@ -145,7 +145,7 @@ The `action` function receive two parameters:
 
 The function should return two values:
 
-- `bool`: Indicates whether the flow should proceed to the next step or wait.
+- `bool`: Indicates whether the flow should wait to the next step or proceed.
 - `error`: Indicates if an error occurred when executing the action.
 
 ## Custom Actions
@@ -154,10 +154,10 @@ If you need custom actions, you can create and define them with the SetCustomAct
 
 ```go
 myActions := lowbot.ActionsMap{
-    "Custom": func(flow *lowbot.Flow, channel lowbot.Channel) (bool, error) {
+    "Custom": func(flow *lowbot.Flow, channel lowbot.IChannel) (bool, error) {
         // your rules
-        next := false
-        return next, nil
+        wait := true
+        return wait, nil
     },
 }
 

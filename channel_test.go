@@ -19,7 +19,7 @@ var BUTTONS = []string{"button"}
 func TestNewInteractionMessageAudio(t *testing.T) {
 	expect := Interaction{
 		SessionID: SESSIONID,
-		Type:      MESSAGE,
+		Type:      MESSAGE_AUDIO,
 		Parameters: InteractionParameters{
 			Text:  TEXT,
 			Audio: AUDIO,
@@ -35,7 +35,7 @@ func TestNewInteractionMessageAudio(t *testing.T) {
 func TestNewInteractionMessageButton(t *testing.T) {
 	expect := Interaction{
 		SessionID: SESSIONID,
-		Type:      MESSAGE,
+		Type:      MESSAGE_BUTTON,
 		Parameters: InteractionParameters{
 			Text:    TEXT,
 			Buttons: BUTTONS,
@@ -51,7 +51,7 @@ func TestNewInteractionMessageButton(t *testing.T) {
 func TestNewInteractionMessageDocument(t *testing.T) {
 	expect := Interaction{
 		SessionID: SESSIONID,
-		Type:      MESSAGE,
+		Type:      MESSAGE_DOCUMENT,
 		Parameters: InteractionParameters{
 			Text:     TEXT,
 			Document: DOCUMENT,
@@ -67,7 +67,7 @@ func TestNewInteractionMessageDocument(t *testing.T) {
 func TestNewInteractionMessageImage(t *testing.T) {
 	expect := Interaction{
 		SessionID: SESSIONID,
-		Type:      MESSAGE,
+		Type:      MESSAGE_IMAGE,
 		Parameters: InteractionParameters{
 			Text:  TEXT,
 			Image: IMAGE,
@@ -83,7 +83,7 @@ func TestNewInteractionMessageImage(t *testing.T) {
 func TestNewInteractionMessageText(t *testing.T) {
 	expect := Interaction{
 		SessionID: SESSIONID,
-		Type:      MESSAGE,
+		Type:      MESSAGE_TEXT,
 		Parameters: InteractionParameters{
 			Text: TEXT,
 		},
@@ -98,7 +98,7 @@ func TestNewInteractionMessageText(t *testing.T) {
 func TestNewInteractionMessageVideo(t *testing.T) {
 	expect := Interaction{
 		SessionID: SESSIONID,
-		Type:      MESSAGE,
+		Type:      MESSAGE_VIDEO,
 		Parameters: InteractionParameters{
 			Text:  TEXT,
 			Video: VIDEO,

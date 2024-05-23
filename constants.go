@@ -2,11 +2,12 @@ package lowbot
 
 import "errors"
 
-const ()
-
 var (
-	ERR_UNKNOWN_TELEGRAM_TOKEN = errors.New("unknown TELEGRAM_TOKEN")
-	ERR_UNKNOWN_DISCORD_TOKEN  = errors.New("unknown DISCORD_TOKEN")
+	DEBUG = true
+	ERR_UNKNOWN_TELEGRAM_TOKEN = errors.New("unknown telegram token")
+	ERR_UNKNOWN_DISCORD_TOKEN  = errors.New("unknown discord token")
+	ERR_UNKNOWN_CHATGPT_TOKEN  = errors.New("unknown chatgpt token")
+	ERR_CONNECT_CHATGPT  = errors.New("connect to chatgpt failed")
 	ERR_UNKNOWN_ACTION         = errors.New("unknown action")
 	ERR_NIL_FLOW               = errors.New("nil flow")
 	ERR_NIL_STEP               = errors.New("nil step")
