@@ -16,7 +16,7 @@ type IChannel interface {
 }
 
 type Interaction struct {
-	channelID  uuid.UUID
+	ChannelID  uuid.UUID
 	SessionID  string
 	Type       InteractionType
 	Parameters InteractionParameters
@@ -62,7 +62,7 @@ func SendInteraction(channel IChannel, interaction *Interaction) error {
 
 func NewInteractionMessageAudio(channelID uuid.UUID, sessionID string, audio string, text string) *Interaction {
 	return &Interaction{
-		channelID: channelID,
+		ChannelID: channelID,
 		SessionID: sessionID,
 		Type:      MESSAGE_AUDIO,
 		Parameters: InteractionParameters{
@@ -74,7 +74,7 @@ func NewInteractionMessageAudio(channelID uuid.UUID, sessionID string, audio str
 
 func NewInteractionMessageButton(channelID uuid.UUID, sessionID string, buttons []string, text string) *Interaction {
 	return &Interaction{
-		channelID: channelID,
+		ChannelID: channelID,
 		SessionID: sessionID,
 		Type:      MESSAGE_BUTTON,
 		Parameters: InteractionParameters{
@@ -86,7 +86,7 @@ func NewInteractionMessageButton(channelID uuid.UUID, sessionID string, buttons 
 
 func NewInteractionMessageDocument(channelID uuid.UUID, sessionID string, document string, text string) *Interaction {
 	return &Interaction{
-		channelID: channelID,
+		ChannelID: channelID,
 		SessionID: sessionID,
 		Type:      MESSAGE_DOCUMENT,
 		Parameters: InteractionParameters{
@@ -98,7 +98,7 @@ func NewInteractionMessageDocument(channelID uuid.UUID, sessionID string, docume
 
 func NewInteractionMessageImage(channelID uuid.UUID, sessionID string, image string, text string) *Interaction {
 	return &Interaction{
-		channelID: channelID,
+		ChannelID: channelID,
 		SessionID: sessionID,
 		Type:      MESSAGE_IMAGE,
 		Parameters: InteractionParameters{
@@ -110,7 +110,7 @@ func NewInteractionMessageImage(channelID uuid.UUID, sessionID string, image str
 
 func NewInteractionMessageText(channelID uuid.UUID, sessionID string, text string) *Interaction {
 	return &Interaction{
-		channelID: channelID,
+		ChannelID: channelID,
 		SessionID: sessionID,
 		Type:      MESSAGE_TEXT,
 		Parameters: InteractionParameters{
@@ -121,7 +121,7 @@ func NewInteractionMessageText(channelID uuid.UUID, sessionID string, text strin
 
 func NewInteractionMessageVideo(channelID uuid.UUID, sessionID string, video string, text string) *Interaction {
 	return &Interaction{
-		channelID: channelID,
+		ChannelID: channelID,
 		SessionID: sessionID,
 		Type:      MESSAGE_VIDEO,
 		Parameters: InteractionParameters{
