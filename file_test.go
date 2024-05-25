@@ -36,3 +36,11 @@ func TestFile_Read(t *testing.T) {
 		t.Errorf(FormatTestError([]byte{}, nil))
 	}
 }
+
+func TestFile_SetFileType(t *testing.T) {
+	file := NewFile("./mocks/features.txt")
+
+	file.GetFile().SetFileType()
+
+	t.Fatal()
+}

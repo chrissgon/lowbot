@@ -55,7 +55,17 @@ func ActionFile(flow *Flow, interaction *Interaction, channel IChannel) (bool, e
 	newInteraction := NewInteractionMessageFile(channel, interaction.Sender, step.Parameters.Path, text)
 	newInteraction.SetReplier(replier)
 
-	return false, channel.SendVideo(newInteraction)
+	if newInteraction.Parameters.File.GetFile().FileType == FILETYPE_AUDIO {
+		return false, channel.SendAudio(newInteraction)
+	}
+	if newInteraction.Parameters.File.GetFile().FileType == FILETYPE_IMAGE {
+		return false, channel.SendImage(newInteraction)
+	}
+	if newInteraction.Parameters.File.GetFile().FileType == FILETYPE_VIDEO {
+		return false, channel.SendVideo(newInteraction)
+	}
+
+	return false, channel.SendDocument(newInteraction)
 }
 
 func ActionInput(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
