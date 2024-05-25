@@ -8,9 +8,9 @@ steps:
   audio:
     next:
       default: button
-    action: Audio
+    action: File
     parameters:
-      audio: ./mocks/music.mp3
+      path: ./mocks/music.mp3
 
   button:
     next:
@@ -26,16 +26,16 @@ steps:
   document:
     next:
       default: image
-    action: Document
+    action: File
     parameters:
-      document: ./mocks/features.txt
+      path: ./mocks/features.txt
 
   image:
     next:
       default: text
-    action: Image
+    action: File
     parameters:
-      image: ./mocks/image.jpg
+      path: ./mocks/image.jpg
 
   text:
     next:
@@ -48,9 +48,9 @@ steps:
   video:
     next:
       default: end
-    action: Video
+    action: File
     parameters:
-      video: ./mocks/video.mp4
+      path: ./mocks/video.mp4
 
   end:
     action: Text

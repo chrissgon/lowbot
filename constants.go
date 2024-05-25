@@ -3,8 +3,7 @@ package lowbot
 import "errors"
 
 var (
-	DEBUG                        = true
-	ERR_UNKNOWN_INTERACTION_TYPE = errors.New("unknown interaction type")
+	DEBUG                        = false
 	ERR_UNKNOWN_TELEGRAM_TOKEN   = errors.New("unknown telegram token")
 	ERR_UNKNOWN_DISCORD_TOKEN    = errors.New("unknown discord token")
 	ERR_UNKNOWN_CHATGPT_TOKEN    = errors.New("unknown chatgpt token")
@@ -16,4 +15,12 @@ var (
 	ERR_UNKNOWN_INIT_STEP        = errors.New("unknown step: init")
 	ERR_UNKNOWN_NEXT_STEP        = errors.New("unknown next step")
 	ERR_PATTERN_NEXT_STEP        = errors.New("step pattern invalid")
+
+)
+
+const (
+	CHANNEL_TELEGRAM_NAME = "telegram"
+	CHANNEL_DISCORD_NAME = "discord"
+	CONSUMER_JOURNEY_NAME = "journey"
+	CONSUMER_CHATGPT_NAME = "chatgpt"
 )

@@ -8,4 +8,6 @@ func StartConsumer(consumer IConsumer, channel IChannel) {
 	for interaction := range interactions {
 		consumer.Run(interaction, channel)
 	}
+
+	close(interactions)
 }

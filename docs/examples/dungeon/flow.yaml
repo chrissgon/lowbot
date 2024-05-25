@@ -17,8 +17,8 @@ steps:
         - ""
         - Choose one of the paths below. 👇🏻
       buttons:
-        - Right
         - Left
+        - Right
 
   minotaur:
     action: Button

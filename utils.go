@@ -4,25 +4,15 @@ import (
 	"fmt"
 	"log"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
-func FormatTestError(expect, have interface{}) string {
+func FormatTestError(expect, have any) string {
 	return fmt.Sprintf("\nexpect: %v, \nhave: %v", expect, have)
 }
 
 func ParseTemplate(texts []string) string {
 	return strings.Join(texts, "\n")
-}
-
-func Int64ToString(number int64) string {
-	return fmt.Sprintf("%d", number)
-}
-
-func StringToInt64(str string) int64 {
-	number, _ := strconv.ParseInt(str, 10, 64)
-	return number
 }
 
 func IsURL(str string) bool {

@@ -4,14 +4,15 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/google/uuid"
 	"gopkg.in/yaml.v3"
 )
 
 type Flow struct {
-	SessionID string
-	Name      string `yaml:"name"`
-	Steps     Steps  `yaml:"steps"`
-	Current   *Step
+	FlowID  uuid.UUID
+	Name    string `yaml:"name"`
+	Steps   Steps  `yaml:"steps"`
+	Current *Step
 }
 
 type Step struct {
@@ -22,21 +23,18 @@ type Step struct {
 }
 
 type StepParameters struct {
-	Audio    string         `yaml:"audio"`
-	Buttons  []string       `yaml:"buttons"`
-	Document string         `yaml:"document"`
-	Image    string         `yaml:"image"`
-	Text     string         `yaml:"text"`
-	Texts    []string       `yaml:"texts"`
-	Video    string         `yaml:"video"`
-	Custom   map[string]any `yaml:"custom"`
+	Buttons []string `yaml:"buttons"`
+	Path    string `yaml:"path"`
+	Text  string   `yaml:"text"`
+	Texts []string `yaml:"texts"`
+	Custom map[string]any `yaml:"custom"`
 }
 
 type Steps map[string]*Step
 
 type FlowPersist interface {
-	Set(flow *Flow) error
-	Get(sessionID string) (*Flow, error)
+	Set(any, *Flow) error
+	Get(any) (*Flow, error)
 }
 
 func NewFlow(path string) (*Flow, error) {
@@ -54,6 +52,8 @@ func NewFlow(path string) (*Flow, error) {
 }
 
 func (flow *Flow) Start() error {
+	flow.FlowID = uuid.New()
+
 	step, exists := flow.Steps["init"]
 
 	if !exists {

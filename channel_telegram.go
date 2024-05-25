@@ -6,8 +6,8 @@ import (
 )
 
 type TelegramChannel struct {
-	channelID uuid.UUID
-	conn      *tgbotapi.BotAPI
+	*Channel
+	conn *tgbotapi.BotAPI
 }
 
 func NewTelegramChannel(token string) (IChannel, error) {
@@ -23,57 +23,64 @@ func NewTelegramChannel(token string) (IChannel, error) {
 	}
 
 	return &TelegramChannel{
-		channelID: uuid.New(),
-		conn:      conn,
+		Channel: &Channel{
+			ChannelID: uuid.New(),
+			Name:      CHANNEL_TELEGRAM_NAME,
+		},
+		conn: conn,
 	}, nil
 }
 
-func (ch *TelegramChannel) ChannelID() uuid.UUID {
-	return ch.channelID
+func (channel *TelegramChannel) GetChannel() *Channel {
+	return channel.Channel
 }
 
-func (ch *TelegramChannel) Next(interaction chan *Interaction) {
+func (channel *TelegramChannel) Next(interaction chan *Interaction) {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
-	updates := ch.conn.GetUpdatesChan(u)
+	updates := channel.conn.GetUpdatesChan(u)
 
 	for update := range updates {
 		var i *Interaction
 
 		if update.Message != nil {
-			i = NewInteractionMessageText(ch.channelID, Int64ToString(update.Message.Chat.ID), update.Message.Text)
+			sender := NewWho(update.Message.Chat.ID, update.Message.From.UserName)
+			i = NewInteractionMessageText(channel, sender, update.Message.Text)
 		}
 
 		if update.CallbackQuery != nil {
-			i = NewInteractionMessageText(ch.channelID, Int64ToString(update.CallbackQuery.From.ID), update.CallbackData())
+			sender := NewWho(update.CallbackQuery.From.ID, update.CallbackQuery.From.UserName)
+			i = NewInteractionMessageText(channel, sender, update.CallbackData())
 		}
 
 		interaction <- i
 	}
 }
 
-func (ch *TelegramChannel) SendAudio(interaction *Interaction) error {
-	ch.SendText(interaction)
+func (channel *TelegramChannel) SendAudio(interaction *Interaction) error {
+	channel.SendText(interaction)
 
-	file := ch.getRequestFileDate(interaction.Parameters.Audio)
-
-	_, err := ch.conn.Send(tgbotapi.NewAudio(StringToInt64(interaction.SessionID), file))
+	file := channel.getRequestFileDate(interaction.Parameters.File.GetFile().Path)
+	chatID := interaction.Sender.WhoID.(int64)
+	message := tgbotapi.NewAudio(chatID, file)
+	_, err := channel.conn.Send(message)
 
 	return err
 }
 
-func (ch *TelegramChannel) SendButton(interaction *Interaction) error {
+func (channel *TelegramChannel) SendButton(interaction *Interaction) error {
 	button := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			ch.getButtons(interaction)...,
+			channel.getButtons(interaction)...,
 		),
 	)
 
-	message := tgbotapi.NewMessage(StringToInt64(interaction.SessionID), interaction.Parameters.Text)
+	chatID := interaction.Sender.WhoID.(int64)
+	message := tgbotapi.NewMessage(chatID, interaction.Parameters.Text)
 	message.ReplyMarkup = button
+	_, err := channel.conn.Send(message)
 
-	_, err := ch.conn.Send(message)
 	return err
 }
 
@@ -84,47 +91,53 @@ func (*TelegramChannel) getButtons(interaction *Interaction) (buttons []tgbotapi
 	return
 }
 
-func (ch *TelegramChannel) SendDocument(interaction *Interaction) error {
-	ch.SendText(interaction)
+func (channel *TelegramChannel) SendDocument(interaction *Interaction) error {
+	channel.SendText(interaction)
 
-	file := ch.getRequestFileDate(interaction.Parameters.Document)
-
-	_, err := ch.conn.Send(tgbotapi.NewDocument(StringToInt64(interaction.SessionID), file))
-
-	return err
-}
-
-func (ch *TelegramChannel) SendImage(interaction *Interaction) error {
-	ch.SendText(interaction)
-
-	file := ch.getRequestFileDate(interaction.Parameters.Image)
-
-	_, err := ch.conn.Send(tgbotapi.NewPhoto(StringToInt64(interaction.SessionID), file))
+	file := channel.getRequestFileDate(interaction.Parameters.File.GetFile().Path)
+	chatID := interaction.Sender.WhoID.(int64)
+	message := tgbotapi.NewDocument(chatID, file)
+	_, err := channel.conn.Send(message)
 
 	return err
 }
 
-func (ch *TelegramChannel) SendText(interaction *Interaction) error {
-	_, err := ch.conn.Send(tgbotapi.NewMessage(StringToInt64(interaction.SessionID), interaction.Parameters.Text))
+func (channel *TelegramChannel) SendImage(interaction *Interaction) error {
+	channel.SendText(interaction)
+
+	file := channel.getRequestFileDate(interaction.Parameters.File.GetFile().Path)
+	chatID := interaction.Sender.WhoID.(int64)
+	message := tgbotapi.NewPhoto(chatID, file)
+	_, err := channel.conn.Send(message)
+
 	return err
 }
 
-func (ch *TelegramChannel) SendVideo(interaction *Interaction) error {
-	ch.SendText(interaction)
+func (channel *TelegramChannel) SendText(interaction *Interaction) error {
+	chatID := interaction.Sender.WhoID.(int64)
+	message := tgbotapi.NewMessage(chatID, interaction.Parameters.Text)
+	_, err := channel.conn.Send(message)
 
-	file := ch.getRequestFileDate(interaction.Parameters.Video)
+	return err
+}
 
-	_, err := ch.conn.Send(tgbotapi.NewVideo(StringToInt64(interaction.SessionID), file))
+func (channel *TelegramChannel) SendVideo(interaction *Interaction) error {
+	channel.SendText(interaction)
+
+	file := channel.getRequestFileDate(interaction.Parameters.File.GetFile().Path)
+	chatID := interaction.Sender.WhoID.(int64)
+	message := tgbotapi.NewDocument(chatID, file)
+	_, err := channel.conn.Send(message)
 
 	return err
 }
 
 func (*TelegramChannel) getRequestFileDate(str string) (file tgbotapi.RequestFileData) {
-	file = tgbotapi.FilePath(str)
-
 	if IsURL(str) {
 		file = tgbotapi.FileURL(str)
 	}
+
+	file = tgbotapi.FilePath(str)
 
 	return
 }

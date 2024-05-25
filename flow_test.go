@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-func TestNewFlow(t *testing.T) {
-	expect := NewMock()
+func TestFlow_NewFlow(t *testing.T) {
+	expect := newFlowMock()
 	have, err := NewFlow("./mocks/flow.yaml")
 
 	if err != nil {
@@ -18,7 +18,7 @@ func TestNewFlow(t *testing.T) {
 	}
 }
 
-func TestStartFlow(t *testing.T) {
+func TestFlow_StartFlow(t *testing.T) {
 	flow, _ := NewFlow("./mocks/flow.yaml")
 	flow.Start()
 
@@ -30,10 +30,10 @@ func TestStartFlow(t *testing.T) {
 	}
 }
 
-func TestNextFlow(t *testing.T) {
+func TestFlow_NextFlow(t *testing.T) {
 	flow, _ := NewFlow("./mocks/flow.yaml")
 	flow.Start()
-	flow.Next(NewInteractionMessageText(CHANNELID, SESSIONID, ""))
+	flow.Next(NewInteractionMessageText(CHANNEL_MOCK, WHO_MOCK, ""))
 
 	expect := flow.Steps["audio"]
 	have := flow.Current
@@ -43,7 +43,7 @@ func TestNextFlow(t *testing.T) {
 	}
 }
 
-func TestNoHasNext(t *testing.T) {
+func TestFlow_NoHasNext(t *testing.T) {
 	flow, _ := NewFlow("./mocks/flow.yaml")
 	flow.Start()
 	flow.Current.Next = nil
@@ -53,10 +53,10 @@ func TestNoHasNext(t *testing.T) {
 	}
 }
 
-func TestAddResponse(t *testing.T) {
+func TestFlow_AddResponse(t *testing.T) {
 	flow, _ := NewFlow("./mocks/flow.yaml")
 	flow.Start()
-	flow.Next(NewInteractionMessageText(CHANNELID, SESSIONID, ""))
+	flow.Next(NewInteractionMessageText(CHANNEL_MOCK, WHO_MOCK, ""))
 
 	expect := 1
 	have := len(flow.Current.Responses)
@@ -66,13 +66,13 @@ func TestAddResponse(t *testing.T) {
 	}
 
 }
-func TestAddResponseValue(t *testing.T) {
-	in := NewInteractionMessageText(CHANNELID, SESSIONID, "Response")
+func TestFlow_AddResponseValue(t *testing.T) {
+	interaction := NewInteractionMessageText(CHANNEL_MOCK, WHO_MOCK, "Response")
 	flow, _ := NewFlow("./mocks/flow.yaml")
 	flow.Start()
-	flow.Next(in)
+	flow.Next(interaction)
 
-	expect := in
+	expect := interaction
 	have := flow.Current.Responses[0]
 
 	if !reflect.DeepEqual(expect, have) {
@@ -80,7 +80,7 @@ func TestAddResponseValue(t *testing.T) {
 	}
 }
 
-func NewMock() Flow {
+func newFlowMock() Flow {
 	return Flow{
 		Name: "flow",
 		Steps: Steps{
@@ -93,9 +93,9 @@ func NewMock() Flow {
 				Next: map[string]string{
 					"default": "button",
 				},
-				Action: "Audio",
+				Action: "File",
 				Parameters: StepParameters{
-					Audio: "./mocks/music.mp3",
+					Path: "./mocks/music.mp3",
 				},
 			},
 			"button": {
@@ -105,25 +105,25 @@ func NewMock() Flow {
 				Action: "Button",
 				Parameters: StepParameters{
 					Buttons: []string{"yes", "no"},
-					Texts: []string{"buttons here"},
+					Texts:   []string{"buttons here"},
 				},
 			},
 			"document": {
 				Next: map[string]string{
 					"default": "image",
 				},
-				Action: "Document",
+				Action: "File",
 				Parameters: StepParameters{
-					Document: "./mocks/features.txt",
+					Path: "./mocks/features.txt",
 				},
 			},
 			"image": {
 				Next: map[string]string{
 					"default": "text",
 				},
-				Action: "Image",
+				Action: "File",
 				Parameters: StepParameters{
-					Image: "./mocks/image.jpg",
+					Path: "./mocks/image.jpg",
 				},
 			},
 			"text": {
@@ -139,9 +139,9 @@ func NewMock() Flow {
 				Next: map[string]string{
 					"default": "end",
 				},
-				Action: "Video",
+				Action: "File",
 				Parameters: StepParameters{
-					Video: "./mocks/video.mp4",
+					Path: "./mocks/video.mp4",
 				},
 			},
 			"end": {

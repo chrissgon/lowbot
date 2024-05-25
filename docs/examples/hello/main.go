@@ -19,11 +19,11 @@ func main() {
 
 	// set custom actions
 	lowbot.SetCustomActions(lowbot.ActionsMap{
-		"TextUsername": func(flow *lowbot.Flow, channel lowbot.IChannel) (bool, error) {
+		"TextUsername": func(flow *lowbot.Flow, interaction *lowbot.Interaction, channel lowbot.IChannel) (bool, error) {
 			step := flow.Current
 			template := lowbot.ParseTemplate(step.Parameters.Texts)
 			templateWithUsername := fmt.Sprintf(template, step.GetLastResponseText())
-			in := lowbot.NewInteractionMessageText(channel.ChannelID(), flow.SessionID, templateWithUsername)
+			in := lowbot.NewInteractionMessageText(channel, interaction.Sender, templateWithUsername)
 			err := channel.SendText(in)
 			return true, err
 		},
