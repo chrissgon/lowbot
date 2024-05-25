@@ -23,7 +23,7 @@ func main() {
 			step := flow.Current
 			template := lowbot.ParseTemplate(step.Parameters.Texts)
 			templateWithUsername := fmt.Sprintf(template, step.GetLastResponseText())
-			in := lowbot.NewInteractionMessageText(flow.SessionID, templateWithUsername)
+			in := lowbot.NewInteractionMessageText(channel.ChannelID(), flow.SessionID, templateWithUsername)
 			err := channel.SendText(in)
 			return true, err
 		},

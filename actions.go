@@ -41,43 +41,43 @@ func RunAction(flow *Flow, channel IChannel) (bool, error) {
 
 func ActionAudio(flow *Flow, channel IChannel) (bool, error) {
 	step := flow.Current
-	err := channel.SendAudio(NewInteractionMessageAudio(flow.SessionID, step.Parameters.Audio, ParseTemplate(step.Parameters.Texts)))
+	err := channel.SendAudio(NewInteractionMessageAudio(channel.ChannelID(), flow.SessionID, step.Parameters.Audio, ParseTemplate(step.Parameters.Texts)))
 	return false, err
 }
 
 func ActionButton(flow *Flow, channel IChannel) (bool, error) {
 	step := flow.Current
-	err := channel.SendButton(NewInteractionMessageButton(flow.SessionID, step.Parameters.Buttons, ParseTemplate(step.Parameters.Texts)))
+	err := channel.SendButton(NewInteractionMessageButton(channel.ChannelID(), flow.SessionID, step.Parameters.Buttons, ParseTemplate(step.Parameters.Texts)))
 	return true, err
 }
 
 func ActionDocument(flow *Flow, channel IChannel) (bool, error) {
 	step := flow.Current
-	err := channel.SendDocument(NewInteractionMessageDocument(flow.SessionID, step.Parameters.Document, ParseTemplate(step.Parameters.Texts)))
+	err := channel.SendDocument(NewInteractionMessageDocument(channel.ChannelID(), flow.SessionID, step.Parameters.Document, ParseTemplate(step.Parameters.Texts)))
 	return false, err
 }
 
 func ActionImage(flow *Flow, channel IChannel) (bool, error) {
 	step := flow.Current
-	err := channel.SendImage(NewInteractionMessageImage(flow.SessionID, step.Parameters.Image, ParseTemplate(step.Parameters.Texts)))
+	err := channel.SendImage(NewInteractionMessageImage(channel.ChannelID(), flow.SessionID, step.Parameters.Image, ParseTemplate(step.Parameters.Texts)))
 	return false, err
 }
 
 func ActionInput(flow *Flow, channel IChannel) (bool, error) {
 	step := flow.Current
-	err := channel.SendText(NewInteractionMessageText(flow.SessionID, ParseTemplate(step.Parameters.Texts)))
+	err := channel.SendText(NewInteractionMessageText(channel.ChannelID(), flow.SessionID, ParseTemplate(step.Parameters.Texts)))
 	return true, err
 }
 
 func ActionText(flow *Flow, channel IChannel) (bool, error) {
 	step := flow.Current
-	err := channel.SendText(NewInteractionMessageText(flow.SessionID, ParseTemplate(step.Parameters.Texts)))
+	err := channel.SendText(NewInteractionMessageText(channel.ChannelID(), flow.SessionID, ParseTemplate(step.Parameters.Texts)))
 	return false, err
 }
 
 func ActionVideo(flow *Flow, channel IChannel) (bool, error) {
 	step := flow.Current
-	err := channel.SendVideo(NewInteractionMessageVideo(flow.SessionID, step.Parameters.Video, ParseTemplate(step.Parameters.Texts)))
+	err := channel.SendVideo(NewInteractionMessageVideo(channel.ChannelID(), flow.SessionID, step.Parameters.Video, ParseTemplate(step.Parameters.Texts)))
 	return false, err
 }
 

@@ -1,21 +1,34 @@
 package lowbot
 
-import (
-	"os"
-	"testing"
-)
+import "testing"
 
 func TestStartJourney(t *testing.T) {
-	os.Setenv("TELEGRAM_TOKEN", "7187351845:AAGGNkwB6ehdajFAJCrveKtyMe4mvMcO4Vg")
-	flow, _ := NewFlow("./mocks/flow.yaml")
-	persist, _ := NewMemoryFlowPersist()
+	// os.Setenv("TELEGRAM_TOKEN", )
+	// flow, _ := NewFlow("./mocks/flow.yaml")
+	// persist, _ := NewMemoryFlowPersist()
 
-	joruney := NewJourneyConsumer(flow, persist)
+	// joruney := NewJourneyConsumer(flow, persist)
 
-	telegram, _ := NewTelegramChannel(os.Getenv("TELEGRAM_TOKEN"))
+	// lowbot.NewDiscordChannel("MTExNzU1Mjk0MTQxOTc0MTE4NA.G1_soj.kGkxobXrtE_Ko7DS7ODQOKnFPqCcNrS7IonNd0")
+	// telegram, _ := NewTelegramChannel("7187351845:AAGGNkwB6ehdajFAJCrveKtyMe4mvMcO4Vg")
+	// telegramB, _ := NewDiscordChannel("MTExNzU1Mjk0MTQxOTc0MTE4NA.G1_soj.kGkxobXrtE_Ko7DS7ODQOKnFPqCcNrS7IonNd0")
 
-	StartConsumer(joruney, telegram)
+	// StartRoom([]IChannel{telegram, telegramB})
 }
+
+// func TestStartJourney(t *testing.T) {
+// 	// os.Setenv("TELEGRAM_TOKEN", )
+// 	flow, _ := NewFlow("./mocks/flow.yaml")
+// 	persist, _ := NewMemoryFlowPersist()
+
+// 	joruney := NewJourneyConsumer(flow, persist)
+
+// 	channel, _ := NewDiscordChannel("MTExNzU1Mjk0MTQxOTc0MTE4NA.G1_soj.kGkxobXrtE_Ko7DS7ODQOKnFPqCcNrS7IonNd0")
+// 	// telegramA, _ := NewTelegramChannel("7187351845:AAGGNkwB6ehdajFAJCrveKtyMe4mvMcO4Vg")
+// 	// telegramB, _ := NewTelegramChannel("6824630284:AAFbdBJK5bSSjkjqfFGLiroxwUawhBl7AVk")
+
+// 	StartConsumer(joruney, channel)
+// }
 
 // func TestStartBot(t *testing.T) {
 // 	EnableLocalPersist = false

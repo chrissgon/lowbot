@@ -42,5 +42,5 @@ func (c *ChatGPTConsumer) Run(interaction *Interaction, channel IChannel) {
 		},
 	)
 
-	channel.SendText(NewInteractionMessageText(interaction.SessionID, resp.Choices[0].Message.Content))
+	channel.SendText(NewInteractionMessageText(channel.ChannelID(), interaction.SessionID, resp.Choices[0].Message.Content))
 }

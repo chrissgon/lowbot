@@ -1,19 +1,22 @@
 package lowbot
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 type IChannel interface {
 	ChannelID() uuid.UUID
+	Next(chan *Interaction)
 	SendAudio(*Interaction) error
 	SendButton(*Interaction) error
 	SendDocument(*Interaction) error
 	SendImage(*Interaction) error
 	SendText(*Interaction) error
 	SendVideo(*Interaction) error
-	Next(chan *Interaction)
 }
 
 type Interaction struct {
+	channelID  uuid.UUID
 	SessionID  string
 	Type       InteractionType
 	Parameters InteractionParameters
@@ -34,8 +37,32 @@ const (
 	EVENT_TYPING     InteractionType = "typing"
 )
 
-func NewInteractionMessageAudio(sessionID string, audio string, text string) *Interaction {
+func SendInteraction(channel IChannel, interaction *Interaction) error {
+	if interaction.Type == MESSAGE_AUDIO {
+		return channel.SendAudio(interaction)
+	}
+	if interaction.Type == MESSAGE_BUTTON {
+		return channel.SendButton(interaction)
+	}
+	if interaction.Type == MESSAGE_DOCUMENT {
+		return channel.SendDocument(interaction)
+	}
+	if interaction.Type == MESSAGE_IMAGE {
+		return channel.SendImage(interaction)
+	}
+	if interaction.Type == MESSAGE_TEXT {
+		return channel.SendText(interaction)
+	}
+	if interaction.Type == MESSAGE_VIDEO {
+		return channel.SendVideo(interaction)
+	}
+
+	return ERR_UNKNOWN_INTERACTION_TYPE
+}
+
+func NewInteractionMessageAudio(channelID uuid.UUID, sessionID string, audio string, text string) *Interaction {
 	return &Interaction{
+		channelID: channelID,
 		SessionID: sessionID,
 		Type:      MESSAGE_AUDIO,
 		Parameters: InteractionParameters{
@@ -45,8 +72,9 @@ func NewInteractionMessageAudio(sessionID string, audio string, text string) *In
 	}
 }
 
-func NewInteractionMessageButton(sessionID string, buttons []string, text string) *Interaction {
+func NewInteractionMessageButton(channelID uuid.UUID, sessionID string, buttons []string, text string) *Interaction {
 	return &Interaction{
+		channelID: channelID,
 		SessionID: sessionID,
 		Type:      MESSAGE_BUTTON,
 		Parameters: InteractionParameters{
@@ -56,8 +84,9 @@ func NewInteractionMessageButton(sessionID string, buttons []string, text string
 	}
 }
 
-func NewInteractionMessageDocument(sessionID string, document string, text string) *Interaction {
+func NewInteractionMessageDocument(channelID uuid.UUID, sessionID string, document string, text string) *Interaction {
 	return &Interaction{
+		channelID: channelID,
 		SessionID: sessionID,
 		Type:      MESSAGE_DOCUMENT,
 		Parameters: InteractionParameters{
@@ -67,8 +96,9 @@ func NewInteractionMessageDocument(sessionID string, document string, text strin
 	}
 }
 
-func NewInteractionMessageImage(sessionID string, image string, text string) *Interaction {
+func NewInteractionMessageImage(channelID uuid.UUID, sessionID string, image string, text string) *Interaction {
 	return &Interaction{
+		channelID: channelID,
 		SessionID: sessionID,
 		Type:      MESSAGE_IMAGE,
 		Parameters: InteractionParameters{
@@ -78,8 +108,9 @@ func NewInteractionMessageImage(sessionID string, image string, text string) *In
 	}
 }
 
-func NewInteractionMessageText(sessionID string, text string) *Interaction {
+func NewInteractionMessageText(channelID uuid.UUID, sessionID string, text string) *Interaction {
 	return &Interaction{
+		channelID: channelID,
 		SessionID: sessionID,
 		Type:      MESSAGE_TEXT,
 		Parameters: InteractionParameters{
@@ -88,8 +119,9 @@ func NewInteractionMessageText(sessionID string, text string) *Interaction {
 	}
 }
 
-func NewInteractionMessageVideo(sessionID string, video string, text string) *Interaction {
+func NewInteractionMessageVideo(channelID uuid.UUID, sessionID string, video string, text string) *Interaction {
 	return &Interaction{
+		channelID: channelID,
 		SessionID: sessionID,
 		Type:      MESSAGE_VIDEO,
 		Parameters: InteractionParameters{

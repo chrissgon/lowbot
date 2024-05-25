@@ -3,6 +3,12 @@ package lowbot
 import (
 	"reflect"
 	"testing"
+
+	"github.com/google/uuid"
+)
+
+var (
+	CHANNELID = uuid.New()
 )
 
 const (
@@ -18,6 +24,7 @@ var BUTTONS = []string{"button"}
 
 func TestNewInteractionMessageAudio(t *testing.T) {
 	expect := Interaction{
+		channelID: CHANNELID,
 		SessionID: SESSIONID,
 		Type:      MESSAGE_AUDIO,
 		Parameters: InteractionParameters{
@@ -25,7 +32,7 @@ func TestNewInteractionMessageAudio(t *testing.T) {
 			Audio: AUDIO,
 		},
 	}
-	have := *NewInteractionMessageAudio(SESSIONID, AUDIO, TEXT)
+	have := *NewInteractionMessageAudio(CHANNELID, SESSIONID, AUDIO, TEXT)
 
 	if !reflect.DeepEqual(expect, have) {
 		t.Errorf(FormatTestError(expect, have))
@@ -34,6 +41,7 @@ func TestNewInteractionMessageAudio(t *testing.T) {
 
 func TestNewInteractionMessageButton(t *testing.T) {
 	expect := Interaction{
+		channelID: CHANNELID,
 		SessionID: SESSIONID,
 		Type:      MESSAGE_BUTTON,
 		Parameters: InteractionParameters{
@@ -41,7 +49,7 @@ func TestNewInteractionMessageButton(t *testing.T) {
 			Buttons: BUTTONS,
 		},
 	}
-	have := *NewInteractionMessageButton(SESSIONID, BUTTONS, TEXT)
+	have := *NewInteractionMessageButton(CHANNELID, SESSIONID, BUTTONS, TEXT)
 
 	if !reflect.DeepEqual(expect, have) {
 		t.Errorf(FormatTestError(expect, have))
@@ -50,6 +58,7 @@ func TestNewInteractionMessageButton(t *testing.T) {
 
 func TestNewInteractionMessageDocument(t *testing.T) {
 	expect := Interaction{
+		channelID: CHANNELID,
 		SessionID: SESSIONID,
 		Type:      MESSAGE_DOCUMENT,
 		Parameters: InteractionParameters{
@@ -57,7 +66,7 @@ func TestNewInteractionMessageDocument(t *testing.T) {
 			Document: DOCUMENT,
 		},
 	}
-	have := *NewInteractionMessageDocument(SESSIONID, DOCUMENT, TEXT)
+	have := *NewInteractionMessageDocument(CHANNELID, SESSIONID, DOCUMENT, TEXT)
 
 	if !reflect.DeepEqual(expect, have) {
 		t.Errorf(FormatTestError(expect, have))
@@ -66,6 +75,7 @@ func TestNewInteractionMessageDocument(t *testing.T) {
 
 func TestNewInteractionMessageImage(t *testing.T) {
 	expect := Interaction{
+		channelID: CHANNELID,
 		SessionID: SESSIONID,
 		Type:      MESSAGE_IMAGE,
 		Parameters: InteractionParameters{
@@ -73,7 +83,7 @@ func TestNewInteractionMessageImage(t *testing.T) {
 			Image: IMAGE,
 		},
 	}
-	have := *NewInteractionMessageImage(SESSIONID, IMAGE, TEXT)
+	have := *NewInteractionMessageImage(CHANNELID, SESSIONID, IMAGE, TEXT)
 
 	if !reflect.DeepEqual(expect, have) {
 		t.Errorf(FormatTestError(expect, have))
@@ -82,13 +92,14 @@ func TestNewInteractionMessageImage(t *testing.T) {
 
 func TestNewInteractionMessageText(t *testing.T) {
 	expect := Interaction{
+		channelID: CHANNELID,
 		SessionID: SESSIONID,
 		Type:      MESSAGE_TEXT,
 		Parameters: InteractionParameters{
 			Text: TEXT,
 		},
 	}
-	have := *NewInteractionMessageText(SESSIONID, TEXT)
+	have := *NewInteractionMessageText(CHANNELID, SESSIONID, TEXT)
 
 	if !reflect.DeepEqual(expect, have) {
 		t.Errorf(FormatTestError(expect, have))
@@ -97,6 +108,7 @@ func TestNewInteractionMessageText(t *testing.T) {
 
 func TestNewInteractionMessageVideo(t *testing.T) {
 	expect := Interaction{
+		channelID: CHANNELID,
 		SessionID: SESSIONID,
 		Type:      MESSAGE_VIDEO,
 		Parameters: InteractionParameters{
@@ -104,7 +116,7 @@ func TestNewInteractionMessageVideo(t *testing.T) {
 			Video: VIDEO,
 		},
 	}
-	have := *NewInteractionMessageVideo(SESSIONID, VIDEO, TEXT)
+	have := *NewInteractionMessageVideo(CHANNELID, SESSIONID, VIDEO, TEXT)
 
 	if !reflect.DeepEqual(expect, have) {
 		t.Errorf(FormatTestError(expect, have))

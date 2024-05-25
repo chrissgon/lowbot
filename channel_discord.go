@@ -14,7 +14,6 @@ type DiscordChannel struct {
 	conn      *discordgo.Session
 }
 
-
 func NewDiscordChannel(token string) (IChannel, error) {
 	if token == "" {
 		return nil, ERR_UNKNOWN_DISCORD_TOKEN
@@ -32,26 +31,26 @@ func NewDiscordChannel(token string) (IChannel, error) {
 	}, nil
 }
 
-func (ds *DiscordChannel) ChannelID() uuid.UUID {
-	return ds.channelID
+func (ch *DiscordChannel) ChannelID() uuid.UUID {
+	return ch.channelID
 }
 
-func (ds *DiscordChannel) Next(in chan *Interaction) {
-	ds.conn.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
+func (ch *DiscordChannel) Next(in chan *Interaction) {
+	ch.conn.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if m.Author.ID == s.State.User.ID {
 			return
 		}
 
-		in <- NewInteractionMessageText(m.ChannelID, m.Content)
+		in <- NewInteractionMessageText(ch.channelID, m.ChannelID, m.Content)
 	})
-	ds.conn.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		ds.RespondInteraction(i.Interaction)
-		in <- NewInteractionMessageText(i.ChannelID, i.Interaction.MessageComponentData().CustomID)
+	ch.conn.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		ch.RespondInteraction(i.Interaction)
+		in <- NewInteractionMessageText(ch.channelID, i.ChannelID, i.Interaction.MessageComponentData().CustomID)
 	})
 
-	ds.conn.Identify.Intents = discordgo.IntentsGuildMessages
+	ch.conn.Identify.Intents = discordgo.IntentsGuildMessages
 
-	err := ds.conn.Open()
+	err := ch.conn.Open()
 
 	if err != nil {
 		return
@@ -60,31 +59,31 @@ func (ds *DiscordChannel) Next(in chan *Interaction) {
 	sc := make(chan os.Signal, 1)
 	<-sc
 
-	ds.conn.Close()
+	ch.conn.Close()
 }
 
-func (ds *DiscordChannel) RespondInteraction(in *discordgo.Interaction) {
-	ds.conn.InteractionRespond(in, &discordgo.InteractionResponse{
+func (ch *DiscordChannel) RespondInteraction(in *discordgo.Interaction) {
+	ch.conn.InteractionRespond(in, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{Content: ""}},
 	)
 }
 
-func (ds *DiscordChannel) SendAudio(interaction *Interaction) error {
-	return ds.SendFile(interaction.SessionID, interaction.Parameters.Text, interaction.Parameters.Audio)
+func (ch *DiscordChannel) SendAudio(interaction *Interaction) error {
+	return ch.SendFile(interaction.SessionID, interaction.Parameters.Text, interaction.Parameters.Audio)
 }
 
-func (ds *DiscordChannel) SendButton(interaction *Interaction) error {
-	_, err := ds.conn.ChannelMessageSendComplex(interaction.SessionID, &discordgo.MessageSend{
+func (ch *DiscordChannel) SendButton(interaction *Interaction) error {
+	_, err := ch.conn.ChannelMessageSendComplex(interaction.SessionID, &discordgo.MessageSend{
 		Content: interaction.Parameters.Text,
 		Components: []discordgo.MessageComponent{
-			discordgo.ActionsRow{Components: ds.getButtons(interaction)},
+			discordgo.ActionsRow{Components: ch.getButtons(interaction)},
 		},
 	})
 	return err
 }
 
-func (ds *DiscordChannel) getButtons(interaction *Interaction) (buttons []discordgo.MessageComponent) {
+func (ch *DiscordChannel) getButtons(interaction *Interaction) (buttons []discordgo.MessageComponent) {
 	for _, button := range interaction.Parameters.Buttons {
 		buttons = append(buttons, discordgo.Button{
 			Label:    button,
@@ -96,16 +95,16 @@ func (ds *DiscordChannel) getButtons(interaction *Interaction) (buttons []discor
 	return
 }
 
-func (ds *DiscordChannel) SendDocument(interaction *Interaction) error {
-	return ds.SendFile(interaction.SessionID, interaction.Parameters.Text, interaction.Parameters.Document)
+func (ch *DiscordChannel) SendDocument(interaction *Interaction) error {
+	return ch.SendFile(interaction.SessionID, interaction.Parameters.Text, interaction.Parameters.Document)
 }
 
-func (ds *DiscordChannel) SendImage(interaction *Interaction) error {
+func (ch *DiscordChannel) SendImage(interaction *Interaction) error {
 	if !IsURL(interaction.Parameters.Image) {
-		return ds.SendFile(interaction.SessionID, interaction.Parameters.Text, interaction.Parameters.Image)
+		return ch.SendFile(interaction.SessionID, interaction.Parameters.Text, interaction.Parameters.Image)
 	}
 
-	_, err := ds.conn.ChannelMessageSendComplex(interaction.SessionID, &discordgo.MessageSend{
+	_, err := ch.conn.ChannelMessageSendComplex(interaction.SessionID, &discordgo.MessageSend{
 		Content: interaction.Parameters.Text,
 		Embed: &discordgo.MessageEmbed{
 			Image: &discordgo.MessageEmbedImage{
@@ -113,20 +112,21 @@ func (ds *DiscordChannel) SendImage(interaction *Interaction) error {
 			},
 		},
 	})
+
 	return err
 }
 
-func (ds *DiscordChannel) SendText(interaction *Interaction) error {
-	_, err := ds.conn.ChannelMessageSend(interaction.SessionID, interaction.Parameters.Text)
+func (ch *DiscordChannel) SendText(interaction *Interaction) error {
+	_, err := ch.conn.ChannelMessageSend(interaction.SessionID, interaction.Parameters.Text)
 	return err
 }
 
-func (ds *DiscordChannel) SendVideo(interaction *Interaction) error {
+func (ch *DiscordChannel) SendVideo(interaction *Interaction) error {
 	if !IsURL(interaction.Parameters.Video) {
-		return ds.SendFile(interaction.SessionID, interaction.Parameters.Text, interaction.Parameters.Video)
+		return ch.SendFile(interaction.SessionID, interaction.Parameters.Text, interaction.Parameters.Video)
 	}
 
-	_, err := ds.conn.ChannelMessageSendComplex(interaction.SessionID, &discordgo.MessageSend{
+	_, err := ch.conn.ChannelMessageSendComplex(interaction.SessionID, &discordgo.MessageSend{
 		Content: interaction.Parameters.Text,
 		Embed: &discordgo.MessageEmbed{
 			Video: &discordgo.MessageEmbedVideo{
@@ -138,7 +138,7 @@ func (ds *DiscordChannel) SendVideo(interaction *Interaction) error {
 	return err
 }
 
-func (ds *DiscordChannel) SendFile(sessionID, text, path string) error {
+func (ch *DiscordChannel) SendFile(sessionID, text, path string) error {
 	file, err := os.ReadFile(path)
 
 	if err != nil {
@@ -148,7 +148,7 @@ func (ds *DiscordChannel) SendFile(sessionID, text, path string) error {
 	parts := strings.Split(path, "/")
 	name := parts[len(parts)-1]
 
-	_, err = ds.conn.ChannelMessageSendComplex(sessionID, &discordgo.MessageSend{
+	_, err = ch.conn.ChannelMessageSendComplex(sessionID, &discordgo.MessageSend{
 		Content: text,
 		File: &discordgo.File{
 			Name:   name,
