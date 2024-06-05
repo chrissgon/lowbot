@@ -11,6 +11,10 @@ import (
 type IFile interface {
 	GetFile() *File
 	Read() error
+	IsAudio() bool
+	IsDocument() bool
+	IsImage() bool
+	IsVideo() bool
 }
 
 type File struct {
@@ -25,10 +29,10 @@ type File struct {
 type FileType string
 
 const (
-	FILETYPE_AUDIO    FileType = "audio"
-	FILETYPE_DOCUMENT FileType = "document"
-	FILETYPE_IMAGE    FileType = "image"
-	FILETYPE_VIDEO    FileType = "video"
+	FILETYPE_AUDIO    FileType = "FILETYPE_AUDIO"
+	FILETYPE_DOCUMENT FileType = "FILETYPE_DOCUMENT"
+	FILETYPE_IMAGE    FileType = "FILETYPE_IMAGE"
+	FILETYPE_VIDEO    FileType = "FILETYPE_VIDEO"
 )
 
 var (
@@ -38,22 +42,20 @@ var (
 )
 
 func NewFile(path string) IFile {
-	var err error
-
 	file := &File{
 		FileID:   uuid.New(),
 		FileType: FILETYPE_DOCUMENT,
 	}
 
 	file.Extension = filepath.Ext(path)
-	file.Path, err = filepath.Abs(path)
 
-	if err != nil {
-		file.Path = path
-	}
-
+	file.SetFilePath(path)
 	file.SetFileType()
 
+	return file
+}
+
+func (file *File) GetFile() *File {
 	return file
 }
 
@@ -68,8 +70,17 @@ func (file *File) Read() error {
 	return file.Err
 }
 
-func (file *File) GetFile() *File {
-	return file
+func (file *File) SetFilePath(path string) {
+	if IsURL(path) {
+		file.Path = path
+		return
+	}
+
+	file.Path, file.Err = filepath.Abs(path)
+
+	if file.Err != nil {
+		file.Path = path
+	}
 }
 
 func (file *File) SetFileType() {
@@ -91,4 +102,20 @@ func (file *File) SetFileType() {
 			return
 		}
 	}
+}
+
+func (file *File) IsAudio() bool {
+	return file.FileType == FILETYPE_AUDIO
+}
+
+func (file *File) IsDocument() bool {
+	return file.FileType == FILETYPE_DOCUMENT
+}
+
+func (file *File) IsImage() bool {
+	return file.FileType == FILETYPE_IMAGE
+}
+
+func (file *File) IsVideo() bool {
+	return file.FileType == FILETYPE_VIDEO
 }

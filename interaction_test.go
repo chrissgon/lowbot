@@ -1,6 +1,7 @@
 package lowbot
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/google/uuid"
@@ -14,7 +15,7 @@ const (
 
 var (
 	BUTTONS      = []string{"button"}
-	WHO_MOCK          = NewWho(uuid.New().String(), "WHO MOCK")
+	WHO_MOCK     = NewWho(uuid.New().String(), "WHO MOCK")
 	CHANNEL_MOCK = newMockChannel()
 )
 
@@ -106,8 +107,10 @@ func TestInteraction_NewInteractionMessageFile(t *testing.T) {
 		t.Errorf(FormatTestError(TEXT, have.Parameters.Text))
 	}
 
-	if FILE != have.Parameters.File.GetFile().Path {
-		t.Errorf(FormatTestError(FILE, have.Parameters.File.GetFile().Path))
+	abs, _ := filepath.Abs(FILE)
+
+	if abs != have.Parameters.File.GetFile().Path {
+		t.Errorf(FormatTestError(abs, have.Parameters.File.GetFile().Path))
 	}
 }
 

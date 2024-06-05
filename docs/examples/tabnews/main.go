@@ -18,5 +18,5 @@ func main() {
 	consumer := lowbot.NewJourneyConsumer(flow, persist)
 
 	// start consumer
-	lowbot.StartConsumer(consumer, channel)
+	lowbot.StartConsumer(consumer, []lowbot.IChannel{channel})
 }

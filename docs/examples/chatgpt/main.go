@@ -15,5 +15,5 @@ func main() {
 	consumer, _ := lowbot.NewChatGPTConsumer(os.Getenv("CHATGPT_TOKEN"), openai.GPT3Dot5Turbo)
 
 	// start bot
-	lowbot.StartConsumer(consumer, channel)
+	lowbot.StartConsumer(consumer, []lowbot.IChannel{channel})
 }

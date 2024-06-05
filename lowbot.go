@@ -1,13 +1,24 @@
 package lowbot
 
-func StartConsumer(consumer IConsumer, channel IChannel) {
-	interactions := make(chan *Interaction)
+import "sync"
 
-	go channel.Next(interactions)
+func StartConsumer(consumer IConsumer, channels []IChannel) {
+	var wg sync.WaitGroup
 
-	for interaction := range interactions {
-		consumer.Run(interaction, channel)
+	for _, channel := range channels {
+		go func(consumer IConsumer, channel IChannel) {
+			interactions := make(chan *Interaction)
+
+			go channel.Next(interactions)
+
+			for interaction := range interactions {
+				consumer.Run(interaction, channel)
+			}
+
+			close(interactions)
+		}(consumer, channel)
 	}
 
-	close(interactions)
+	wg.Add(1)
+	wg.Wait()
 }

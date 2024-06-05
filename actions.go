@@ -38,30 +38,28 @@ func RunAction(flow *Flow, interaction *Interaction, channel IChannel) (bool, er
 
 func ActionButton(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
 	step := flow.Current
-	replier := NewWho(flow.FlowID, flow.Name)
+
 	text := ParseTemplate(step.Parameters.Texts)
 
 	newInteraction := NewInteractionMessageButton(channel, interaction.Sender, step.Parameters.Buttons, text)
-	newInteraction.SetReplier(replier)
 
 	return true, channel.SendButton(newInteraction)
 }
 
 func ActionFile(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
 	step := flow.Current
-	replier := NewWho(flow.FlowID, flow.Name)
+
 	text := ParseTemplate(step.Parameters.Texts)
 
 	newInteraction := NewInteractionMessageFile(channel, interaction.Sender, step.Parameters.Path, text)
-	newInteraction.SetReplier(replier)
 
-	if newInteraction.Parameters.File.GetFile().FileType == FILETYPE_AUDIO {
+	if newInteraction.Parameters.File.IsAudio() {
 		return false, channel.SendAudio(newInteraction)
 	}
-	if newInteraction.Parameters.File.GetFile().FileType == FILETYPE_IMAGE {
+	if newInteraction.Parameters.File.IsImage() {
 		return false, channel.SendImage(newInteraction)
 	}
-	if newInteraction.Parameters.File.GetFile().FileType == FILETYPE_VIDEO {
+	if newInteraction.Parameters.File.IsVideo() {
 		return false, channel.SendVideo(newInteraction)
 	}
 
@@ -76,11 +74,10 @@ func ActionInput(flow *Flow, interaction *Interaction, channel IChannel) (bool, 
 
 func ActionText(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
 	step := flow.Current
-	replier := NewWho(flow.FlowID, flow.Name)
+
 	text := ParseTemplate(step.Parameters.Texts)
 
 	newInteraction := NewInteractionMessageText(channel, interaction.Sender, text)
-	newInteraction.SetReplier(replier)
 
 	return false, channel.SendText(newInteraction)
 }

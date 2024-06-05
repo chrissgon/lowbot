@@ -1,6 +1,7 @@
 package lowbot
 
 import (
+	"path/filepath"
 	"testing"
 )
 
@@ -15,8 +16,17 @@ func TestFile_NewFile(t *testing.T) {
 		t.Errorf(FormatTestError(expect, have))
 	}
 
-	expect = path
+	expect, _ = filepath.Abs(path)
 	have = file.GetFile().Path
+
+	if expect != have {
+		t.Errorf(FormatTestError(expect, have))
+	}
+}
+
+func TestFile_GetFile(t *testing.T) {
+	expect := NewFile("./mocks/features.txt")
+	have := expect.GetFile()
 
 	if expect != have {
 		t.Errorf(FormatTestError(expect, have))
@@ -35,12 +45,4 @@ func TestFile_Read(t *testing.T) {
 	if file.GetFile().Bytes == nil {
 		t.Errorf(FormatTestError([]byte{}, nil))
 	}
-}
-
-func TestFile_SetFileType(t *testing.T) {
-	file := NewFile("./mocks/features.txt")
-
-	file.GetFile().SetFileType()
-
-	t.Fatal()
 }

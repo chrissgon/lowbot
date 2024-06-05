@@ -34,11 +34,11 @@ func NewChatGPTConsumer(token string, model string) (IConsumer, error) {
 	}, nil
 }
 
-func (c *ChatGPTConsumer) Run(interaction *Interaction, channel IChannel) error {
-	resp, err := c.conn.CreateChatCompletion(
+func (consumer *ChatGPTConsumer) Run(interaction *Interaction, channel IChannel) error {
+	resp, err := consumer.conn.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model: c.model,
+			Model: consumer.model,
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleUser,
@@ -52,5 +52,9 @@ func (c *ChatGPTConsumer) Run(interaction *Interaction, channel IChannel) error 
 		return err
 	}
 
-	return channel.SendText(NewInteractionMessageText(channel, interaction.Sender, resp.Choices[0].Message.Content))
+	replier := NewWho(consumer.ConsumerID, consumer.Name)
+	newInteraction := NewInteractionMessageText(channel, interaction.Sender, resp.Choices[0].Message.Content)
+	newInteraction.SetReplier(replier)
+
+	return channel.SendText(newInteraction)
 }

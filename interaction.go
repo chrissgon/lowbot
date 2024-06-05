@@ -12,10 +12,10 @@ type Interaction struct {
 type InteractionType string
 
 const (
-	MESSAGE_BUTTON InteractionType = "button"
-	MESSAGE_FILE   InteractionType = "file"
-	MESSAGE_TEXT   InteractionType = "text"
-	EVENT_TYPING   InteractionType = "typing"
+	MESSAGE_BUTTON InteractionType = "MESSAGE_BUTTON"
+	MESSAGE_FILE   InteractionType = "MESSAGE_FILE"
+	MESSAGE_TEXT   InteractionType = "MESSAGE_TEXT"
+	EVENT_TYPING   InteractionType = "EVENT_TYPING"
 )
 
 type InteractionParameters struct {
