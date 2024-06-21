@@ -2,6 +2,7 @@ package lowbot
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -82,6 +83,7 @@ func (consumer *ChatGPTConsumer) Run(interaction *Interaction, channel IChannel)
 	)
 
 	if err != nil {
+		printLog(fmt.Sprintf("%v: WhoID:<%v> ERR: %v\n", consumer.Name, interaction.Sender.WhoID, err))
 		return err
 	}
 
@@ -110,6 +112,7 @@ func (consumer *ChatGPTAssistantConsumer) Run(interaction *Interaction, channel 
 	})
 
 	if err != nil {
+		printLog(fmt.Sprintf("%v: WhoID:<%v> ERR: %v\n", consumer.Name, interaction.Sender.WhoID, err))
 		return err
 	}
 

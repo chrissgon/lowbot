@@ -1,6 +1,9 @@
 package lowbot
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 func StartConsumer(consumer IConsumer, channels []IChannel) {
 	var wg sync.WaitGroup
@@ -12,7 +15,11 @@ func StartConsumer(consumer IConsumer, channels []IChannel) {
 			go channel.Next(interactions)
 
 			for interaction := range interactions {
-				consumer.Run(interaction, channel)
+				err := consumer.Run(interaction, channel)
+
+				if err != nil{
+					printLog(fmt.Sprintf("Run ERR: %v\n", err))
+				}
 			}
 
 			close(interactions)
