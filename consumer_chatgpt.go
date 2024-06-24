@@ -52,7 +52,7 @@ func NewChatGPTAssistantConsumer(token string, assistantID string) (IConsumer, e
 
 	conn := openai.NewClient(token)
 
-	assistant, err := conn.RetrieveAssistant(context.Background(), assistantID)
+	assistant, err := conn.RetrieveAssistant(context.TODO(), assistantID)
 
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func NewChatGPTAssistantConsumer(token string, assistantID string) (IConsumer, e
 
 func (consumer *ChatGPTConsumer) Run(interaction *Interaction, channel IChannel) error {
 	resp, err := consumer.conn.CreateChatCompletion(
-		context.Background(),
+		context.TODO(),
 		openai.ChatCompletionRequest{
 			Model: consumer.model,
 			Messages: []openai.ChatCompletionMessage{
@@ -95,7 +95,7 @@ func (consumer *ChatGPTConsumer) Run(interaction *Interaction, channel IChannel)
 }
 
 func (consumer *ChatGPTAssistantConsumer) Run(interaction *Interaction, channel IChannel) error {
-	run, err := consumer.conn.CreateThreadAndRun(context.Background(), openai.CreateThreadAndRunRequest{
+	run, err := consumer.conn.CreateThreadAndRun(context.TODO(), openai.CreateThreadAndRunRequest{
 		RunRequest: openai.RunRequest{
 			AssistantID:  consumer.assistant.ID,
 			Model:        consumer.assistant.Model,
@@ -130,12 +130,12 @@ func (consumer *ChatGPTAssistantConsumer) waitMessage(run openai.Run) string {
 		after := ""
 		before := ""
 
-		msgs, _ := consumer.conn.ListMessage(context.Background(), run.ThreadID, &limit, &order, &after, &before)
+		msgs, _ := consumer.conn.ListMessage(context.TODO(), run.ThreadID, &limit, &order, &after, &before)
 
 		return msgs.Messages[0].Content[0].Text.Value
 	}
 
 	time.Sleep(2 * time.Second)
-	run, _ = consumer.conn.RetrieveRun(context.Background(), run.ThreadID, run.ID)
+	run, _ = consumer.conn.RetrieveRun(context.TODO(), run.ThreadID, run.ID)
 	return consumer.waitMessage(run)
 }
