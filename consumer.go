@@ -4,6 +4,7 @@ import "github.com/google/uuid"
 
 type IConsumer interface {
 	Run(*Interaction, IChannel) error
+	GetConsumer() *Consumer
 }
 
 type Consumer struct {

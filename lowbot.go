@@ -17,8 +17,8 @@ func StartConsumer(consumer IConsumer, channels []IChannel) {
 			for interaction := range interactions {
 				err := consumer.Run(interaction, channel)
 
-				if err != nil{
-					printLog(fmt.Sprintf("Run ERR: %v\n", err))
+				if err != nil {
+					printLog(fmt.Sprintf("%v: WhoID:<%v> ERR: %v\n", consumer.GetConsumer().Name, interaction.Sender.WhoID, err))
 				}
 			}
 

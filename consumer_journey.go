@@ -23,27 +23,31 @@ func NewJourneyConsumer(flow *Flow, persist FlowPersist) IConsumer {
 	}
 }
 
-func (journey *JourneyConsumer) Run(interaction *Interaction, channel IChannel) error {
-	flow, err := journey.Persist.Get(interaction.Sender.WhoID)
+func (consumer *JourneyConsumer) GetConsumer() *Consumer {
+	return consumer.Consumer
+}
+
+func (consumer *JourneyConsumer) Run(interaction *Interaction, channel IChannel) error {
+	flow, err := consumer.Persist.Get(interaction.Sender.WhoID)
 
 	flowNotExistsOrWasFinished := err != nil || flow.NoHasNext()
 
 	if flowNotExistsOrWasFinished {
-		copyFlow := *journey.Flow
+		copyFlow := *consumer.Flow
 		copyFlow.Start()
 		flow = &copyFlow
 	}
 
-	err = journey.processStep(flow, channel, interaction)
+	err = consumer.processStep(flow, channel, interaction)
 
-	journey.Persist.Set(interaction.Sender.WhoID, flow)
+	consumer.Persist.Set(interaction.Sender.WhoID, flow)
 
 	printLog(fmt.Sprintf("WhoID:<%v> Action:<%s> ERR: %v\n", interaction.Sender.WhoID, flow.Current.Action, err))
 
 	return err
 }
 
-func (journey *JourneyConsumer) processStep(flow *Flow, channel IChannel, interaction *Interaction) error {
+func (consumer *JourneyConsumer) processStep(flow *Flow, channel IChannel, interaction *Interaction) error {
 	err := flow.Next(interaction)
 
 	if err != nil {
@@ -63,5 +67,5 @@ func (journey *JourneyConsumer) processStep(flow *Flow, channel IChannel, intera
 		return nil
 	}
 
-	return journey.processStep(flow, channel, interaction)
+	return consumer.processStep(flow, channel, interaction)
 }

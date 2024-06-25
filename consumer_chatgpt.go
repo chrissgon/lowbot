@@ -13,7 +13,6 @@ type ChatGPTConsumer struct {
 	*Consumer
 	model string
 	conn  *openai.Client
-	ctx       context.Context
 }
 
 type ChatGPTAssistantConsumer struct {
@@ -42,7 +41,6 @@ func NewChatGPTConsumer(token string, model string) (IConsumer, error) {
 		},
 		conn:  conn,
 		model: model,
-		ctx : context.Background(),
 	}, nil
 }
 
@@ -75,9 +73,17 @@ func NewChatGPTAssistantConsumer(token string, assistantID string) (IConsumer, e
 	}, nil
 }
 
+func (consumer *ChatGPTConsumer) GetConsumer() *Consumer {
+	return consumer.Consumer
+}
+
+func (consumer *ChatGPTAssistantConsumer) GetConsumer() *Consumer {
+	return consumer.Consumer
+}
+
 func (consumer *ChatGPTConsumer) Run(interaction *Interaction, channel IChannel) error {
 	resp, err := consumer.conn.CreateChatCompletion(
-		consumer.ctx,
+		context.Background(),
 		openai.ChatCompletionRequest{
 			Model: consumer.model,
 			Messages: []openai.ChatCompletionMessage{
@@ -107,7 +113,6 @@ func (consumer *ChatGPTAssistantConsumer) Run(interaction *Interaction, channel 
 	consumer.threads[interaction.Sender.WhoID] = threadID
 
 	if err != nil {
-		printLog(fmt.Sprintf("%v: WhoID:<%v> ERR: %v\n", consumer.Name, interaction.Sender.WhoID, err))
 		return err
 	}
 
@@ -118,12 +123,17 @@ func (consumer *ChatGPTAssistantConsumer) Run(interaction *Interaction, channel 
 	})
 
 	if err != nil {
-		printLog(fmt.Sprintf("%v: WhoID:<%v> ERR: %v\n", consumer.Name, interaction.Sender.WhoID, err))
+		return err
+	}
+
+	answer, err := consumer.waitMessage(run)
+
+	if err != nil {
 		return err
 	}
 
 	replier := NewWho(consumer.ConsumerID, consumer.Name)
-	newInteraction := NewInteractionMessageText(channel, interaction.Sender, consumer.waitMessage(run))
+	newInteraction := NewInteractionMessageText(channel, interaction.Sender, answer)
 	newInteraction.SetReplier(replier)
 
 	return channel.SendText(newInteraction)
@@ -133,6 +143,11 @@ func (consumer *ChatGPTAssistantConsumer) getThreadID(interaction *Interaction) 
 	threadID, exists := consumer.threads[interaction.Sender.WhoID]
 
 	if exists {
+		consumer.conn.CreateMessage(consumer.ctx, threadID, openai.MessageRequest{
+			Role:    string(openai.ThreadMessageRoleUser),
+			Content: interaction.Parameters.Text,
+		})
+
 		return threadID, nil
 	}
 
@@ -148,19 +163,29 @@ func (consumer *ChatGPTAssistantConsumer) getThreadID(interaction *Interaction) 
 	return thread.ID, err
 }
 
-func (consumer *ChatGPTAssistantConsumer) waitMessage(run openai.Run) string {
+func (consumer *ChatGPTAssistantConsumer) waitMessage(run openai.Run) (string, error) {
 	if run.Status == "completed" {
 		limit := 1
 		order := "desc"
 		after := ""
 		before := ""
 
-		msgs, _ := consumer.conn.ListMessage(consumer.ctx, run.ThreadID, &limit, &order, &after, &before)
+		msgs, err := consumer.conn.ListMessage(consumer.ctx, run.ThreadID, &limit, &order, &after, &before)
 
-		return msgs.Messages[0].Content[0].Text.Value
+		if err != nil {
+			return "", err
+		}
+
+		return msgs.Messages[0].Content[0].Text.Value, nil
 	}
 
-	time.Sleep(2 * time.Second)
-	run, _ = consumer.conn.RetrieveRun(consumer.ctx, run.ThreadID, run.ID)
+	time.Sleep(1 * time.Second)
+
+	run, err := consumer.conn.RetrieveRun(consumer.ctx, run.ThreadID, run.ID)
+
+	if err != nil {
+		return "", err
+	}
+
 	return consumer.waitMessage(run)
 }
