@@ -2,6 +2,7 @@ package lowbot
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -164,7 +165,7 @@ func (consumer *ChatGPTAssistantConsumer) getThreadID(interaction *Interaction) 
 }
 
 func (consumer *ChatGPTAssistantConsumer) waitMessage(run openai.Run) (string, error) {
-	if run.Status == "completed" {
+	if run.Status == openai.RunStatusCompleted {
 		limit := 1
 		order := "desc"
 		after := ""
@@ -178,14 +179,17 @@ func (consumer *ChatGPTAssistantConsumer) waitMessage(run openai.Run) (string, e
 
 		return msgs.Messages[0].Content[0].Text.Value, nil
 	}
+	if run.Status == "queued" || run.Status == "in_progress" {
+		time.Sleep(1 * time.Second)
 
-	time.Sleep(1 * time.Second)
+		run, err := consumer.conn.RetrieveRun(consumer.ctx, run.ThreadID, run.ID)
 
-	run, err := consumer.conn.RetrieveRun(consumer.ctx, run.ThreadID, run.ID)
+		if err != nil {
+			return "", err
+		}
 
-	if err != nil {
-		return "", err
+		return consumer.waitMessage(run)
 	}
 
-	return consumer.waitMessage(run)
+	return "", errors.New(run.LastError.Message)
 }
