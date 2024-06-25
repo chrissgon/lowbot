@@ -54,7 +54,7 @@ func (consumer *JourneyConsumer) processStep(flow *Flow, channel IChannel, inter
 		return err
 	}
 
-	replier := NewWho(flow.FlowID, flow.Name)
+	replier := NewWho(flow.FlowID.String(), flow.Name)
 	interaction.SetReplier(replier)
 
 	wait, err := RunAction(flow, interaction, channel)

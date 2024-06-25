@@ -1,6 +1,8 @@
 package lowbot
 
 import (
+	"strconv"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/google/uuid"
 )
@@ -45,12 +47,12 @@ func (channel *TelegramChannel) Next(interaction chan *Interaction) {
 		var i *Interaction
 
 		if update.Message != nil {
-			sender := NewWho(update.Message.Chat.ID, update.Message.From.UserName)
+			sender := NewWho(strconv.Itoa(int(update.Message.Chat.ID)), update.Message.From.UserName)
 			i = NewInteractionMessageText(channel, sender, update.Message.Text)
 		}
 
 		if update.CallbackQuery != nil {
-			sender := NewWho(update.CallbackQuery.From.ID, update.CallbackQuery.From.UserName)
+			sender := NewWho(strconv.Itoa(int(update.CallbackQuery.From.ID)), update.CallbackQuery.From.UserName)
 			i = NewInteractionMessageText(channel, sender, update.CallbackData())
 		}
 
@@ -62,9 +64,14 @@ func (channel *TelegramChannel) SendAudio(interaction *Interaction) error {
 	channel.SendText(interaction)
 
 	file := channel.getRequestFileDate(interaction.Parameters.File.GetFile().Path)
-	chatID := interaction.Sender.WhoID.(int64)
-	message := tgbotapi.NewAudio(chatID, file)
-	_, err := channel.conn.Send(message)
+	chatID, err := strconv.Atoi(interaction.Sender.WhoID)
+
+	if err != nil {
+		return err
+	}
+
+	message := tgbotapi.NewAudio(int64(chatID), file)
+	_, err = channel.conn.Send(message)
 
 	return err
 }
@@ -76,10 +83,15 @@ func (channel *TelegramChannel) SendButton(interaction *Interaction) error {
 		),
 	)
 
-	chatID := interaction.Sender.WhoID.(int64)
-	message := tgbotapi.NewMessage(chatID, interaction.Parameters.Text)
+	chatID, err := strconv.Atoi(interaction.Sender.WhoID)
+
+	if err != nil {
+		return err
+	}
+
+	message := tgbotapi.NewMessage(int64(chatID), interaction.Parameters.Text)
 	message.ReplyMarkup = button
-	_, err := channel.conn.Send(message)
+	_, err = channel.conn.Send(message)
 
 	return err
 }
@@ -95,9 +107,14 @@ func (channel *TelegramChannel) SendDocument(interaction *Interaction) error {
 	channel.SendText(interaction)
 
 	file := channel.getRequestFileDate(interaction.Parameters.File.GetFile().Path)
-	chatID := interaction.Sender.WhoID.(int64)
-	message := tgbotapi.NewDocument(chatID, file)
-	_, err := channel.conn.Send(message)
+	chatID, err := strconv.Atoi(interaction.Sender.WhoID)
+
+	if err != nil {
+		return err
+	}
+
+	message := tgbotapi.NewDocument(int64(chatID), file)
+	_, err = channel.conn.Send(message)
 
 	return err
 }
@@ -106,17 +123,27 @@ func (channel *TelegramChannel) SendImage(interaction *Interaction) error {
 	channel.SendText(interaction)
 
 	file := channel.getRequestFileDate(interaction.Parameters.File.GetFile().Path)
-	chatID := interaction.Sender.WhoID.(int64)
-	message := tgbotapi.NewPhoto(chatID, file)
-	_, err := channel.conn.Send(message)
+	chatID, err := strconv.Atoi(interaction.Sender.WhoID)
+
+	if err != nil {
+		return err
+	}
+
+	message := tgbotapi.NewPhoto(int64(chatID), file)
+	_, err = channel.conn.Send(message)
 
 	return err
 }
 
 func (channel *TelegramChannel) SendText(interaction *Interaction) error {
-	chatID := interaction.Sender.WhoID.(int64)
-	message := tgbotapi.NewMessage(chatID, interaction.Parameters.Text)
-	_, err := channel.conn.Send(message)
+	chatID, err := strconv.Atoi(interaction.Sender.WhoID)
+
+	if err != nil {
+		return err
+	}
+
+	message := tgbotapi.NewMessage(int64(chatID), interaction.Parameters.Text)
+	_, err = channel.conn.Send(message)
 
 	return err
 }
@@ -125,9 +152,14 @@ func (channel *TelegramChannel) SendVideo(interaction *Interaction) error {
 	channel.SendText(interaction)
 
 	file := channel.getRequestFileDate(interaction.Parameters.File.GetFile().Path)
-	chatID := interaction.Sender.WhoID.(int64)
-	message := tgbotapi.NewDocument(chatID, file)
-	_, err := channel.conn.Send(message)
+	chatID, err := strconv.Atoi(interaction.Sender.WhoID)
+
+	if err != nil {
+		return err
+	}
+
+	message := tgbotapi.NewDocument(int64(chatID), file)
+	_, err = channel.conn.Send(message)
 
 	return err
 }

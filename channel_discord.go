@@ -78,14 +78,14 @@ func (channel *DiscordChannel) RespondInteraction(in *discordgo.Interaction) {
 }
 
 func (channel *DiscordChannel) SendAudio(interaction *Interaction) error {
-	sessionID := interaction.Sender.WhoID.(string)
+	sessionID := interaction.Sender.WhoID
 	path := interaction.Parameters.File.GetFile().Path
 
 	return channel.SendFile(sessionID, interaction.Parameters.Text, path)
 }
 
 func (channel *DiscordChannel) SendButton(interaction *Interaction) error {
-	sessionID := interaction.Sender.WhoID.(string)
+	sessionID := interaction.Sender.WhoID
 
 	message := &discordgo.MessageSend{
 		Content: interaction.Parameters.Text,
@@ -112,14 +112,14 @@ func (*DiscordChannel) getButtons(interaction *Interaction) (buttons []discordgo
 }
 
 func (channel *DiscordChannel) SendDocument(interaction *Interaction) error {
-	sessionID := interaction.Sender.WhoID.(string)
+	sessionID := interaction.Sender.WhoID
 	path := interaction.Parameters.File.GetFile().Path
 
 	return channel.SendFile(sessionID, interaction.Parameters.Text, path)
 }
 
 func (channel *DiscordChannel) SendImage(interaction *Interaction) error {
-	sessionID := interaction.Sender.WhoID.(string)
+	sessionID := interaction.Sender.WhoID
 	path := interaction.Parameters.File.GetFile().Path
 
 	if !IsURL(path) {
@@ -141,7 +141,7 @@ func (channel *DiscordChannel) SendImage(interaction *Interaction) error {
 }
 
 func (channel *DiscordChannel) SendText(interaction *Interaction) error {
-	sessionID := interaction.Sender.WhoID.(string)
+	sessionID := interaction.Sender.WhoID
 
 	_, err := channel.conn.ChannelMessageSend(sessionID, interaction.Parameters.Text)
 
@@ -149,7 +149,7 @@ func (channel *DiscordChannel) SendText(interaction *Interaction) error {
 }
 
 func (channel *DiscordChannel) SendVideo(interaction *Interaction) error {
-	sessionID := interaction.Sender.WhoID.(string)
+	sessionID := interaction.Sender.WhoID
 	path := interaction.Parameters.File.GetFile().Path
 
 	if !IsURL(path) {

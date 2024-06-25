@@ -101,7 +101,7 @@ func (consumer *ChatGPTConsumer) Run(interaction *Interaction, channel IChannel)
 		return err
 	}
 
-	replier := NewWho(consumer.ConsumerID, consumer.Name)
+	replier := NewWho(consumer.ConsumerID.String(), consumer.Name)
 	newInteraction := NewInteractionMessageText(channel, interaction.Sender, resp.Choices[0].Message.Content)
 	newInteraction.SetReplier(replier)
 
@@ -133,7 +133,7 @@ func (consumer *ChatGPTAssistantConsumer) Run(interaction *Interaction, channel 
 		return err
 	}
 
-	replier := NewWho(consumer.ConsumerID, consumer.Name)
+	replier := NewWho(consumer.ConsumerID.String(), consumer.Name)
 	newInteraction := NewInteractionMessageText(channel, interaction.Sender, answer)
 	newInteraction.SetReplier(replier)
 
