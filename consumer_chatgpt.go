@@ -13,6 +13,7 @@ type ChatGPTConsumer struct {
 	*Consumer
 	model string
 	conn  *openai.Client
+	ctx       context.Context
 }
 
 type ChatGPTAssistantConsumer struct {
@@ -20,6 +21,7 @@ type ChatGPTAssistantConsumer struct {
 	conn      *openai.Client
 	assistant openai.Assistant
 	threads   map[any]string
+	ctx       context.Context
 }
 
 func NewChatGPTConsumer(token string, model string) (IConsumer, error) {
@@ -40,6 +42,7 @@ func NewChatGPTConsumer(token string, model string) (IConsumer, error) {
 		},
 		conn:  conn,
 		model: model,
+		ctx : context.Background(),
 	}, nil
 }
 
@@ -52,8 +55,9 @@ func NewChatGPTAssistantConsumer(token string, assistantID string) (IConsumer, e
 	}
 
 	conn := openai.NewClient(token)
+	ctx := context.Background()
 
-	assistant, err := conn.RetrieveAssistant(context.Background(), assistantID)
+	assistant, err := conn.RetrieveAssistant(ctx, assistantID)
 
 	if err != nil {
 		return nil, err
@@ -67,12 +71,13 @@ func NewChatGPTAssistantConsumer(token string, assistantID string) (IConsumer, e
 		conn:      conn,
 		assistant: assistant,
 		threads:   map[any]string{},
+		ctx:       ctx,
 	}, nil
 }
 
 func (consumer *ChatGPTConsumer) Run(interaction *Interaction, channel IChannel) error {
 	resp, err := consumer.conn.CreateChatCompletion(
-		context.Background(),
+		consumer.ctx,
 		openai.ChatCompletionRequest{
 			Model: consumer.model,
 			Messages: []openai.ChatCompletionMessage{
@@ -106,7 +111,7 @@ func (consumer *ChatGPTAssistantConsumer) Run(interaction *Interaction, channel 
 		return err
 	}
 
-	run, err := consumer.conn.CreateRun(context.Background(), threadID, openai.RunRequest{
+	run, err := consumer.conn.CreateRun(consumer.ctx, threadID, openai.RunRequest{
 		AssistantID:  consumer.assistant.ID,
 		Model:        consumer.assistant.Model,
 		Instructions: *consumer.assistant.Instructions,
@@ -131,7 +136,7 @@ func (consumer *ChatGPTAssistantConsumer) getThreadID(interaction *Interaction) 
 		return threadID, nil
 	}
 
-	thread, err := consumer.conn.CreateThread(context.Background(), openai.ThreadRequest{
+	thread, err := consumer.conn.CreateThread(consumer.ctx, openai.ThreadRequest{
 		Messages: []openai.ThreadMessage{
 			{
 				Role:    openai.ThreadMessageRoleUser,
@@ -150,12 +155,12 @@ func (consumer *ChatGPTAssistantConsumer) waitMessage(run openai.Run) string {
 		after := ""
 		before := ""
 
-		msgs, _ := consumer.conn.ListMessage(context.Background(), run.ThreadID, &limit, &order, &after, &before)
+		msgs, _ := consumer.conn.ListMessage(consumer.ctx, run.ThreadID, &limit, &order, &after, &before)
 
 		return msgs.Messages[0].Content[0].Text.Value
 	}
 
 	time.Sleep(2 * time.Second)
-	run, _ = consumer.conn.RetrieveRun(context.Background(), run.ThreadID, run.ID)
+	run, _ = consumer.conn.RetrieveRun(consumer.ctx, run.ThreadID, run.ID)
 	return consumer.waitMessage(run)
 }
