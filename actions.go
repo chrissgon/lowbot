@@ -3,11 +3,11 @@ package lowbot
 type ActionsMap map[string]func(*Flow, *Interaction, IChannel) (bool, error)
 
 var actions = ActionsMap{
-	"Button": ActionButton,
-	"File":   ActionFile,
-	"Input":  ActionInput,
-	"Text":   ActionText,
-	"Wait":   ActionWait,
+	"Button": RunActionButton,
+	"File":   RunActionFile,
+	"Input":  RunActionInput,
+	"Text":   RunActionText,
+	"Wait":   RunActionWait,
 }
 
 func SetCustomActions(custom ActionsMap) {
@@ -36,7 +36,7 @@ func RunAction(flow *Flow, interaction *Interaction, channel IChannel) (bool, er
 	return action(flow, interaction, channel)
 }
 
-func ActionButton(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
+func RunActionButton(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
 	step := flow.Current
 
 	text := ParseTemplate(step.Parameters.Texts)
@@ -46,7 +46,7 @@ func ActionButton(flow *Flow, interaction *Interaction, channel IChannel) (bool,
 	return true, channel.SendButton(newInteraction)
 }
 
-func ActionFile(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
+func RunActionFile(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
 	step := flow.Current
 
 	text := ParseTemplate(step.Parameters.Texts)
@@ -66,13 +66,13 @@ func ActionFile(flow *Flow, interaction *Interaction, channel IChannel) (bool, e
 	return false, channel.SendDocument(newInteraction)
 }
 
-func ActionInput(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
-	_, err := ActionText(flow, interaction, channel)
+func RunActionInput(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
+	_, err := RunActionText(flow, interaction, channel)
 
 	return true, err
 }
 
-func ActionText(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
+func RunActionText(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
 	step := flow.Current
 
 	text := ParseTemplate(step.Parameters.Texts)
@@ -82,6 +82,6 @@ func ActionText(flow *Flow, interaction *Interaction, channel IChannel) (bool, e
 	return false, channel.SendText(newInteraction)
 }
 
-func ActionWait(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
+func RunActionWait(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
 	return true, nil
 }
