@@ -7,6 +7,7 @@ import (
 type IChannel interface {
 	GetChannel() *Channel
 	Next(chan *Interaction)
+	Close() error
 	SendAudio(*Interaction) error
 	SendButton(*Interaction) error
 	SendDocument(*Interaction) error
@@ -18,4 +19,26 @@ type IChannel interface {
 type Channel struct {
 	ChannelID uuid.UUID
 	Name      string
+}
+
+func SendInteraction(channel IChannel, interaction *Interaction) error {
+	if interaction.Type == MESSAGE_TEXT {
+		return channel.SendText(interaction)
+	}
+	if interaction.Type == MESSAGE_BUTTON {
+		return channel.SendButton(interaction)
+	}
+
+	// file
+	if interaction.Parameters.File.IsAudio() {
+		return channel.SendAudio(interaction)
+	}
+	if interaction.Parameters.File.IsImage() {
+		return channel.SendImage(interaction)
+	}
+	if interaction.Parameters.File.IsVideo() {
+		return channel.SendVideo(interaction)
+	}
+
+	return channel.SendDocument(interaction)
 }

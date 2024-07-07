@@ -37,6 +37,10 @@ func (m *mockChannel) GetChannel() *Channel {
 	return m.Channel
 }
 
+func (m *mockChannel) Close() error {
+	return nil
+}
+
 func (m *mockChannel) Next(interaction chan *Interaction) {
 	interaction <- NewInteractionMessageText(m, DESTINATION_MOCK, SENDER_MOCK, TEXT)
 }

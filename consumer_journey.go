@@ -1,6 +1,7 @@
 package lowbot
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -42,7 +43,14 @@ func (consumer *JourneyConsumer) Run(interaction *Interaction, channel IChannel)
 
 	consumer.Persist.Set(interaction.Sender.WhoID, flow)
 
+	if errors.Is(err, ERR_UNKNOWN_NEXT_STEP){
+		printLog(fmt.Sprintf("WhoID:<%v> Action:<%s> ERR: %v\n", interaction.Sender.WhoID, flow.Current.Action, err))
+		return nil
+	}
+
 	printLog(fmt.Sprintf("WhoID:<%v> Action:<%s> ERR: %v\n", interaction.Sender.WhoID, flow.Current.Action, err))
+
+	
 
 	return err
 }

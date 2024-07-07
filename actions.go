@@ -8,6 +8,7 @@ var actions = ActionsMap{
 	"Input":  RunActionInput,
 	"Text":   RunActionText,
 	"Wait":   RunActionWait,
+	"Room":   RunActionRoom,
 }
 
 func SetCustomActions(custom ActionsMap) {
@@ -83,5 +84,15 @@ func RunActionText(flow *Flow, interaction *Interaction, channel IChannel) (bool
 }
 
 func RunActionWait(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
+	return true, nil
+}
+
+func RunActionRoom(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
+	// guests := RoomGuests{
+	// 	interaction.Sender.WhoID: NewGuest(interaction.Sender, channel),
+	// }
+
+	// room := NewRoom(guests)
+
 	return true, nil
 }

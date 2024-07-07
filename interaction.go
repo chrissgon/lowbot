@@ -68,3 +68,8 @@ func (interaction *Interaction) SetReplier(replier *Who) *Interaction {
 	interaction.Replier = replier
 	return interaction
 }
+
+func (interaction *Interaction) SetDestination(destination *Who) *Interaction {
+	interaction.Destination = destination
+	return interaction
+}

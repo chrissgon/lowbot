@@ -11,7 +11,8 @@ import (
 
 type DiscordChannel struct {
 	*Channel
-	conn *discordgo.Session
+	conn   *discordgo.Session
+	closed bool
 }
 
 func NewDiscordChannel(token string) (IChannel, error) {
@@ -30,7 +31,8 @@ func NewDiscordChannel(token string) (IChannel, error) {
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_DISCORD_NAME,
 		},
-		conn: conn,
+		conn:   conn,
+		closed: false,
 	}, nil
 }
 
@@ -38,8 +40,16 @@ func (channel *DiscordChannel) GetChannel() *Channel {
 	return channel.Channel
 }
 
+func (channel *DiscordChannel) Close() error {
+	channel.closed = true
+	return channel.conn.Close()
+}
+
 func (channel *DiscordChannel) Next(interaction chan *Interaction) {
 	channel.conn.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
+		if channel.closed{
+			return
+		}
 		if m.Author.ID == s.State.User.ID {
 			return
 		}

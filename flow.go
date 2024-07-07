@@ -66,11 +66,14 @@ func (flow *Flow) Start() error {
 }
 
 func (flow *Flow) Next(interaction *Interaction) error {
+	if flow.FinishedByRoom(){
+		return ERR_FINISHED_FLOW
+	}
 	if flow.NoHasNext() {
 		return ERR_UNKNOWN_NEXT_STEP
 	}
 
-	err := flow.setNextFlow(interaction)
+	err := flow.setNextStep(interaction)
 
 	if err != nil {
 		return err
@@ -81,7 +84,7 @@ func (flow *Flow) Next(interaction *Interaction) error {
 	return nil
 }
 
-func (flow *Flow) setNextFlow(interaction *Interaction) error {
+func (flow *Flow) setNextStep(interaction *Interaction) error {
 	for pattern, next := range flow.Current.Next {
 		matched, err := regexp.MatchString(pattern, interaction.Parameters.Text)
 
@@ -109,6 +112,10 @@ func (flow *Flow) setNextFlow(interaction *Interaction) error {
 
 func (flow *Flow) NoHasNext() bool {
 	return flow.Current.Next == nil
+}
+
+func (flow *Flow) FinishedByRoom() bool {
+	return flow.Current.Action == "Room"
 }
 
 func (step *Step) AddResponse(interaction *Interaction) {

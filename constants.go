@@ -16,6 +16,7 @@ var (
 	ERR_UNKNOWN_INIT_STEP           = errors.New("unknown step: init")
 	ERR_UNKNOWN_NEXT_STEP           = errors.New("unknown next step")
 	ERR_PATTERN_NEXT_STEP           = errors.New("step pattern invalid")
+	ERR_FINISHED_FLOW           = errors.New("flow finished by room")
 )
 
 const (

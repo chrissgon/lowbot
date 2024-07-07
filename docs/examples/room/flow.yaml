@@ -1,0 +1,29 @@
+name: pingpong
+
+steps:
+  init:
+    next:
+      default: welcome
+
+  welcome:
+    action: Button
+    next:
+      Yes: room
+      default: end
+    parameters:
+      texts:
+        - Hello, would you like to speak to one of our team?
+      buttons:
+        - Yes
+        - No
+
+  room:
+    action: Room
+    next:
+      default: end
+
+  end:
+    action: Text
+    parameters:
+      texts:
+        - Okay, see you later

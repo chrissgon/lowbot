@@ -19,9 +19,11 @@ func StartConsumer(consumer IConsumer, channels []IChannel) {
 
 				if err != nil {
 					printLog(fmt.Sprintf("%v: WhoID:<%v> ERR: %v\n", consumer.GetConsumer().Name, interaction.Sender.WhoID, err))
+					break
 				}
 			}
 
+			channel.Close()
 			close(interactions)
 		}(consumer, channel)
 	}

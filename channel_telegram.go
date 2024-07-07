@@ -9,7 +9,8 @@ import (
 
 type TelegramChannel struct {
 	*Channel
-	conn *tgbotapi.BotAPI
+	conn   *tgbotapi.BotAPI
+	closed bool
 }
 
 func NewTelegramChannel(token string) (IChannel, error) {
@@ -29,12 +30,18 @@ func NewTelegramChannel(token string) (IChannel, error) {
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_TELEGRAM_NAME,
 		},
-		conn: conn,
+		conn:   conn,
+		closed: false,
 	}, nil
 }
 
 func (channel *TelegramChannel) GetChannel() *Channel {
 	return channel.Channel
+}
+
+func (channel *TelegramChannel) Close() error {
+	channel.closed = true
+	return nil
 }
 
 func (channel *TelegramChannel) Next(interaction chan *Interaction) {
@@ -44,6 +51,10 @@ func (channel *TelegramChannel) Next(interaction chan *Interaction) {
 	updates := channel.conn.GetUpdatesChan(u)
 
 	for update := range updates {
+		if channel.closed {
+			return
+		}
+
 		var i *Interaction
 
 		if update.Message != nil {
