@@ -3,7 +3,6 @@ package lowbot
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -97,12 +96,11 @@ func (consumer *ChatGPTConsumer) Run(interaction *Interaction, channel IChannel)
 	)
 
 	if err != nil {
-		printLog(fmt.Sprintf("%v: WhoID:<%v> ERR: %v\n", consumer.Name, interaction.Sender.WhoID, err))
 		return err
 	}
 
 	replier := NewWho(consumer.ConsumerID.String(), consumer.Name)
-	newInteraction := NewInteractionMessageText(channel, interaction.Sender, resp.Choices[0].Message.Content)
+	newInteraction := NewInteractionMessageText(channel, interaction.Destination, interaction.Sender, resp.Choices[0].Message.Content)
 	newInteraction.SetReplier(replier)
 
 	return channel.SendText(newInteraction)
@@ -134,7 +132,7 @@ func (consumer *ChatGPTAssistantConsumer) Run(interaction *Interaction, channel 
 	}
 
 	replier := NewWho(consumer.ConsumerID.String(), consumer.Name)
-	newInteraction := NewInteractionMessageText(channel, interaction.Sender, answer)
+	newInteraction := NewInteractionMessageText(channel, interaction.Destination, interaction.Sender, answer)
 	newInteraction.SetReplier(replier)
 
 	return channel.SendText(newInteraction)

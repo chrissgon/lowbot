@@ -41,7 +41,7 @@ func RunActionButton(flow *Flow, interaction *Interaction, channel IChannel) (bo
 
 	text := ParseTemplate(step.Parameters.Texts)
 
-	newInteraction := NewInteractionMessageButton(channel, interaction.Sender, step.Parameters.Buttons, text)
+	newInteraction := NewInteractionMessageButton(channel, interaction.Destination, interaction.Sender, step.Parameters.Buttons, text)
 
 	return true, channel.SendButton(newInteraction)
 }
@@ -51,7 +51,7 @@ func RunActionFile(flow *Flow, interaction *Interaction, channel IChannel) (bool
 
 	text := ParseTemplate(step.Parameters.Texts)
 
-	newInteraction := NewInteractionMessageFile(channel, interaction.Sender, step.Parameters.Path, text)
+	newInteraction := NewInteractionMessageFile(channel, interaction.Destination, interaction.Sender, step.Parameters.Path, text)
 
 	if newInteraction.Parameters.File.IsAudio() {
 		return false, channel.SendAudio(newInteraction)
@@ -77,7 +77,7 @@ func RunActionText(flow *Flow, interaction *Interaction, channel IChannel) (bool
 
 	text := ParseTemplate(step.Parameters.Texts)
 
-	newInteraction := NewInteractionMessageText(channel, interaction.Sender, text)
+	newInteraction := NewInteractionMessageText(channel, interaction.Destination, interaction.Sender, text)
 
 	return false, channel.SendText(newInteraction)
 }

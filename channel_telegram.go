@@ -47,13 +47,13 @@ func (channel *TelegramChannel) Next(interaction chan *Interaction) {
 		var i *Interaction
 
 		if update.Message != nil {
-			sender := NewWho(strconv.Itoa(int(update.Message.Chat.ID)), update.Message.From.UserName)
-			i = NewInteractionMessageText(channel, sender, update.Message.Text)
+			destination := NewWho(strconv.Itoa(int(update.Message.Chat.ID)), update.Message.From.UserName)
+			i = NewInteractionMessageText(channel, destination, destination, update.Message.Text)
 		}
 
 		if update.CallbackQuery != nil {
-			sender := NewWho(strconv.Itoa(int(update.CallbackQuery.From.ID)), update.CallbackQuery.From.UserName)
-			i = NewInteractionMessageText(channel, sender, update.CallbackData())
+			destination := NewWho(strconv.Itoa(int(update.CallbackQuery.From.ID)), update.CallbackQuery.From.UserName)
+			i = NewInteractionMessageText(channel, destination, destination, update.CallbackData())
 		}
 
 		interaction <- i
@@ -64,7 +64,7 @@ func (channel *TelegramChannel) SendAudio(interaction *Interaction) error {
 	channel.SendText(interaction)
 
 	file := channel.getRequestFileDate(interaction.Parameters.File.GetFile().Path)
-	chatID, err := strconv.Atoi(interaction.Sender.WhoID)
+	chatID, err := strconv.Atoi(interaction.Destination.WhoID)
 
 	if err != nil {
 		return err
@@ -83,7 +83,7 @@ func (channel *TelegramChannel) SendButton(interaction *Interaction) error {
 		),
 	)
 
-	chatID, err := strconv.Atoi(interaction.Sender.WhoID)
+	chatID, err := strconv.Atoi(interaction.Destination.WhoID)
 
 	if err != nil {
 		return err
@@ -107,7 +107,7 @@ func (channel *TelegramChannel) SendDocument(interaction *Interaction) error {
 	channel.SendText(interaction)
 
 	file := channel.getRequestFileDate(interaction.Parameters.File.GetFile().Path)
-	chatID, err := strconv.Atoi(interaction.Sender.WhoID)
+	chatID, err := strconv.Atoi(interaction.Destination.WhoID)
 
 	if err != nil {
 		return err
@@ -123,7 +123,7 @@ func (channel *TelegramChannel) SendImage(interaction *Interaction) error {
 	channel.SendText(interaction)
 
 	file := channel.getRequestFileDate(interaction.Parameters.File.GetFile().Path)
-	chatID, err := strconv.Atoi(interaction.Sender.WhoID)
+	chatID, err := strconv.Atoi(interaction.Destination.WhoID)
 
 	if err != nil {
 		return err
@@ -136,7 +136,7 @@ func (channel *TelegramChannel) SendImage(interaction *Interaction) error {
 }
 
 func (channel *TelegramChannel) SendText(interaction *Interaction) error {
-	chatID, err := strconv.Atoi(interaction.Sender.WhoID)
+	chatID, err := strconv.Atoi(interaction.Destination.WhoID)
 
 	if err != nil {
 		return err
@@ -152,7 +152,7 @@ func (channel *TelegramChannel) SendVideo(interaction *Interaction) error {
 	channel.SendText(interaction)
 
 	file := channel.getRequestFileDate(interaction.Parameters.File.GetFile().Path)
-	chatID, err := strconv.Atoi(interaction.Sender.WhoID)
+	chatID, err := strconv.Atoi(interaction.Destination.WhoID)
 
 	if err != nil {
 		return err

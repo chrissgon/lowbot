@@ -33,7 +33,7 @@ func TestFlow_StartFlow(t *testing.T) {
 func TestFlow_NextFlow(t *testing.T) {
 	flow, _ := NewFlow("./mocks/flow.yaml")
 	flow.Start()
-	flow.Next(NewInteractionMessageText(CHANNEL_MOCK, WHO_MOCK, ""))
+	flow.Next(NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, ""))
 
 	expect := flow.Steps["audio"]
 	have := flow.Current
@@ -56,7 +56,7 @@ func TestFlow_NoHasNext(t *testing.T) {
 func TestFlow_AddResponse(t *testing.T) {
 	flow, _ := NewFlow("./mocks/flow.yaml")
 	flow.Start()
-	flow.Next(NewInteractionMessageText(CHANNEL_MOCK, WHO_MOCK, ""))
+	flow.Next(NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, ""))
 
 	expect := 1
 	have := len(flow.Current.Responses)
@@ -67,7 +67,7 @@ func TestFlow_AddResponse(t *testing.T) {
 
 }
 func TestFlow_AddResponseValue(t *testing.T) {
-	interaction := NewInteractionMessageText(CHANNEL_MOCK, WHO_MOCK, "Response")
+	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "Response")
 	flow, _ := NewFlow("./mocks/flow.yaml")
 	flow.Start()
 	flow.Next(interaction)

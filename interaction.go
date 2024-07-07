@@ -1,12 +1,13 @@
 package lowbot
 
 type Interaction struct {
-	Channel *Channel
-	Sender  *Who
-	Replier *Who
-	Type       InteractionType
-	Parameters InteractionParameters
-	Custom     map[string]any
+	Channel     *Channel
+	Destination *Who
+	Sender      *Who
+	Replier     *Who
+	Type        InteractionType
+	Parameters  InteractionParameters
+	Custom      map[string]any
 }
 
 type InteractionType string
@@ -25,11 +26,12 @@ type InteractionParameters struct {
 	Custom  map[string]any
 }
 
-func NewInteractionMessageButton(channel IChannel, sender *Who, buttons []string, text string) *Interaction {
+func NewInteractionMessageButton(channel IChannel, destination *Who, sender *Who, buttons []string, text string) *Interaction {
 	return &Interaction{
-		Channel: channel.GetChannel(),
-		Sender:  sender,
-		Type:    MESSAGE_BUTTON,
+		Channel:     channel.GetChannel(),
+		Destination: destination,
+		Sender:      sender,
+		Type:        MESSAGE_BUTTON,
 		Parameters: InteractionParameters{
 			Text:    text,
 			Buttons: buttons,
@@ -37,11 +39,12 @@ func NewInteractionMessageButton(channel IChannel, sender *Who, buttons []string
 	}
 }
 
-func NewInteractionMessageFile(channel IChannel, sender *Who, path string, text string) *Interaction {
+func NewInteractionMessageFile(channel IChannel, destination *Who, sender *Who, path string, text string) *Interaction {
 	return &Interaction{
-		Channel: channel.GetChannel(),
-		Sender:  sender,
-		Type:    MESSAGE_FILE,
+		Channel:     channel.GetChannel(),
+		Destination: destination,
+		Sender:      sender,
+		Type:        MESSAGE_FILE,
 		Parameters: InteractionParameters{
 			Text: text,
 			File: NewFile(path),
@@ -49,11 +52,12 @@ func NewInteractionMessageFile(channel IChannel, sender *Who, path string, text 
 	}
 }
 
-func NewInteractionMessageText(channel IChannel, sender *Who, text string) *Interaction {
+func NewInteractionMessageText(channel IChannel, destination *Who, sender *Who, text string) *Interaction {
 	return &Interaction{
-		Channel: channel.GetChannel(),
-		Sender:  sender,
-		Type:    MESSAGE_TEXT,
+		Channel:     channel.GetChannel(),
+		Destination: destination,
+		Sender:      sender,
+		Type:        MESSAGE_TEXT,
 		Parameters: InteractionParameters{
 			Text: text,
 		},

@@ -15,7 +15,8 @@ const (
 
 var (
 	BUTTONS      = []string{"button"}
-	WHO_MOCK     = NewWho(uuid.New().String(), "WHO MOCK")
+	DESTINATION_MOCK     = NewWho(uuid.New().String(), "WHO DESTINATION")
+	SENDER_MOCK     = NewWho(uuid.New().String(), "WHO SENDER")
 	CHANNEL_MOCK = newMockChannel()
 )
 
@@ -37,7 +38,7 @@ func (m *mockChannel) GetChannel() *Channel {
 }
 
 func (m *mockChannel) Next(interaction chan *Interaction) {
-	interaction <- NewInteractionMessageText(m, WHO_MOCK, TEXT)
+	interaction <- NewInteractionMessageText(m, DESTINATION_MOCK, SENDER_MOCK, TEXT)
 }
 
 func (m *mockChannel) SendAudio(*Interaction) error {
@@ -65,14 +66,18 @@ func (m *mockChannel) SendVideo(*Interaction) error {
 }
 
 func TestInteraction_NewInteractionMessageButton(t *testing.T) {
-	have := NewInteractionMessageButton(CHANNEL_MOCK, WHO_MOCK, BUTTONS, TEXT)
+	have := NewInteractionMessageButton(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, BUTTONS, TEXT)
 
 	if CHANNEL_MOCK.GetChannel() != have.Channel {
 		t.Errorf(FormatTestError(CHANNEL_MOCK.GetChannel(), have.Channel))
 	}
 
-	if WHO_MOCK != have.Sender {
-		t.Errorf(FormatTestError(WHO_MOCK, have.Sender))
+	if DESTINATION_MOCK != have.Destination {
+		t.Errorf(FormatTestError(DESTINATION_MOCK, have.Destination))
+	}
+
+	if SENDER_MOCK != have.Sender {
+		t.Errorf(FormatTestError(SENDER_MOCK, have.Sender))
 	}
 
 	if MESSAGE_BUTTON != have.Type {
@@ -89,14 +94,18 @@ func TestInteraction_NewInteractionMessageButton(t *testing.T) {
 }
 
 func TestInteraction_NewInteractionMessageFile(t *testing.T) {
-	have := NewInteractionMessageFile(CHANNEL_MOCK, WHO_MOCK, FILE, TEXT)
+	have := NewInteractionMessageFile(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, FILE, TEXT)
 
 	if CHANNEL_MOCK.GetChannel() != have.Channel {
 		t.Errorf(FormatTestError(CHANNEL_MOCK.GetChannel(), have.Channel))
 	}
 
-	if WHO_MOCK != have.Sender {
-		t.Errorf(FormatTestError(WHO_MOCK, have.Sender))
+	if DESTINATION_MOCK != have.Destination {
+		t.Errorf(FormatTestError(DESTINATION_MOCK, have.Destination))
+	}
+
+	if SENDER_MOCK != have.Sender {
+		t.Errorf(FormatTestError(SENDER_MOCK, have.Sender))
 	}
 
 	if MESSAGE_FILE != have.Type {
@@ -115,14 +124,18 @@ func TestInteraction_NewInteractionMessageFile(t *testing.T) {
 }
 
 func TestInteraction_NewInteractionMessageText(t *testing.T) {
-	have := NewInteractionMessageText(CHANNEL_MOCK, WHO_MOCK, TEXT)
+	have := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, TEXT)
 
 	if CHANNEL_MOCK.GetChannel() != have.Channel {
 		t.Errorf(FormatTestError(CHANNEL_MOCK.GetChannel(), have.Channel))
 	}
 
-	if WHO_MOCK != have.Sender {
-		t.Errorf(FormatTestError(WHO_MOCK, have.Sender))
+	if DESTINATION_MOCK != have.Destination {
+		t.Errorf(FormatTestError(DESTINATION_MOCK, have.Destination))
+	}
+
+	if SENDER_MOCK != have.Sender {
+		t.Errorf(FormatTestError(SENDER_MOCK, have.Sender))
 	}
 
 	if MESSAGE_TEXT != have.Type {
