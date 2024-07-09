@@ -10,21 +10,17 @@ func StartConsumer(consumer IConsumer, channels []IChannel) {
 
 	for _, channel := range channels {
 		go func(consumer IConsumer, channel IChannel) {
-			interactions := make(chan *Interaction)
+			listener := channel.GetChannel().Broadcast.Listen()
 
-			go channel.Next(interactions)
-
-			for interaction := range interactions {
+			for interaction := range listener {
 				err := consumer.Run(interaction, channel)
-
+				
 				if err != nil {
 					printLog(fmt.Sprintf("%v: WhoID:<%v> ERR: %v\n", consumer.GetConsumer().Name, interaction.Sender.WhoID, err))
-					break
 				}
 			}
 
-			channel.Close()
-			close(interactions)
+			channel.GetChannel().Broadcast.Close()
 		}(consumer, channel)
 	}
 

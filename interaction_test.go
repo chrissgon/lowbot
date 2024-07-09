@@ -3,8 +3,6 @@ package lowbot
 import (
 	"path/filepath"
 	"testing"
-
-	"github.com/google/uuid"
 )
 
 const (
@@ -14,60 +12,10 @@ const (
 )
 
 var (
-	BUTTONS      = []string{"button"}
-	DESTINATION_MOCK     = NewWho(uuid.New().String(), "WHO DESTINATION")
-	SENDER_MOCK     = NewWho(uuid.New().String(), "WHO SENDER")
-	CHANNEL_MOCK = newMockChannel()
+	BUTTONS          = []string{"button"}
+	DESTINATION_MOCK = NewWho("1", "chris")
+	SENDER_MOCK      = NewWho("2", "amanda")
 )
-
-type mockChannel struct {
-	*Channel
-}
-
-func newMockChannel() IChannel {
-	return &mockChannel{
-		Channel: &Channel{
-			ChannelID: uuid.New(),
-			Name:      "mock",
-		},
-	}
-}
-
-func (m *mockChannel) GetChannel() *Channel {
-	return m.Channel
-}
-
-func (m *mockChannel) Close() error {
-	return nil
-}
-
-func (m *mockChannel) Next(interaction chan *Interaction) {
-	interaction <- NewInteractionMessageText(m, DESTINATION_MOCK, SENDER_MOCK, TEXT)
-}
-
-func (m *mockChannel) SendAudio(*Interaction) error {
-	return nil
-}
-
-func (m *mockChannel) SendButton(*Interaction) error {
-	return nil
-}
-
-func (m *mockChannel) SendDocument(*Interaction) error {
-	return nil
-}
-
-func (m *mockChannel) SendImage(*Interaction) error {
-	return nil
-}
-
-func (m *mockChannel) SendText(*Interaction) error {
-	return nil
-}
-
-func (m *mockChannel) SendVideo(*Interaction) error {
-	return nil
-}
 
 func TestInteraction_NewInteractionMessageButton(t *testing.T) {
 	have := NewInteractionMessageButton(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, BUTTONS, TEXT)

@@ -20,7 +20,18 @@ steps:
   room:
     action: Room
     next:
-      default: end
+      default: fakechat
+    parameters:
+      texts:
+        - Okay, wait a few minutes, we're redirecting you for our team
+
+  fakechat:
+    action: Fakechat
+    next:
+      default: fakechat
+    parameters:
+      custom:
+        url: test
 
   end:
     action: Text

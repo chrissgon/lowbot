@@ -6,7 +6,7 @@ import (
 
 type IChannel interface {
 	GetChannel() *Channel
-	Next(chan *Interaction)
+	Next()
 	Close() error
 	SendAudio(*Interaction) error
 	SendButton(*Interaction) error
@@ -19,6 +19,7 @@ type IChannel interface {
 type Channel struct {
 	ChannelID uuid.UUID
 	Name      string
+	Broadcast *Broadcast[*Interaction]
 }
 
 func SendInteraction(channel IChannel, interaction *Interaction) error {

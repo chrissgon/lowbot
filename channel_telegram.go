@@ -9,8 +9,9 @@ import (
 
 type TelegramChannel struct {
 	*Channel
-	conn   *tgbotapi.BotAPI
-	closed bool
+	conn    *tgbotapi.BotAPI
+	updates tgbotapi.UpdatesChannel
+	closed  bool
 }
 
 func NewTelegramChannel(token string) (IChannel, error) {
@@ -25,14 +26,19 @@ func NewTelegramChannel(token string) (IChannel, error) {
 		return nil, err
 	}
 
-	return &TelegramChannel{
+	channel := &TelegramChannel{
 		Channel: &Channel{
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_TELEGRAM_NAME,
+			Broadcast: NewBroadcast[*Interaction](),
 		},
 		conn:   conn,
 		closed: false,
-	}, nil
+	}
+
+	go channel.Next()
+
+	return channel, nil
 }
 
 func (channel *TelegramChannel) GetChannel() *Channel {
@@ -41,33 +47,36 @@ func (channel *TelegramChannel) GetChannel() *Channel {
 
 func (channel *TelegramChannel) Close() error {
 	channel.closed = true
+	channel.Broadcast.Close()
 	return nil
 }
 
-func (channel *TelegramChannel) Next(interaction chan *Interaction) {
+func (channel *TelegramChannel) Next() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
-	updates := channel.conn.GetUpdatesChan(u)
+	if channel.updates == nil {
+		channel.updates = channel.conn.GetUpdatesChan(u)
+	}
 
-	for update := range updates {
+	for update := range channel.updates {
 		if channel.closed {
 			return
 		}
 
-		var i *Interaction
+		var interaction *Interaction
 
 		if update.Message != nil {
 			destination := NewWho(strconv.Itoa(int(update.Message.Chat.ID)), update.Message.From.UserName)
-			i = NewInteractionMessageText(channel, destination, destination, update.Message.Text)
+			interaction = NewInteractionMessageText(channel, destination, destination, update.Message.Text)
 		}
 
 		if update.CallbackQuery != nil {
 			destination := NewWho(strconv.Itoa(int(update.CallbackQuery.From.ID)), update.CallbackQuery.From.UserName)
-			i = NewInteractionMessageText(channel, destination, destination, update.CallbackData())
+			interaction = NewInteractionMessageText(channel, destination, destination, update.CallbackData())
 		}
 
-		interaction <- i
+		channel.Broadcast.Send(interaction)
 	}
 }
 

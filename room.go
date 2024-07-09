@@ -1,6 +1,8 @@
 package lowbot
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 type RoomGuests map[string]*Guest
 type Room struct {
@@ -10,40 +12,27 @@ type Room struct {
 }
 
 func NewRoom(guests RoomGuests) *Room {
-	room := &Room{
+	return &Room{
 		RoomID:       uuid.New(),
 		Guests:       guests,
 		Interactions: []*Interaction{},
 	}
-
-	for _, guest := range guests{
-		room.ListenGuest(guest)
-	}
-
-	return room
 }
 
 func (room *Room) AddGuest(guest *Guest) {
 	room.Guests[guest.Who.WhoID] = guest
-	room.ListenGuest(guest)
 }
 
-func (room *Room) ListenGuest(guest *Guest) {
-	interactions := make(chan *Interaction)
-
-	guest.Channel.Next(interactions)
-
-	for interaction := range interactions {
-		room.AddInteraction(interaction)
-	}
-
-	close(interactions)
-}
-
-func (room *Room) AddInteraction(interaction *Interaction) []error {
+func (room *Room) AddInteraction(interaction *Interaction) error {
 	room.Interactions = append(room.Interactions, interaction)
 
-	return room.SendInteractionExcludingSender(interaction)
+	errors := room.SendInteractionExcludingSender(interaction)
+
+	if len(errors) > 0 {
+		return errors[0]
+	}
+
+	return nil
 }
 
 func (room *Room) SendInteractionExcludingSender(interaction *Interaction) (errs []error) {

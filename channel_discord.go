@@ -26,14 +26,19 @@ func NewDiscordChannel(token string) (IChannel, error) {
 		return nil, err
 	}
 
-	return &DiscordChannel{
+	channel := &DiscordChannel{
 		Channel: &Channel{
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_DISCORD_NAME,
+			Broadcast: NewBroadcast[*Interaction](),
 		},
 		conn:   conn,
 		closed: false,
-	}, nil
+	}
+
+	go channel.Next()
+
+	return channel, nil
 }
 
 func (channel *DiscordChannel) GetChannel() *Channel {
@@ -42,12 +47,13 @@ func (channel *DiscordChannel) GetChannel() *Channel {
 
 func (channel *DiscordChannel) Close() error {
 	channel.closed = true
+	channel.Broadcast.Close()
 	return channel.conn.Close()
 }
 
-func (channel *DiscordChannel) Next(interaction chan *Interaction) {
+func (channel *DiscordChannel) Next() {
 	channel.conn.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if channel.closed{
+		if channel.closed {
 			return
 		}
 		if m.Author.ID == s.State.User.ID {
@@ -56,14 +62,14 @@ func (channel *DiscordChannel) Next(interaction chan *Interaction) {
 
 		destination := NewWho(m.ChannelID, s.State.User.Username)
 
-		interaction <- NewInteractionMessageText(channel, destination, destination, m.Content)
+		channel.Broadcast.Send(NewInteractionMessageText(channel, destination, destination, m.Content))
 	})
 	channel.conn.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		channel.RespondInteraction(i.Interaction)
 
 		destination := NewWho(i.ChannelID, s.State.User.Username)
 
-		interaction <- NewInteractionMessageText(channel, destination, destination, i.Interaction.MessageComponentData().CustomID)
+		channel.Broadcast.Send(NewInteractionMessageText(channel, destination, destination, i.Interaction.MessageComponentData().CustomID))
 	})
 
 	channel.conn.Identify.Intents = discordgo.IntentsGuildMessages

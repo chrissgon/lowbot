@@ -5,6 +5,8 @@ import (
 	"testing"
 )
 
+var WHO_MOCK = NewWho("1", "chris")
+
 func TestWho_NewWho(t *testing.T) {
 	expect := &Who{
 		WhoID:  "1",

@@ -22,7 +22,7 @@ func RunAction(flow *Flow, interaction *Interaction, channel IChannel) (bool, er
 		return false, ERR_NIL_FLOW
 	}
 
-	step := flow.Current
+	step := flow.CurrentStep
 
 	if step == nil {
 		return false, ERR_NIL_STEP
@@ -38,7 +38,7 @@ func RunAction(flow *Flow, interaction *Interaction, channel IChannel) (bool, er
 }
 
 func RunActionButton(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
-	step := flow.Current
+	step := flow.CurrentStep
 
 	text := ParseTemplate(step.Parameters.Texts)
 
@@ -48,7 +48,7 @@ func RunActionButton(flow *Flow, interaction *Interaction, channel IChannel) (bo
 }
 
 func RunActionFile(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
-	step := flow.Current
+	step := flow.CurrentStep
 
 	text := ParseTemplate(step.Parameters.Texts)
 
@@ -74,7 +74,7 @@ func RunActionInput(flow *Flow, interaction *Interaction, channel IChannel) (boo
 }
 
 func RunActionText(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
-	step := flow.Current
+	step := flow.CurrentStep
 
 	text := ParseTemplate(step.Parameters.Texts)
 
@@ -88,11 +88,17 @@ func RunActionWait(flow *Flow, interaction *Interaction, channel IChannel) (bool
 }
 
 func RunActionRoom(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
-	// guests := RoomGuests{
-	// 	interaction.Sender.WhoID: NewGuest(interaction.Sender, channel),
-	// }
+	RunActionText(flow, interaction, channel)
 
-	// room := NewRoom(guests)
+	guests := RoomGuests{
+		interaction.Sender.WhoID: NewGuest(interaction.Sender, channel),
+	}
 
-	return true, nil
+	room := NewRoom(guests)
+
+	interaction.Custom["RoomID"] = room.RoomID
+
+	roomManager.AddRoom(room)
+
+	return false, nil
 }

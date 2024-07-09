@@ -2,24 +2,36 @@ package lowbot
 
 import (
 	"path/filepath"
+	"reflect"
 	"testing"
+
+	"github.com/google/uuid"
+)
+
+var (
+	FILE_AUDIO_MOCK    = NewFile("./mocks/music.mp3")
+	FILE_DOCUMENT_MOCK = NewFile("./mocks/features.txt")
+	FILE_IMAGE_MOCK    = NewFile("./mocks/image.jpg")
+	FILE_VIDEO_MOCK    = NewFile("./mocks/video.mp4")
 )
 
 func TestFile_NewFile(t *testing.T) {
 	path := "./mocks/features.txt"
-	file := NewFile(path)
+	p, err := filepath.Abs(path)
+	fileID := uuid.New()
 
-	expect := ".txt"
-	have := file.GetFile().Extension
-
-	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+	expect := &File{
+		FileID:    fileID,
+		FileType:  FILETYPE_DOCUMENT,
+		Extension: ".txt",
+		Path:      p,
+		Err:       err,
 	}
 
-	expect, _ = filepath.Abs(path)
-	have = file.GetFile().Path
+	have := NewFile(path)
+	have.GetFile().FileID = fileID
 
-	if expect != have {
+	if !reflect.DeepEqual(expect, have) {
 		t.Errorf(FormatTestError(expect, have))
 	}
 }
@@ -44,5 +56,87 @@ func TestFile_Read(t *testing.T) {
 
 	if file.GetFile().Bytes == nil {
 		t.Errorf(FormatTestError([]byte{}, nil))
+	}
+}
+
+func TestFile_SetFileType(t *testing.T) {
+	expect := FILETYPE_AUDIO
+	have := FILE_AUDIO_MOCK.GetFile().FileType
+
+	if expect != have {
+		t.Errorf(FormatTestError(expect, have))
+	}
+
+	expect = FILETYPE_DOCUMENT
+	have = FILE_DOCUMENT_MOCK.GetFile().FileType
+
+	if expect != have {
+		t.Errorf(FormatTestError(expect, have))
+	}
+
+	expect = FILETYPE_IMAGE
+	have = FILE_IMAGE_MOCK.GetFile().FileType
+
+	if expect != have {
+		t.Errorf(FormatTestError(expect, have))
+	}
+
+	expect = FILETYPE_VIDEO
+	have = FILE_VIDEO_MOCK.GetFile().FileType
+
+	if expect != have {
+		t.Errorf(FormatTestError(expect, have))
+	}
+}
+
+func TestFile_IsAudio(t *testing.T) {
+	file := &File{
+		FileType: FILETYPE_AUDIO,
+	}
+	
+	expect := true
+	have := file.IsAudio()
+
+	if expect != have {
+		t.Errorf(FormatTestError(expect, have))
+	}
+}
+
+func TestFile_IsDocument(t *testing.T) {
+	file := &File{
+		FileType: FILETYPE_DOCUMENT,
+	}
+	
+	expect := true
+	have := file.IsDocument()
+
+	if expect != have {
+		t.Errorf(FormatTestError(expect, have))
+	}
+}
+
+func TestFile_IsImage(t *testing.T) {
+	file := &File{
+		FileType: FILETYPE_IMAGE,
+	}
+	
+	expect := true
+	have := file.IsImage()
+
+	if expect != have {
+		t.Errorf(FormatTestError(expect, have))
+	}
+}
+
+func TestFile_IsVideo(t *testing.T) {
+	file := &File{
+		FileType: FILETYPE_VIDEO,
+	}
+	
+	expect := true
+	have := file.IsVideo()
+
+	if expect != have {
+		t.Errorf(FormatTestError(expect, have))
 	}
 }

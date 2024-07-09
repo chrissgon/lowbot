@@ -9,25 +9,26 @@ import (
 )
 
 type Flow struct {
-	FlowID  uuid.UUID
-	Name    string `yaml:"name"`
-	Steps   Steps  `yaml:"steps"`
-	Current *Step
+	FlowID          uuid.UUID
+	Name            string `yaml:"name"`
+	Steps           Steps  `yaml:"steps"`
+	CurrentStep     *Step
+	CurrentStepName string
+	Responses  []*Interaction
 }
 
 type Step struct {
 	Action     string            `yaml:"action"`
 	Next       map[string]string `yaml:"next"`
 	Parameters StepParameters    `yaml:"parameters"`
-	Responses  []*Interaction
 }
 
 type StepParameters struct {
-	Buttons []string `yaml:"buttons"`
-	Path    string `yaml:"path"`
-	Text  string   `yaml:"text"`
-	Texts []string `yaml:"texts"`
-	Custom map[string]any `yaml:"custom"`
+	Buttons []string       `yaml:"buttons"`
+	Path    string         `yaml:"path"`
+	Text    string         `yaml:"text"`
+	Texts   []string       `yaml:"texts"`
+	Custom  map[string]any `yaml:"custom"`
 }
 
 type Steps map[string]*Step
@@ -54,38 +55,42 @@ func NewFlow(path string) (*Flow, error) {
 func (flow *Flow) Start() error {
 	flow.FlowID = uuid.New()
 
-	step, exists := flow.Steps["init"]
+	step, exists := flow.Steps[FLOW_INIT_STEP_NAME]
 
 	if !exists {
 		return ERR_UNKNOWN_INIT_STEP
 	}
 
-	flow.Current = step
+	flow.CurrentStep = step
+	flow.CurrentStepName = FLOW_INIT_STEP_NAME
 
 	return nil
 }
 
 func (flow *Flow) Next(interaction *Interaction) error {
-	if flow.FinishedByRoom(){
-		return ERR_FINISHED_FLOW
+	if flow.Ended() {
+		return ERR_ENDED_FLOW
 	}
+	// if flow.StopedByRoom() {
+	// 	return ERR_ROOM_STOPPED_FLOW
+	// }
 	if flow.NoHasNext() {
 		return ERR_UNKNOWN_NEXT_STEP
 	}
 
-	err := flow.setNextStep(interaction)
+	err := flow.goNextStep(interaction)
 
 	if err != nil {
 		return err
 	}
 
-	flow.Current.AddResponse(interaction)
+	flow.AddResponse(interaction)
 
 	return nil
 }
 
-func (flow *Flow) setNextStep(interaction *Interaction) error {
-	for pattern, next := range flow.Current.Next {
+func (flow *Flow) goNextStep(interaction *Interaction) error {
+	for pattern, next := range flow.CurrentStep.Next {
 		matched, err := regexp.MatchString(pattern, interaction.Parameters.Text)
 
 		if err != nil {
@@ -93,39 +98,45 @@ func (flow *Flow) setNextStep(interaction *Interaction) error {
 		}
 
 		if matched {
-			flow.Current = flow.Steps[next]
+			flow.CurrentStep = flow.Steps[next]
+			flow.CurrentStepName = next
 
 			return nil
 		}
 	}
 
-	next, exists := flow.Current.Next["default"]
+	next, exists := flow.CurrentStep.Next[FLOW_DEFAULT_STEP_NAME]
 
 	if !exists {
 		return ERR_UNKNOWN_DEFAULT_STEP
 	}
 
-	flow.Current = flow.Steps[next]
+	flow.CurrentStep = flow.Steps[next]
+	flow.CurrentStepName = next
 
 	return nil
 }
 
 func (flow *Flow) NoHasNext() bool {
-	return flow.Current.Next == nil
+	return flow.CurrentStep.Next == nil
 }
 
-func (flow *Flow) FinishedByRoom() bool {
-	return flow.Current.Action == "Room"
+// func (flow *Flow) StopedByRoom() bool {
+// 	return flow.CurrentStep.Action == "Room"
+// }
+
+func (flow *Flow) Ended() bool {
+	return flow.CurrentStepName == FLOW_END_STEP_NAME
 }
 
-func (step *Step) AddResponse(interaction *Interaction) {
-	step.Responses = append(step.Responses, interaction)
+func (flow *Flow) AddResponse(interaction *Interaction) {
+	flow.Responses = append(flow.Responses, interaction)
 }
 
-func (step *Step) GetLastResponse() *Interaction {
-	return step.Responses[len(step.Responses)-1]
+func (flow *Flow) GetLastResponse() *Interaction {
+	return flow.Responses[len(flow.Responses)-1]
 }
 
-func (step *Step) GetLastResponseText() string {
-	return step.Responses[len(step.Responses)-1].Parameters.Text
+func (flow *Flow) GetLastResponseText() string {
+	return flow.Responses[len(flow.Responses)-1].Parameters.Text
 }

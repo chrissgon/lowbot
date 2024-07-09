@@ -36,6 +36,7 @@ func NewInteractionMessageButton(channel IChannel, destination *Who, sender *Who
 			Text:    text,
 			Buttons: buttons,
 		},
+		Custom: map[string]any{},
 	}
 }
 
@@ -49,6 +50,7 @@ func NewInteractionMessageFile(channel IChannel, destination *Who, sender *Who, 
 			Text: text,
 			File: NewFile(path),
 		},
+		Custom: map[string]any{},
 	}
 }
 
@@ -61,6 +63,7 @@ func NewInteractionMessageText(channel IChannel, destination *Who, sender *Who, 
 		Parameters: InteractionParameters{
 			Text: text,
 		},
+		Custom: map[string]any{},
 	}
 }
 

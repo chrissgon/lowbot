@@ -1,7 +1,6 @@
 package lowbot
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -31,7 +30,7 @@ func (consumer *JourneyConsumer) GetConsumer() *Consumer {
 func (consumer *JourneyConsumer) Run(interaction *Interaction, channel IChannel) error {
 	flow, err := consumer.Persist.Get(interaction.Sender.WhoID)
 
-	flowNotExistsOrWasFinished := err != nil || flow.NoHasNext()
+	flowNotExistsOrWasFinished := err != nil || flow.Ended()
 
 	if flowNotExistsOrWasFinished {
 		copyFlow := *consumer.Flow
@@ -43,14 +42,7 @@ func (consumer *JourneyConsumer) Run(interaction *Interaction, channel IChannel)
 
 	consumer.Persist.Set(interaction.Sender.WhoID, flow)
 
-	if errors.Is(err, ERR_UNKNOWN_NEXT_STEP){
-		printLog(fmt.Sprintf("WhoID:<%v> Action:<%s> ERR: %v\n", interaction.Sender.WhoID, flow.Current.Action, err))
-		return nil
-	}
-
-	printLog(fmt.Sprintf("WhoID:<%v> Action:<%s> ERR: %v\n", interaction.Sender.WhoID, flow.Current.Action, err))
-
-	
+	printLog(fmt.Sprintf("WhoID:<%v> Step:<%s> ERR: %v\n", interaction.Sender.WhoID, flow.CurrentStepName, err))
 
 	return err
 }
