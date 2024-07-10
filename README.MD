@@ -97,6 +97,13 @@ When you run this project, you need set the following environment variables.
 - ### When you to use Discord:
   `DISCORD_TOKEN`: Discord bot token.
 
+## 📝 Anotations
+
+Run all the tests with coverage.
+```bash
+go test ./... -coverprofile=coverage.out && ./coverage-ignore.sh && go tool cover -html=coverage.out
+```
+
 ## 💪🏻 Contribution
 
 This project is open source and welcomes community contributions. Feel free to fork, implement improvements, and submit a pull request. Every contribution is valued and appreciated!

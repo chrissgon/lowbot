@@ -6,19 +6,19 @@ import (
 	"github.com/google/uuid"
 )
 
-// type GuestRoomRelation
+type GuestRoomRelation map[string]uuid.UUID
 
 type RoomManager struct {
-	ChannelGuestRoomRelation map[uuid.UUID]map[string]uuid.UUID
+	ChannelGuestRoomRelation map[uuid.UUID]GuestRoomRelation
 	Rooms                    map[uuid.UUID]*Room
-	// Channels                 []IChannel
+	Err error
 }
 
 var roomManager = NewRoomManager()
 
 func NewRoomManager() *RoomManager {
 	return &RoomManager{
-		ChannelGuestRoomRelation: map[uuid.UUID]map[string]uuid.UUID{},
+		ChannelGuestRoomRelation: map[uuid.UUID]GuestRoomRelation{},
 		Rooms:                    map[uuid.UUID]*Room{},
 	}
 }
@@ -33,31 +33,36 @@ func (manager *RoomManager) GetRoom(roomID uuid.UUID) *Room {
 
 func (manager *RoomManager) AddRoom(room *Room) error {
 	for _, guest := range room.Guests {
-		fmt.Println("guest", guest.Who.WhoID)
-		channelID := guest.Channel.GetChannel().ChannelID
-		_, exists := manager.ChannelGuestRoomRelation[channelID]
-
-		if !exists {
-			manager.ChannelGuestRoomRelation[channelID] = map[string]uuid.UUID{}
-			// manager.Channels = append(manager.Channels, guest.Channel)
-			go manager.ListenChannel(guest.Channel)
-		}
-
+		channelID := manager.AddChannel(guest.Channel)
 		manager.ChannelGuestRoomRelation[channelID][guest.Who.WhoID] = room.RoomID
 		manager.Rooms[room.RoomID] = room
 	}
 
 	return nil
 }
+func (manager *RoomManager) AddChannel(channel IChannel) uuid.UUID {
+	channelID := channel.GetChannel().ChannelID
+	_, exists := manager.ChannelGuestRoomRelation[channelID]
+
+	if !exists {
+		manager.ChannelGuestRoomRelation[channelID] = GuestRoomRelation{}
+		go manager.ListenChannel(channel)
+	}
+
+	return channelID
+}
 
 func (manager *RoomManager) ListenChannel(channel IChannel) {
 	listener := channel.GetChannel().Broadcast.Listen()
 
 	for interaction := range listener {
-		manager.AddInteraction(interaction)
-	}
+		err := manager.AddInteraction(interaction)
 
-	channel.GetChannel().Broadcast.Close()
+		if err != nil {
+			manager.Err = err
+			printLog(fmt.Sprintf("Room Manager: ListenChannel ERR: %v", err))
+		}
+	}
 }
 
 func (manager *RoomManager) AddInteraction(interaction *Interaction) error {
@@ -82,14 +87,7 @@ func (manager *RoomManager) AddGuest(roomID uuid.UUID, guest *Guest) error {
 
 	room.AddGuest(guest)
 
-	channelID := guest.Channel.GetChannel().ChannelID
-
-	_, exists := manager.ChannelGuestRoomRelation[channelID]
-
-	if !exists {
-		manager.ChannelGuestRoomRelation[channelID] = map[string]uuid.UUID{}
-		go manager.ListenChannel(guest.Channel)
-	}
+	channelID := manager.AddChannel(guest.Channel)
 
 	manager.ChannelGuestRoomRelation[channelID][guest.Who.WhoID] = room.RoomID
 

@@ -1,6 +1,7 @@
 package lowbot
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/google/uuid"
@@ -9,6 +10,8 @@ import (
 var (
 	channelCount            = 0
 	channelLastMethodCalled = ""
+
+	ERR_MOCK = errors.New("error mock")
 )
 
 type mockChannel struct {
@@ -65,7 +68,7 @@ func (m *mockChannel) SendImage(*Interaction) error {
 func (m *mockChannel) SendText(*Interaction) error {
 	channelLastMethodCalled = "SendText"
 	channelCount++
-	return nil
+	return ERR_MOCK
 }
 
 func (m *mockChannel) SendVideo(*Interaction) error {
@@ -84,8 +87,8 @@ func TestChannel_SendInteractionText(t *testing.T) {
 
 	err := SendInteraction(CHANNEL_MOCK, interaction)
 
-	if err != nil {
-		t.Errorf(FormatTestError(nil, err))
+	if !errors.Is(err, ERR_MOCK) {
+		t.Errorf(FormatTestError(ERR_MOCK, err))
 	}
 
 	have = channelCount
