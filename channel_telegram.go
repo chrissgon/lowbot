@@ -1,6 +1,7 @@
 package lowbot
 
 import (
+	"context"
 	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -26,11 +27,15 @@ func NewTelegramChannel(token string) (IChannel, error) {
 		return nil, err
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
+
 	channel := &TelegramChannel{
 		Channel: &Channel{
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_TELEGRAM_NAME,
 			Broadcast: NewBroadcast[*Interaction](),
+			Context:   ctx,
+			Cancel:    cancel,
 		},
 		conn:   conn,
 		closed: false,
@@ -48,6 +53,7 @@ func (channel *TelegramChannel) GetChannel() *Channel {
 func (channel *TelegramChannel) Close() error {
 	channel.closed = true
 	channel.Broadcast.Close()
+	channel.conn.StopReceivingUpdates()
 	return nil
 }
 

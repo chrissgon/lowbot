@@ -8,12 +8,12 @@ steps:
   input:
     action: Input
     next:
-      default: custom
+      default: end
     parameters:
       texts:
         - 👋 Hi. What is your name?
 
-  custom:
+  end:
     action: TextUsername
     parameters:
       texts:

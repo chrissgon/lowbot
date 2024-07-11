@@ -14,14 +14,17 @@ func StartConsumer(consumer IConsumer, channels []IChannel) {
 
 			for interaction := range listener {
 				err := consumer.Run(interaction, channel)
-				
+
 				if err != nil {
 					printLog(fmt.Sprintf("%v: WhoID:<%v> ERR: %v\n", consumer.GetConsumer().Name, interaction.Sender.WhoID, err))
 				}
 			}
-
-			channel.GetChannel().Broadcast.Close()
 		}(consumer, channel)
+
+		go func(channel IChannel) {
+			<-channel.GetChannel().Context.Done()
+			channel.GetChannel().Broadcast.Close()
+		}(channel)
 	}
 
 	wg.Add(1)

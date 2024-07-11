@@ -66,9 +66,3 @@ steps:
     parameters:
       texts:
         - The adventure is over...
-        
-  error:
-    action: Text
-    parameters:
-      texts:
-        - error

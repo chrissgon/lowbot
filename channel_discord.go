@@ -2,6 +2,7 @@ package lowbot
 
 import (
 	"bytes"
+	"context"
 	"os"
 	"strings"
 
@@ -26,11 +27,15 @@ func NewDiscordChannel(token string) (IChannel, error) {
 		return nil, err
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
+
 	channel := &DiscordChannel{
 		Channel: &Channel{
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_DISCORD_NAME,
 			Broadcast: NewBroadcast[*Interaction](),
+			Context:   ctx,
+			Cancel:    cancel,
 		},
 		conn:   conn,
 		closed: false,
