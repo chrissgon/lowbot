@@ -71,9 +71,6 @@ func (flow *Flow) Next(interaction *Interaction) error {
 	if flow.Ended() {
 		return ERR_ENDED_FLOW
 	}
-	// if flow.StopedByRoom() {
-	// 	return ERR_ROOM_STOPPED_FLOW
-	// }
 	if flow.NoHasNext() {
 		return ERR_UNKNOWN_NEXT_STEP
 	}
@@ -120,10 +117,6 @@ func (flow *Flow) goNextStep(interaction *Interaction) error {
 func (flow *Flow) NoHasNext() bool {
 	return flow.CurrentStep.Next == nil
 }
-
-// func (flow *Flow) StopedByRoom() bool {
-// 	return flow.CurrentStep.Action == "Room"
-// }
 
 func (flow *Flow) Ended() bool {
 	return flow.CurrentStepName == FLOW_END_STEP_NAME

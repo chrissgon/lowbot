@@ -2,6 +2,7 @@ package lowbot
 
 import (
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
@@ -96,5 +97,31 @@ func TestInteraction_NewInteractionMessageText(t *testing.T) {
 
 	if TEXT != have.Parameters.Text {
 		t.Errorf(FormatTestError(TEXT, have.Parameters.Text))
+	}
+}
+
+func TestInteraction_SetReplier(t *testing.T) {
+	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, TEXT)
+
+	interaction.SetReplier(WHO_MOCK)
+
+	have := interaction.Replier
+	expect := WHO_MOCK
+
+	if !reflect.DeepEqual(expect, have) {
+		t.Errorf(FormatTestError(expect, have))
+	}
+}
+
+func TestInteraction_SetDestination(t *testing.T) {
+	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, TEXT)
+
+	interaction.SetDestination(WHO_MOCK)
+
+	have := interaction.Destination
+	expect := WHO_MOCK
+
+	if !reflect.DeepEqual(expect, have) {
+		t.Errorf(FormatTestError(expect, have))
 	}
 }

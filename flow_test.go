@@ -1,16 +1,23 @@
 package lowbot
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 )
 
 func TestFlow_NewFlow(t *testing.T) {
+	_, err := NewFlow("")
+
+	if err == nil {
+		t.Errorf(FormatTestError("any error", nil))
+	}
+
 	expect := newFlowMock()
 	have, err := NewFlow("./mocks/flow.yaml")
 
 	if err != nil {
-		t.Error(err)
+		t.Errorf(FormatTestError(nil, err))
 	}
 
 	if !reflect.DeepEqual(expect, *have) {
@@ -20,7 +27,14 @@ func TestFlow_NewFlow(t *testing.T) {
 
 func TestFlow_StartFlow(t *testing.T) {
 	flow, _ := NewFlow("./mocks/flow.yaml")
-	flow.Start()
+
+	delete(flow.Steps, "init")
+
+	err := flow.Start()
+
+	if !errors.Is(err, ERR_UNKNOWN_INIT_STEP) {
+		t.Errorf(FormatTestError(ERR_UNKNOWN_INIT_STEP, err))
+	}
 
 	expect := flow.Steps["init"]
 	have := flow.CurrentStep
@@ -31,7 +45,36 @@ func TestFlow_StartFlow(t *testing.T) {
 }
 
 func TestFlow_NextFlow(t *testing.T) {
+	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "")
+
 	flow, _ := NewFlow("./mocks/flow.yaml")
+	flow.Start()
+	flow.CurrentStepName = FLOW_END_STEP_NAME
+	err := flow.Next(interaction)
+
+	if !errors.Is(err, ERR_ENDED_FLOW) {
+		t.Errorf(FormatTestError(ERR_ENDED_FLOW, err))
+	}
+
+	flow, _ = NewFlow("./mocks/flow.yaml")
+	flow.Start()
+	flow.CurrentStep.Next = nil
+	err = flow.Next(interaction)
+
+	if !errors.Is(err, ERR_UNKNOWN_NEXT_STEP) {
+		t.Errorf(FormatTestError(ERR_UNKNOWN_NEXT_STEP, err))
+	}
+
+	flow, _ = NewFlow("./mocks/flow.yaml")
+	flow.Start()
+	delete(flow.CurrentStep.Next, "default")
+	err = flow.Next(interaction)
+
+	if !errors.Is(err, ERR_UNKNOWN_DEFAULT_STEP) {
+		t.Errorf(FormatTestError(ERR_UNKNOWN_DEFAULT_STEP, err))
+	}
+
+	flow, _ = NewFlow("./mocks/flow.yaml")
 	flow.Start()
 	flow.Next(NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, ""))
 
@@ -66,6 +109,46 @@ func TestFlow_AddResponse(t *testing.T) {
 	}
 }
 func TestFlow_AddResponseValue(t *testing.T) {
+	flow, _ := NewFlow("./mocks/flow.yaml")
+
+	flow.CurrentStepName = FLOW_END_STEP_NAME
+
+	expect := true
+	have := flow.Ended()
+
+	if expect != have {
+		t.Errorf(FormatTestError(expect, have))
+	}
+}
+func TestFlow_GetLastResponse(t *testing.T) {
+	flow, _ := NewFlow("./mocks/flow.yaml")
+	flow.Start()
+
+	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "")
+	flow.Next(interaction)
+
+	expect := interaction
+	have := flow.GetLastResponse()
+
+	if !reflect.DeepEqual(expect, have) {
+		t.Errorf(FormatTestError(expect, have))
+	}
+}
+func TestFlow_GetLastResponsetText(t *testing.T) {
+	flow, _ := NewFlow("./mocks/flow.yaml")
+	flow.Start()
+
+	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "")
+	flow.Next(interaction)
+
+	expect := interaction.Parameters.Text
+	have := flow.GetLastResponseText()
+
+	if expect != have {
+		t.Errorf(FormatTestError(expect, have))
+	}
+}
+func TestFlow_Ended(t *testing.T) {
 	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "Response")
 	flow, _ := NewFlow("./mocks/flow.yaml")
 	flow.Start()

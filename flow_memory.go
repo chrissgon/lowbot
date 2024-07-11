@@ -1,9 +1,5 @@
 package lowbot
 
-import (
-	"fmt"
-)
-
 type MemoryFlowPersist struct {
 	Sessions map[any]*Flow
 }
@@ -24,7 +20,7 @@ func (memory *MemoryFlowPersist) Get(ID any) (*Flow, error) {
 	flow := memory.Sessions[ID]
 
 	if flow == nil {
-		return nil, fmt.Errorf("not found flow")
+		return nil, ERR_NIL_FLOW
 	}
 
 	return flow, nil

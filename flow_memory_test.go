@@ -1,6 +1,7 @@
 package lowbot
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -34,6 +35,12 @@ func TestFlowMemory_Get(t *testing.T) {
 	ID := 1
 	flow := newFlowMock()
 	persist, _ := NewMemoryFlowPersist()
+
+	_, err := persist.Get(ID)
+
+	if !errors.Is(err, ERR_NIL_FLOW){
+		t.Errorf(FormatTestError(ERR_NIL_FLOW, err))
+	}
 
 	persist.Set(ID, &flow)
 
