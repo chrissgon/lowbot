@@ -1,6 +1,7 @@
 package lowbot
 
 import (
+	"errors"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -57,6 +58,14 @@ func TestFile_Read(t *testing.T) {
 	if file.GetFile().Bytes == nil {
 		t.Errorf(FormatTestError([]byte{}, nil))
 	}
+
+	file = NewFile("https://myurl.com/features.txt")
+
+	err = file.Read()
+
+	if !errors.Is(err, ERR_FEATURE_UNIMPLEMENTED) {
+		t.Errorf(FormatTestError(ERR_FEATURE_UNIMPLEMENTED, err))
+	}
 }
 
 func TestFile_SetFileType(t *testing.T) {
@@ -93,7 +102,7 @@ func TestFile_IsAudio(t *testing.T) {
 	file := &File{
 		FileType: FILETYPE_AUDIO,
 	}
-	
+
 	expect := true
 	have := file.IsAudio()
 
@@ -106,7 +115,7 @@ func TestFile_IsDocument(t *testing.T) {
 	file := &File{
 		FileType: FILETYPE_DOCUMENT,
 	}
-	
+
 	expect := true
 	have := file.IsDocument()
 
@@ -119,7 +128,7 @@ func TestFile_IsImage(t *testing.T) {
 	file := &File{
 		FileType: FILETYPE_IMAGE,
 	}
-	
+
 	expect := true
 	have := file.IsImage()
 
@@ -132,7 +141,7 @@ func TestFile_IsVideo(t *testing.T) {
 	file := &File{
 		FileType: FILETYPE_VIDEO,
 	}
-	
+
 	expect := true
 	have := file.IsVideo()
 

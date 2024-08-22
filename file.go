@@ -1,7 +1,6 @@
 package lowbot
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 
@@ -61,7 +60,7 @@ func (file *File) GetFile() *File {
 
 func (file *File) Read() error {
 	if IsURL(file.Path) {
-		file.Err = errors.New("file Read url unimplemented")
+		file.Err = ERR_FEATURE_UNIMPLEMENTED
 		return file.Err
 	}
 

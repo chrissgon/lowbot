@@ -19,6 +19,8 @@ var (
 	ERR_PATTERN_NEXT_STEP           = errors.New("step pattern invalid")
 	ERR_ENDED_FLOW                  = errors.New("flow ended")
 	ERR_ROOM_STOPPED_FLOW            = errors.New("flow finished by room")
+
+	ERR_FEATURE_UNIMPLEMENTED = errors.New("feature unimplemented")
 )
 
 const (
