@@ -41,7 +41,7 @@ func (b *Broadcast[T]) Close() error {
 		close(listener)
 	}
 
-	clear(b.listeners)
+	b.listeners = []chan T{}
 
 	return nil
 }
