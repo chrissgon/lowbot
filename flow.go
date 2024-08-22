@@ -1,6 +1,7 @@
 package lowbot
 
 import (
+	"encoding/json"
 	"os"
 	"regexp"
 
@@ -10,25 +11,25 @@ import (
 
 type Flow struct {
 	FlowID          uuid.UUID
-	Name            string `yaml:"name"`
-	Steps           Steps  `yaml:"steps"`
+	Name            string `yaml:"name" json:"name"`
+	Steps           Steps  `yaml:"steps" json:"steps"`
 	CurrentStep     *Step
 	CurrentStepName string
-	Responses  []*Interaction
+	Responses       []*Interaction
 }
 
 type Step struct {
-	Action     string            `yaml:"action"`
-	Next       map[string]string `yaml:"next"`
-	Parameters StepParameters    `yaml:"parameters"`
+	Action     string            `yaml:"action" json:"action"`
+	Next       map[string]string `yaml:"next" json:"next"`
+	Parameters StepParameters    `yaml:"parameters" json:"parameters"`
 }
 
 type StepParameters struct {
-	Buttons []string       `yaml:"buttons"`
-	Path    string         `yaml:"path"`
-	Text    string         `yaml:"text"`
-	Texts   []string       `yaml:"texts"`
-	Custom  map[string]any `yaml:"custom"`
+	Buttons []string       `yaml:"buttons" json:"buttons"`
+	Path    string         `yaml:"path" json:"path"`
+	Text    string         `yaml:"text" json:"text"`
+	Texts   []string       `yaml:"texts" json:"texts"`
+	Custom  map[string]any `yaml:"custom" json:"custom"`
 }
 
 type Steps map[string]*Step
@@ -48,6 +49,28 @@ func NewFlow(path string) (*Flow, error) {
 	flow := &Flow{}
 
 	err = yaml.Unmarshal(bytes, flow)
+
+	return flow, err
+}
+
+func NewFlowByJSON(strJSON string) (*Flow, error) {
+	flow := &Flow{}
+
+	err := json.Unmarshal([]byte(strJSON), flow)
+
+	return flow, err
+}
+
+func NewFlowByJSONFile(path string) (*Flow, error) {
+	bytes, err := os.ReadFile(path)
+
+	if err != nil {
+		return nil, err
+	}
+
+	flow := &Flow{}
+
+	err = json.Unmarshal(bytes, flow)
 
 	return flow, err
 }

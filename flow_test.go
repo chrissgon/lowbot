@@ -24,6 +24,118 @@ func TestFlow_NewFlow(t *testing.T) {
 		t.Errorf(FormatTestError(expect, have))
 	}
 }
+func TestFlow_NewFlowByJSON(t *testing.T) {
+	strJSON := `
+	{
+		"name": "flow",
+		"steps": {
+			"init": {
+				"next": {
+					"default": "audio"
+				}
+			},
+
+			"audio": {
+				"next": {
+					"default": "button"
+				},
+				"action": "File",
+				"parameters": {
+					"path": "./mocks/music.mp3"
+				}
+			},
+
+			"button": {
+				"next": {
+					"default": "document"
+				},
+				"action": "Button",
+				"parameters": {
+					"buttons": ["yes", "no"],
+					"texts": ["buttons here"]
+				}
+			},
+
+			"document": {
+				"next": {
+					"default": "image"
+				},
+				"action": "File",
+				"parameters": {
+					"path": "./mocks/features.txt"
+				}
+			},
+
+			"image": {
+				"next": {
+					"default": "text"
+				},
+				"action": "File",
+				"parameters": {
+					"path": "./mocks/image.jpg"
+				}
+			},
+
+			"text": {
+				"next": {
+					"default": "video"
+				},
+				"action": "Text",
+				"parameters": {
+					"texts": ["texts"]
+				}
+			},
+
+			"video": {
+				"next": {
+					"default": "end"
+				},
+				"action": "File",
+				"parameters": {
+					"path": "./mocks/video.mp4"
+				}
+			},
+
+			"end": {
+				"action": "Text",
+				"parameters": {
+					"texts": ["end"]
+				}
+			}
+		}
+	}
+
+	`
+
+	expect := newFlowMock()
+	have, err := NewFlowByJSON(strJSON)
+
+	if err != nil {
+		t.Errorf(FormatTestError(nil, err))
+	}
+
+	if !reflect.DeepEqual(expect, *have) {
+		t.Errorf(FormatTestError(expect, have))
+	}
+}
+func TestFlow_NewFlowByJSONFile(t *testing.T) {
+	_, err := NewFlowByJSONFile("")
+
+	if err == nil {
+		t.Errorf(FormatTestError("any error", nil))
+	}
+
+	expect := newFlowMock()
+	have, err := NewFlowByJSONFile("./mocks/flow.json")
+
+	if err != nil {
+		t.Errorf(FormatTestError(nil, err))
+	}
+
+	if !reflect.DeepEqual(expect, *have) {
+		t.Errorf(FormatTestError(expect, have))
+	}
+}
 
 func TestFlow_StartFlow(t *testing.T) {
 	flow, _ := NewFlow("./mocks/flow.yaml")
@@ -83,6 +195,71 @@ func TestFlow_NextFlow(t *testing.T) {
 
 	if !reflect.DeepEqual(expect, have) {
 		t.Errorf(FormatTestError(expect, have))
+	}
+}
+
+func TestFlow_goNextStep(t *testing.T) {
+	strJSON := `
+	{
+		"name": "pingpong",
+		"steps": {
+			"init": {
+				"next": {
+					"default": "invalid"
+				}
+			},
+
+			"invalid": {
+				"action": "Wait",
+				"next": {
+					"$*)": "invalid",
+					"default": "invalid"
+				}
+			},
+
+			"matched": {
+				"action": "Wait",
+				"next": {
+					"yes": "end",
+					"default": "matched"
+				}
+			},
+
+			"end": {
+				"action": "Text",
+				"parameters": {
+					"texts": ["end"]
+				}
+			}
+		}
+	}
+	`
+	flow, err := NewFlowByJSON(strJSON)
+
+	if err != nil {
+		t.Errorf(FormatTestError(nil, err))
+	}
+
+	flow.CurrentStep = flow.Steps["invalid"]
+	flow.CurrentStepName = "invalid"
+
+	err = flow.goNextStep(NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, ""))
+
+	if !errors.Is(ERR_PATTERN_NEXT_STEP, err) {
+		t.Errorf(FormatTestError(ERR_PATTERN_NEXT_STEP, err))
+	}
+
+	flow.CurrentStep = flow.Steps["matched"]
+	flow.CurrentStepName = "matched"
+
+	err = flow.goNextStep(NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "yes"))
+
+	if err != nil {
+		t.Errorf(FormatTestError(nil, err))
+	}
+
+	if flow.CurrentStepName != "end" {
+		t.Errorf(FormatTestError("end", flow.CurrentStepName))
 	}
 }
 
