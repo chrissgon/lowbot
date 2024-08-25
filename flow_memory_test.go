@@ -24,7 +24,7 @@ func TestFlowMemory_Set(t *testing.T) {
 	flow := newFlowMock()
 	persist, _ := NewMemoryFlowPersist()
 
-	err := persist.Set(ID, &flow)
+	err := persist.Set(ID, flow)
 
 	if err != nil {
 		t.Errorf(FormatTestError(nil, err))
@@ -42,9 +42,9 @@ func TestFlowMemory_Get(t *testing.T) {
 		t.Errorf(FormatTestError(ERR_NIL_FLOW, err))
 	}
 
-	persist.Set(ID, &flow)
+	persist.Set(ID, flow)
 
-	expect := &flow
+	expect := flow
 	have, err := persist.Get(ID)
 
 	if err != nil {

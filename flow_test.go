@@ -20,7 +20,7 @@ func TestFlow_NewFlow(t *testing.T) {
 		t.Errorf(FormatTestError(nil, err))
 	}
 
-	if !reflect.DeepEqual(expect, *have) {
+	if !reflect.DeepEqual(expect, have) {
 		t.Errorf(FormatTestError(expect, have))
 	}
 }
@@ -114,7 +114,7 @@ func TestFlow_NewFlowByJSON(t *testing.T) {
 		t.Errorf(FormatTestError(nil, err))
 	}
 
-	if !reflect.DeepEqual(expect, *have) {
+	if !reflect.DeepEqual(expect, have) {
 		t.Errorf(FormatTestError(expect, have))
 	}
 }
@@ -132,7 +132,7 @@ func TestFlow_NewFlowByJSONFile(t *testing.T) {
 		t.Errorf(FormatTestError(nil, err))
 	}
 
-	if !reflect.DeepEqual(expect, *have) {
+	if !reflect.DeepEqual(expect, have) {
 		t.Errorf(FormatTestError(expect, have))
 	}
 }
@@ -339,8 +339,8 @@ func TestFlow_Ended(t *testing.T) {
 	}
 }
 
-func newFlowMock() Flow {
-	return Flow{
+func newFlowMock() *Flow {
+	return &Flow{
 		Name: "flow",
 		Steps: Steps{
 			"init": {

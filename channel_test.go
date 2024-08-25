@@ -10,6 +10,8 @@ import (
 var (
 	channelCount            = 0
 	channelLastMethodCalled = ""
+	channelLastInteractionSent *Interaction = nil
+	channelTriggerError = true
 
 	ERR_MOCK = errors.New("error mock")
 )
@@ -41,46 +43,53 @@ func (m *mockChannel) Close() error {
 func (m *mockChannel) Next() {
 }
 
-func (m *mockChannel) SendAudio(*Interaction) error {
+func (m *mockChannel) SendAudio(interaction *Interaction) error {
 	channelLastMethodCalled = "SendAudio"
 	channelCount++
+	channelLastInteractionSent = interaction
 	return nil
 }
 
-func (m *mockChannel) SendButton(*Interaction) error {
+func (m *mockChannel) SendButton(interaction *Interaction) error {
 	channelLastMethodCalled = "SendButton"
 	channelCount++
+	channelLastInteractionSent = interaction
 	return nil
 }
 
-func (m *mockChannel) SendDocument(*Interaction) error {
+func (m *mockChannel) SendDocument(interaction *Interaction) error {
 	channelLastMethodCalled = "SendDocument"
 	channelCount++
+	channelLastInteractionSent = interaction
 	return nil
 }
 
-func (m *mockChannel) SendImage(*Interaction) error {
+func (m *mockChannel) SendImage(interaction *Interaction) error {
 	channelLastMethodCalled = "SendImage"
 	channelCount++
+	channelLastInteractionSent = interaction
 	return nil
 }
 
-func (m *mockChannel) SendText(*Interaction) error {
+func (m *mockChannel) SendText(interaction *Interaction) error {
 	channelLastMethodCalled = "SendText"
 	channelCount++
-	return ERR_MOCK
+	channelLastInteractionSent = interaction
+	if(channelTriggerError){
+		return ERR_MOCK
+	}
+	return nil
 }
 
-func (m *mockChannel) SendVideo(*Interaction) error {
+func (m *mockChannel) SendVideo(interaction *Interaction) error {
 	channelLastMethodCalled = "SendVideo"
 	channelCount++
+	channelLastInteractionSent = interaction
 	return nil
 }
 
 func TestChannel_SendInteractionText(t *testing.T) {
-	var have any
-	var expect any
-
+	channelTriggerError = true
 	channelCount = 0
 
 	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, TEXT)
@@ -91,25 +100,16 @@ func TestChannel_SendInteractionText(t *testing.T) {
 		t.Errorf(FormatTestError(ERR_MOCK, err))
 	}
 
-	have = channelCount
-	expect = 1
-
-	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+	if channelCount != 1 {
+		t.Errorf(FormatTestError(1, channelCount))
 	}
 
-	have = channelLastMethodCalled
-	expect = "SendText"
-
-	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+	if channelLastMethodCalled != "SendText" {
+		t.Errorf(FormatTestError("SendText", channelLastMethodCalled))
 	}
 }
 
 func TestChannel_SendInteractionButton(t *testing.T) {
-	var have any
-	var expect any
-
 	channelCount = 0
 
 	interaction := NewInteractionMessageButton(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, BUTTONS, TEXT)
@@ -120,25 +120,16 @@ func TestChannel_SendInteractionButton(t *testing.T) {
 		t.Errorf(FormatTestError(nil, err))
 	}
 
-	have = channelCount
-	expect = 1
-
-	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+	if channelCount != 1 {
+		t.Errorf(FormatTestError(1, channelCount))
 	}
 
-	have = channelLastMethodCalled
-	expect = "SendButton"
-
-	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+	if channelLastMethodCalled != "SendButton" {
+		t.Errorf(FormatTestError("SendButton", channelLastMethodCalled))
 	}
 }
 
 func TestChannel_SendInteractionAudio(t *testing.T) {
-	var have any
-	var expect any
-
 	channelCount = 0
 
 	interaction := NewInteractionMessageFile(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "./mocks/audio.mp3", TEXT)
@@ -149,25 +140,16 @@ func TestChannel_SendInteractionAudio(t *testing.T) {
 		t.Errorf(FormatTestError(nil, err))
 	}
 
-	have = channelCount
-	expect = 1
-
-	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+	if channelCount != 1 {
+		t.Errorf(FormatTestError(1, channelCount))
 	}
 
-	have = channelLastMethodCalled
-	expect = "SendAudio"
-
-	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+	if channelLastMethodCalled != "SendAudio" {
+		t.Errorf(FormatTestError("SendAudio", channelLastMethodCalled))
 	}
 }
 
 func TestChannel_SendInteractionDocument(t *testing.T) {
-	var have any
-	var expect any
-
 	channelCount = 0
 
 	interaction := NewInteractionMessageFile(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "./mocks/features.txt", TEXT)
@@ -178,25 +160,16 @@ func TestChannel_SendInteractionDocument(t *testing.T) {
 		t.Errorf(FormatTestError(nil, err))
 	}
 
-	have = channelCount
-	expect = 1
-
-	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+	if channelCount != 1 {
+		t.Errorf(FormatTestError(1, channelCount))
 	}
 
-	have = channelLastMethodCalled
-	expect = "SendDocument"
-
-	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+	if channelLastMethodCalled != "SendDocument" {
+		t.Errorf(FormatTestError("SendDocument", channelLastMethodCalled))
 	}
 }
 
 func TestChannel_SendInteractionImage(t *testing.T) {
-	var have any
-	var expect any
-
 	channelCount = 0
 
 	interaction := NewInteractionMessageFile(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "./mocks/image.jpg", TEXT)
@@ -207,25 +180,16 @@ func TestChannel_SendInteractionImage(t *testing.T) {
 		t.Errorf(FormatTestError(nil, err))
 	}
 
-	have = channelCount
-	expect = 1
-
-	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+	if channelCount != 1 {
+		t.Errorf(FormatTestError(1, channelCount))
 	}
 
-	have = channelLastMethodCalled
-	expect = "SendImage"
-
-	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+	if channelLastMethodCalled != "SendImage" {
+		t.Errorf(FormatTestError("SendImage", channelLastMethodCalled))
 	}
 }
 
 func TestChannel_SendInteractionVideo(t *testing.T) {
-	var have any
-	var expect any
-
 	channelCount = 0
 
 	interaction := NewInteractionMessageFile(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "./mocks/video.mp4", TEXT)
@@ -236,17 +200,11 @@ func TestChannel_SendInteractionVideo(t *testing.T) {
 		t.Errorf(FormatTestError(nil, err))
 	}
 
-	have = channelCount
-	expect = 1
-
-	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+	if channelCount != 1 {
+		t.Errorf(FormatTestError(1, channelCount))
 	}
 
-	have = channelLastMethodCalled
-	expect = "SendVideo"
-
-	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+	if channelLastMethodCalled != "SendVideo" {
+		t.Errorf(FormatTestError("SendVideo", channelLastMethodCalled))
 	}
 }

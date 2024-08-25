@@ -34,6 +34,10 @@ func RunAction(flow *Flow, interaction *Interaction, channel IChannel) (bool, er
 		return false, ERR_UNKNOWN_ACTION
 	}
 
+	if channel == nil {
+		return false, ERR_NIL_CHANNEL
+	}
+
 	return action(flow, interaction, channel)
 }
 
