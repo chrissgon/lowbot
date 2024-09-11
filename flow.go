@@ -12,6 +12,7 @@ import (
 type Flow struct {
 	FlowID          uuid.UUID
 	Name            string `yaml:"name" json:"name"`
+	Description     string `yaml:"description" json:"description"`
 	Steps           Steps  `yaml:"steps" json:"steps"`
 	CurrentStep     *Step
 	CurrentStepName string
