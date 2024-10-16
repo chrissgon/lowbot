@@ -48,6 +48,7 @@ func (bot *Bot) StartConsumerChannel(channel IChannel) {
 	for interaction := range listener {
 		err := bot.Consumer.Run(interaction, channel)
 
+		// TODO: improve how to receive the consumer errors
 		if err != nil {
 			printLog(fmt.Sprintf("%v: WhoID:<%v> ERR: %v\n", bot.Consumer.GetConsumer().Name, interaction.Sender.WhoID, err))
 		}

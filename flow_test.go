@@ -104,7 +104,6 @@ func TestFlow_NewFlowByJSON(t *testing.T) {
 			}
 		}
 	}
-
 	`
 
 	expect := newFlowMock()

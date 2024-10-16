@@ -18,6 +18,9 @@ var (
 
 type mockChannel struct {
 	*Channel
+	startedTimes int
+	stoppedTimes int
+	fail bool
 }
 
 var CHANNEL_MOCK = newMockChannel()
@@ -29,6 +32,9 @@ func newMockChannel() IChannel {
 			Name:      "mock channel",
 			Broadcast: NewBroadcast[*Interaction](),
 		},
+		startedTimes: 0,
+		stoppedTimes: 0,
+		fail: false,
 	}
 }
 
@@ -37,10 +43,18 @@ func (m *mockChannel) GetChannel() *Channel {
 }
 
 func (m *mockChannel) Stop() error {
+	m.stoppedTimes++
+	if m.fail {
+		return ErrMock
+	}
 	return nil
 }
 
 func (m *mockChannel) Start() error {
+	m.startedTimes++
+	if m.fail {
+		return ErrMock
+	}
 	return nil
 }
 
