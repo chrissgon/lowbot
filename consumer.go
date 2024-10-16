@@ -1,6 +1,8 @@
 package lowbot
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 type IConsumer interface {
 	Run(*Interaction, IChannel) error

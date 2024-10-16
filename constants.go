@@ -4,6 +4,8 @@ import "errors"
 
 var (
 	DEBUG                           = false
+	ERR_CHANNEL_RUNNING      = errors.New("channel is running")
+	ERR_CHANNEL_NOT_RUNNING      = errors.New("channel is not running")
 	ERR_UNKNOWN_TELEGRAM_TOKEN      = errors.New("unknown telegram token")
 	ERR_UNKNOWN_DISCORD_TOKEN       = errors.New("unknown discord token")
 	ERR_UNKNOWN_CHATGPT_TOKEN       = errors.New("unknown chatgpt token")

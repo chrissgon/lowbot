@@ -8,12 +8,12 @@ import (
 )
 
 var (
-	channelCount            = 0
-	channelLastMethodCalled = ""
+	channelCount                            = 0
+	channelLastMethodCalled                 = ""
 	channelLastInteractionSent *Interaction = nil
-	channelTriggerError = true
+	channelTriggerError                     = true
 
-	ERR_MOCK = errors.New("error mock")
+	ErrMock = errors.New("error mock")
 )
 
 type mockChannel struct {
@@ -36,7 +36,11 @@ func (m *mockChannel) GetChannel() *Channel {
 	return m.Channel
 }
 
-func (m *mockChannel) Close() error {
+func (m *mockChannel) Stop() error {
+	return nil
+}
+
+func (m *mockChannel) Start() error {
 	return nil
 }
 
@@ -75,8 +79,8 @@ func (m *mockChannel) SendText(interaction *Interaction) error {
 	channelLastMethodCalled = "SendText"
 	channelCount++
 	channelLastInteractionSent = interaction
-	if(channelTriggerError){
-		return ERR_MOCK
+	if channelTriggerError {
+		return ErrMock
 	}
 	return nil
 }
@@ -96,8 +100,8 @@ func TestChannel_SendInteractionText(t *testing.T) {
 
 	err := SendInteraction(CHANNEL_MOCK, interaction)
 
-	if !errors.Is(err, ERR_MOCK) {
-		t.Errorf(FormatTestError(ERR_MOCK, err))
+	if !errors.Is(err, ErrMock) {
+		t.Errorf(FormatTestError(ErrMock, err))
 	}
 
 	if channelCount != 1 {

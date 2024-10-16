@@ -2,11 +2,10 @@ package lowbot
 
 import (
 	"fmt"
-	"sync"
 )
 
 func StartConsumer(consumer IConsumer, channels []IChannel) {
-	var wg sync.WaitGroup
+	// var wg sync.WaitGroup
 
 	for _, channel := range channels {
 		go func(consumer IConsumer, channel IChannel) {
@@ -21,12 +20,11 @@ func StartConsumer(consumer IConsumer, channels []IChannel) {
 			}
 		}(consumer, channel)
 
-		go func(channel IChannel) {
-			<-channel.GetChannel().Context.Done()
-			channel.GetChannel().Broadcast.Close()
-		}(channel)
+		// go func(channel IChannel) {
+		// 	<-channel.GetChannel().Context.Done()
+		// 	channel.GetChannel().Broadcast.Close()
+		// }(channel)
 	}
 
-	wg.Add(1)
-	wg.Wait()
+	// <-consumer.GetConsumer().Context.Done()
 }

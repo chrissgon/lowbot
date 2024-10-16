@@ -25,7 +25,12 @@ func NewFakeChannel() lowbot.IChannel {
 }
 
 // Close implements lowbot.IChannel.
-func (f *FakeChannel) Close() error {
+func (f *FakeChannel) Stop() error {
+	panic("unimplemented")
+}
+
+// Close implements lowbot.IChannel.
+func (f *FakeChannel) Start() error {
 	panic("unimplemented")
 }
 

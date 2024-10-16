@@ -2,7 +2,6 @@ package lowbot
 
 import (
 	"bytes"
-	"context"
 	"os"
 	"strings"
 
@@ -13,7 +12,7 @@ import (
 type DiscordChannel struct {
 	*Channel
 	conn   *discordgo.Session
-	closed bool
+	running bool
 }
 
 func NewDiscordChannel(token string) (IChannel, error) {
@@ -27,21 +26,15 @@ func NewDiscordChannel(token string) (IChannel, error) {
 		return nil, err
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-
 	channel := &DiscordChannel{
 		Channel: &Channel{
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_DISCORD_NAME,
 			Broadcast: NewBroadcast[*Interaction](),
-			Context:   ctx,
-			Cancel:    cancel,
 		},
 		conn:   conn,
-		closed: false,
+		running: false,
 	}
-
-	go channel.Next()
 
 	return channel, nil
 }
@@ -50,15 +43,13 @@ func (channel *DiscordChannel) GetChannel() *Channel {
 	return channel.Channel
 }
 
-func (channel *DiscordChannel) Close() error {
-	channel.closed = true
-	channel.Broadcast.Close()
-	return channel.conn.Close()
-}
+func (channel *DiscordChannel) Start() error {
+	if channel.running {
+		return ERR_CHANNEL_RUNNING
+	}
 
-func (channel *DiscordChannel) Next() {
 	channel.conn.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if channel.closed {
+		if !channel.running {
 			return
 		}
 		if m.Author.ID == s.State.User.ID {
@@ -82,13 +73,23 @@ func (channel *DiscordChannel) Next() {
 	err := channel.conn.Open()
 
 	if err != nil {
-		panic(err)
+		channel.conn.Close()
+		return err
 	}
 
-	sc := make(chan os.Signal, 1)
-	<-sc
+	channel.running = true
 
-	channel.conn.Close()
+	return nil
+}
+
+func (channel *DiscordChannel) Stop() error {
+	if !channel.running {
+		return ERR_CHANNEL_NOT_RUNNING
+	}
+
+	channel.running = false
+	channel.Broadcast.Close()
+	return channel.conn.Close()
 }
 
 func (channel *DiscordChannel) RespondInteraction(in *discordgo.Interaction) {

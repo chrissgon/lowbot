@@ -1,7 +1,6 @@
 package lowbot
 
 import (
-	"context"
 	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -12,7 +11,7 @@ type TelegramChannel struct {
 	*Channel
 	conn    *tgbotapi.BotAPI
 	updates tgbotapi.UpdatesChannel
-	closed  bool
+	running  bool
 }
 
 func NewTelegramChannel(token string) (IChannel, error) {
@@ -27,21 +26,15 @@ func NewTelegramChannel(token string) (IChannel, error) {
 		return nil, err
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-
 	channel := &TelegramChannel{
 		Channel: &Channel{
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_TELEGRAM_NAME,
 			Broadcast: NewBroadcast[*Interaction](),
-			Context:   ctx,
-			Cancel:    cancel,
 		},
 		conn:   conn,
-		closed: false,
+		running: false,
 	}
-
-	go channel.Next()
 
 	return channel, nil
 }
@@ -50,14 +43,11 @@ func (channel *TelegramChannel) GetChannel() *Channel {
 	return channel.Channel
 }
 
-func (channel *TelegramChannel) Close() error {
-	channel.closed = true
-	channel.Broadcast.Close()
-	channel.conn.StopReceivingUpdates()
-	return nil
-}
+func (channel *TelegramChannel) Start() error {
+	if channel.running {
+		return ERR_CHANNEL_RUNNING
+	}
 
-func (channel *TelegramChannel) Next() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
@@ -65,25 +55,41 @@ func (channel *TelegramChannel) Next() {
 		channel.updates = channel.conn.GetUpdatesChan(u)
 	}
 
-	for update := range channel.updates {
-		if channel.closed {
-			return
+	go func() {
+		for update := range channel.updates {
+			if !channel.running {
+				return
+			}
+
+			var interaction *Interaction
+
+			if update.Message != nil {
+				destination := NewWho(strconv.Itoa(int(update.Message.Chat.ID)), update.Message.From.UserName)
+				interaction = NewInteractionMessageText(channel, destination, destination, update.Message.Text)
+			}
+
+			if update.CallbackQuery != nil {
+				destination := NewWho(strconv.Itoa(int(update.CallbackQuery.From.ID)), update.CallbackQuery.From.UserName)
+				interaction = NewInteractionMessageText(channel, destination, destination, update.CallbackData())
+			}
+
+			channel.Broadcast.Send(interaction)
 		}
+	}()
 
-		var interaction *Interaction
+	channel.running = true
 
-		if update.Message != nil {
-			destination := NewWho(strconv.Itoa(int(update.Message.Chat.ID)), update.Message.From.UserName)
-			interaction = NewInteractionMessageText(channel, destination, destination, update.Message.Text)
-		}
+	return nil
+}
 
-		if update.CallbackQuery != nil {
-			destination := NewWho(strconv.Itoa(int(update.CallbackQuery.From.ID)), update.CallbackQuery.From.UserName)
-			interaction = NewInteractionMessageText(channel, destination, destination, update.CallbackData())
-		}
-
-		channel.Broadcast.Send(interaction)
+func (channel *TelegramChannel) Stop() error {
+	if !channel.running {
+		return ERR_CHANNEL_NOT_RUNNING
 	}
+
+	channel.Broadcast.Close()
+	channel.running = false
+	return nil
 }
 
 func (channel *TelegramChannel) SendAudio(interaction *Interaction) error {

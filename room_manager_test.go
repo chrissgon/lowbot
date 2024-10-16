@@ -65,14 +65,13 @@ func TestRoomManager_AddChannel(t *testing.T) {
 		t.Errorf(FormatTestError(expect, have))
 	}
 
-	select {
-	case <-time.After(1 * time.Millisecond):
-		have = len(CHANNEL_MOCK.GetChannel().Broadcast.listeners)
-		expect = 1
+	time.Sleep(1 * time.Millisecond)
 
-		if expect != have {
-			t.Errorf(FormatTestError(expect, have))
-		}
+	have = len(CHANNEL_MOCK.GetChannel().Broadcast.listeners)
+	expect = 1
+
+	if expect != have {
+		t.Errorf(FormatTestError(expect, have))
 	}
 }
 
@@ -81,26 +80,23 @@ func TestRoomManager_ListenChannel(t *testing.T) {
 	manager := NewRoomManager()
 	go manager.ListenChannel(CHANNEL_MOCK)
 
-	select {
-	case <-time.After(1 * time.Millisecond):
-		have := len(CHANNEL_MOCK.GetChannel().Broadcast.listeners)
-		expect := 1
+	time.Sleep(1 * time.Millisecond)
 
-		if expect != have {
-			t.Errorf(FormatTestError(expect, have))
-		}
+	have := len(CHANNEL_MOCK.GetChannel().Broadcast.listeners)
+	expect := 1
+
+	if expect != have {
+		t.Errorf(FormatTestError(expect, have))
 	}
 
 	interaction := NewInteractionMessageText(CHANNEL_MOCK, WHO_MOCK, WHO_MOCK, TEXT)
 	CHANNEL_MOCK.GetChannel().Broadcast.Send(interaction)
 
-	select {
-	case <-time.After(1 * time.Millisecond):
-		if !errors.Is(manager.Err, ERR_UNKNOWN_ROOM) {
-			t.Errorf(FormatTestError(ERR_UNKNOWN_ROOM, manager.Err))
-		}
-	}
+	time.Sleep(1 * time.Millisecond)
 
+	if !errors.Is(manager.Err, ERR_UNKNOWN_ROOM) {
+		t.Errorf(FormatTestError(ERR_UNKNOWN_ROOM, manager.Err))
+	}
 	room := NewRoom(RoomGuests{
 		WHO_MOCK.WhoID: NewGuest(WHO_MOCK, CHANNEL_MOCK),
 	})
@@ -108,16 +104,14 @@ func TestRoomManager_ListenChannel(t *testing.T) {
 
 	CHANNEL_MOCK.GetChannel().Broadcast.Send(interaction)
 
-	select {
-	case <-time.After(1 * time.Millisecond):
-		have := len(manager.GetRoom(room.RoomID).Interactions)
-		expect := 1
+	time.Sleep(1 * time.Millisecond)
 
-		if expect != have {
-			t.Errorf(FormatTestError(expect, have))
-		}
+	have = len(manager.GetRoom(room.RoomID).Interactions)
+	expect = 1
+
+	if expect != have {
+		t.Errorf(FormatTestError(expect, have))
 	}
-
 }
 
 func TestRoomManager_AddRoom(t *testing.T) {

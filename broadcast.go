@@ -16,9 +16,9 @@ func NewBroadcast[T any]() *Broadcast[T] {
 }
 
 func (b *Broadcast[T]) Send(v T) {
-	b.mu.RLock()
-	defer b.mu.RUnlock()
-
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	
 	for _, listener := range b.listeners {
 		select {
 		case listener <- v:
@@ -34,14 +34,14 @@ func (b *Broadcast[T]) Listen() chan T {
 }
 
 func (b *Broadcast[T]) Close() error {
-	b.mu.RLock()
-	defer b.mu.RUnlock()
-
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	
 	for _, listener := range b.listeners {
 		close(listener)
 	}
-
+	
 	b.listeners = []chan T{}
-
+	
 	return nil
 }

@@ -1,15 +1,13 @@
 package lowbot
 
 import (
-	"context"
-
 	"github.com/google/uuid"
 )
 
 type IChannel interface {
 	GetChannel() *Channel
-	Next()
-	Close() error
+	Stop() error
+	Start() error
 	SendAudio(*Interaction) error
 	SendButton(*Interaction) error
 	SendDocument(*Interaction) error
@@ -22,8 +20,8 @@ type Channel struct {
 	ChannelID uuid.UUID
 	Name      string
 	Broadcast *Broadcast[*Interaction]
-	Context context.Context
-	Cancel context.CancelFunc
+	// Context context.Context
+	// Cancel context.CancelFunc
 }
 
 func SendInteraction(channel IChannel, interaction *Interaction) error {
