@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/chrissgon/lowbot"
+	"github.com/google/uuid"
 )
 
 func main() {
@@ -32,6 +33,15 @@ func main() {
 	// make consumer
 	consumer := lowbot.NewJourneyConsumer(flow, persist)
 
-	// start consumer
-	lowbot.StartConsumer(consumer, []lowbot.IChannel{channel})
+	// make bot
+	bot := lowbot.NewBot(consumer, map[uuid.UUID]lowbot.IChannel{
+		channel.GetChannel().ChannelID: channel,
+	})
+
+	// start bot
+	bot.Start()
+
+	// keep the process running
+	sc := make(chan os.Signal, 1)
+	<-sc
 }

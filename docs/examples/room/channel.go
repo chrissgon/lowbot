@@ -20,7 +20,9 @@ func NewFakeChannel() lowbot.IChannel {
 			Broadcast: lowbot.NewBroadcast[*lowbot.Interaction](),
 		},
 	}
-	go channel.Next()
+
+	go channel.Start()
+
 	return channel
 }
 
@@ -31,16 +33,6 @@ func (f *FakeChannel) Stop() error {
 
 // Close implements lowbot.IChannel.
 func (f *FakeChannel) Start() error {
-	panic("unimplemented")
-}
-
-// GetChannel implements lowbot.IChannel.
-func (f *FakeChannel) GetChannel() *lowbot.Channel {
-	return f.Channel
-}
-
-// Next implements lowbot.IChannel.
-func (f *FakeChannel) Next() {
 	for {
 		time.Sleep(3 * time.Second)
 		f.Channel.Broadcast.Send(lowbot.NewInteractionMessageText(
@@ -50,6 +42,11 @@ func (f *FakeChannel) Next() {
 			"Fake automatic message",
 		))
 	}
+}
+
+// GetChannel implements lowbot.IChannel.
+func (f *FakeChannel) GetChannel() *lowbot.Channel {
+	return f.Channel
 }
 
 // SendAudio implements lowbot.IChannel.

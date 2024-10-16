@@ -7,19 +7,15 @@ import (
 	"github.com/google/uuid"
 )
 
-var userRoom *lowbot.Room
-
 var fakeChannel = NewFakeChannel()
 var fakeGuest = lowbot.NewWho("123", "fake guest")
 
 func main() {
-
 	// make a flow
 	flow, _ := lowbot.NewFlow("./flow.yaml")
 
 	// make a channel. In this exemple is Telegram
 	channel, _ := lowbot.NewTelegramChannel(os.Getenv("TELEGRAM_TOKEN"))
-	// channel, _ := lowbot.NewDiscordChannel(os.Getenv("DISCORD_TOKEN"))
 
 	// make a persist
 	persist, _ := lowbot.NewMemoryFlowPersist()
@@ -34,9 +30,6 @@ func main() {
 				guest := lowbot.NewGuest(fakeGuest, fakeChannel)
 
 				roomManager.AddGuest(roomID, guest)
-
-				// userRoom = room
-				// userRoom.AddGuest(guest)
 			}
 
 			return true, nil
@@ -46,6 +39,15 @@ func main() {
 	// make consumer
 	consumer := lowbot.NewJourneyConsumer(flow, persist)
 
-	// start consumer
-	lowbot.StartConsumer(consumer, []lowbot.IChannel{channel})
+	// make bot
+	bot := lowbot.NewBot(consumer, map[uuid.UUID]lowbot.IChannel{
+		channel.GetChannel().ChannelID: channel,
+	})
+
+	// start bot
+	bot.Start()
+
+	// keep the process running
+	sc := make(chan os.Signal, 1)
+	<-sc
 }
