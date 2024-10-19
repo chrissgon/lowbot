@@ -65,12 +65,12 @@ func (channel *TelegramChannel) Start() error {
 
 			if update.Message != nil {
 				destination := NewWho(strconv.Itoa(int(update.Message.Chat.ID)), update.Message.From.UserName)
-				interaction = NewInteractionMessageText(channel, destination, destination, update.Message.Text)
+				interaction = NewInteractionMessageText(destination, destination, update.Message.Text)
 			}
 
 			if update.CallbackQuery != nil {
 				destination := NewWho(strconv.Itoa(int(update.CallbackQuery.From.ID)), update.CallbackQuery.From.UserName)
-				interaction = NewInteractionMessageText(channel, destination, destination, update.CallbackData())
+				interaction = NewInteractionMessageText(destination, destination, update.CallbackData())
 			}
 
 			channel.Broadcast.Send(interaction)

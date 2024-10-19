@@ -65,7 +65,7 @@ func TestRoom_AddInteraction(t *testing.T) {
 		t.Errorf(FormatTestError(expect, have))
 	}
 
-	room.AddInteraction(NewInteractionMessageText(CHANNEL_MOCK, WHO_MOCK, WHO_MOCK, TEXT))
+	room.AddInteraction(NewInteractionMessageText(WHO_MOCK, WHO_MOCK, TEXT))
 
 	have = len(room.Interactions)
 	expect = 1
@@ -89,7 +89,7 @@ func TestRoom_SendInteractionExcludingSender(t *testing.T) {
 	room.AddGuest(NewGuest(NewWho("2", "amanda"), CHANNEL_MOCK))
 	room.AddGuest(NewGuest(NewWho("3", "thais"), CHANNEL_MOCK))
 
-	interaction := NewInteractionMessageText(CHANNEL_MOCK, WHO_MOCK, WHO_MOCK, TEXT)
+	interaction := NewInteractionMessageText(WHO_MOCK, WHO_MOCK, TEXT)
 
 	errs := room.SendInteractionExcludingSender(interaction)
 

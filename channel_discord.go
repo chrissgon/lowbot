@@ -58,14 +58,14 @@ func (channel *DiscordChannel) Start() error {
 
 		destination := NewWho(m.ChannelID, s.State.User.Username)
 
-		channel.Broadcast.Send(NewInteractionMessageText(channel, destination, destination, m.Content))
+		channel.Broadcast.Send(NewInteractionMessageText(destination, destination, m.Content))
 	})
 	channel.conn.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		channel.RespondInteraction(i.Interaction)
 
 		destination := NewWho(i.ChannelID, s.State.User.Username)
 
-		channel.Broadcast.Send(NewInteractionMessageText(channel, destination, destination, i.Interaction.MessageComponentData().CustomID))
+		channel.Broadcast.Send(NewInteractionMessageText(destination, destination, i.Interaction.MessageComponentData().CustomID))
 	})
 
 	channel.conn.Identify.Intents = discordgo.IntentsGuildMessages

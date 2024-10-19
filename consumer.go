@@ -5,7 +5,7 @@ import (
 )
 
 type IConsumer interface {
-	Run(*Interaction, IChannel) error
+	Run(*Interaction) ([]*Interaction, error)
 	GetConsumer() *Consumer
 }
 

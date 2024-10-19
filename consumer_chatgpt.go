@@ -38,7 +38,7 @@ func (consumer *ChatGPTConsumer) GetConsumer() *Consumer {
 	return consumer.Consumer
 }
 
-func (consumer *ChatGPTConsumer) Run(interaction *Interaction, channel IChannel) error {
+func (consumer *ChatGPTConsumer) Run(interaction *Interaction) ([]*Interaction, error) {
 	resp, err := consumer.conn.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
@@ -53,12 +53,12 @@ func (consumer *ChatGPTConsumer) Run(interaction *Interaction, channel IChannel)
 	)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	replier := NewWho(consumer.ConsumerID.String(), consumer.Name)
-	newInteraction := NewInteractionMessageText(channel, interaction.Destination, interaction.Sender, resp.Choices[0].Message.Content)
-	newInteraction.SetReplier(replier)
+	answerInteraction := NewInteractionMessageText(interaction.Destination, interaction.Sender, resp.Choices[0].Message.Content)
+	answerInteraction.SetReplier(replier)
 
-	return channel.SendText(newInteraction)
+	return []*Interaction{answerInteraction}, nil
 }

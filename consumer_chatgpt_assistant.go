@@ -50,13 +50,13 @@ func (consumer *ChatGPTAssistantConsumer) GetConsumer() *Consumer {
 	return consumer.Consumer
 }
 
-func (consumer *ChatGPTAssistantConsumer) Run(interaction *Interaction, channel IChannel) error {
+func (consumer *ChatGPTAssistantConsumer) Run(interaction *Interaction) ([]*Interaction, error) {
 	threadID, err := consumer.getThreadID(interaction)
 
 	consumer.threads[interaction.Sender.WhoID] = threadID
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	run, err := consumer.conn.CreateRun(consumer.ctx, threadID, openai.RunRequest{
@@ -66,20 +66,20 @@ func (consumer *ChatGPTAssistantConsumer) Run(interaction *Interaction, channel 
 	})
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	answer, err := consumer.waitMessage(run)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	replier := NewWho(consumer.ConsumerID.String(), consumer.Name)
-	newInteraction := NewInteractionMessageText(channel, interaction.Destination, interaction.Sender, answer)
-	newInteraction.SetReplier(replier)
+	answerInteraction := NewInteractionMessageText(interaction.Destination, interaction.Sender, answer)
+	answerInteraction.SetReplier(replier)
 
-	return channel.SendText(newInteraction)
+	return []*Interaction{answerInteraction}, nil
 }
 
 func (consumer *ChatGPTAssistantConsumer) getThreadID(interaction *Interaction) (string, error) {

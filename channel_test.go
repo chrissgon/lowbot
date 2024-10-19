@@ -110,7 +110,7 @@ func TestChannel_SendInteractionText(t *testing.T) {
 	channelTriggerError = true
 	channelCount = 0
 
-	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, TEXT)
+	interaction := NewInteractionMessageText(DESTINATION_MOCK, SENDER_MOCK, TEXT)
 
 	err := SendInteraction(CHANNEL_MOCK, interaction)
 
@@ -130,7 +130,7 @@ func TestChannel_SendInteractionText(t *testing.T) {
 func TestChannel_SendInteractionButton(t *testing.T) {
 	channelCount = 0
 
-	interaction := NewInteractionMessageButton(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, BUTTONS, TEXT)
+	interaction := NewInteractionMessageButton(DESTINATION_MOCK, SENDER_MOCK, BUTTONS, TEXT)
 
 	err := SendInteraction(CHANNEL_MOCK, interaction)
 
@@ -150,7 +150,7 @@ func TestChannel_SendInteractionButton(t *testing.T) {
 func TestChannel_SendInteractionAudio(t *testing.T) {
 	channelCount = 0
 
-	interaction := NewInteractionMessageFile(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "./mocks/audio.mp3", TEXT)
+	interaction := NewInteractionMessageFile(DESTINATION_MOCK, SENDER_MOCK, "./mocks/audio.mp3", TEXT)
 
 	err := SendInteraction(CHANNEL_MOCK, interaction)
 
@@ -170,7 +170,7 @@ func TestChannel_SendInteractionAudio(t *testing.T) {
 func TestChannel_SendInteractionDocument(t *testing.T) {
 	channelCount = 0
 
-	interaction := NewInteractionMessageFile(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "./mocks/features.txt", TEXT)
+	interaction := NewInteractionMessageFile(DESTINATION_MOCK, SENDER_MOCK, "./mocks/features.txt", TEXT)
 
 	err := SendInteraction(CHANNEL_MOCK, interaction)
 
@@ -190,7 +190,7 @@ func TestChannel_SendInteractionDocument(t *testing.T) {
 func TestChannel_SendInteractionImage(t *testing.T) {
 	channelCount = 0
 
-	interaction := NewInteractionMessageFile(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "./mocks/image.jpg", TEXT)
+	interaction := NewInteractionMessageFile(DESTINATION_MOCK, SENDER_MOCK, "./mocks/image.jpg", TEXT)
 
 	err := SendInteraction(CHANNEL_MOCK, interaction)
 
@@ -210,7 +210,7 @@ func TestChannel_SendInteractionImage(t *testing.T) {
 func TestChannel_SendInteractionVideo(t *testing.T) {
 	channelCount = 0
 
-	interaction := NewInteractionMessageFile(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "./mocks/video.mp4", TEXT)
+	interaction := NewInteractionMessageFile(DESTINATION_MOCK, SENDER_MOCK, "./mocks/video.mp4", TEXT)
 
 	err := SendInteraction(CHANNEL_MOCK, interaction)
 

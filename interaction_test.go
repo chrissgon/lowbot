@@ -19,11 +19,7 @@ var (
 )
 
 func TestInteraction_NewInteractionMessageButton(t *testing.T) {
-	have := NewInteractionMessageButton(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, BUTTONS, TEXT)
-
-	if CHANNEL_MOCK.GetChannel() != have.Channel {
-		t.Errorf(FormatTestError(CHANNEL_MOCK.GetChannel(), have.Channel))
-	}
+	have := NewInteractionMessageButton(DESTINATION_MOCK, SENDER_MOCK, BUTTONS, TEXT)
 
 	if DESTINATION_MOCK != have.Destination {
 		t.Errorf(FormatTestError(DESTINATION_MOCK, have.Destination))
@@ -47,11 +43,7 @@ func TestInteraction_NewInteractionMessageButton(t *testing.T) {
 }
 
 func TestInteraction_NewInteractionMessageFile(t *testing.T) {
-	have := NewInteractionMessageFile(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, FILE, TEXT)
-
-	if CHANNEL_MOCK.GetChannel() != have.Channel {
-		t.Errorf(FormatTestError(CHANNEL_MOCK.GetChannel(), have.Channel))
-	}
+	have := NewInteractionMessageFile(DESTINATION_MOCK, SENDER_MOCK, FILE, TEXT)
 
 	if DESTINATION_MOCK != have.Destination {
 		t.Errorf(FormatTestError(DESTINATION_MOCK, have.Destination))
@@ -77,11 +69,7 @@ func TestInteraction_NewInteractionMessageFile(t *testing.T) {
 }
 
 func TestInteraction_NewInteractionMessageText(t *testing.T) {
-	have := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, TEXT)
-
-	if CHANNEL_MOCK.GetChannel() != have.Channel {
-		t.Errorf(FormatTestError(CHANNEL_MOCK.GetChannel(), have.Channel))
-	}
+	have := NewInteractionMessageText(DESTINATION_MOCK, SENDER_MOCK, TEXT)
 
 	if DESTINATION_MOCK != have.Destination {
 		t.Errorf(FormatTestError(DESTINATION_MOCK, have.Destination))
@@ -101,7 +89,7 @@ func TestInteraction_NewInteractionMessageText(t *testing.T) {
 }
 
 func TestInteraction_SetReplier(t *testing.T) {
-	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, TEXT)
+	interaction := NewInteractionMessageText(DESTINATION_MOCK, SENDER_MOCK, TEXT)
 
 	interaction.SetReplier(WHO_MOCK)
 
@@ -114,7 +102,7 @@ func TestInteraction_SetReplier(t *testing.T) {
 }
 
 func TestInteraction_SetDestination(t *testing.T) {
-	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, TEXT)
+	interaction := NewInteractionMessageText(DESTINATION_MOCK, SENDER_MOCK, TEXT)
 
 	interaction.SetDestination(WHO_MOCK)
 

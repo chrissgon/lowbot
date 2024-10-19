@@ -20,8 +20,6 @@ type Channel struct {
 	ChannelID uuid.UUID
 	Name      string
 	Broadcast *Broadcast[*Interaction]
-	// Context context.Context
-	// Cancel context.CancelFunc
 }
 
 func SendInteraction(channel IChannel, interaction *Interaction) error {

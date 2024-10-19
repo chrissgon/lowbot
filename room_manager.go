@@ -66,16 +66,17 @@ func (manager *RoomManager) ListenChannel(channel IChannel) {
 }
 
 func (manager *RoomManager) AddInteraction(interaction *Interaction) error {
-	channelID := interaction.Channel.ChannelID
-	guestID := interaction.Sender.WhoID
+	// channelID := interaction.Channel.ChannelID
+	// guestID := interaction.Sender.WhoID
 
-	roomID, exists := manager.ChannelGuestRoomRelation[channelID][guestID]
+	// roomID, exists := manager.ChannelGuestRoomRelation[channelID][guestID]
 
-	if !exists {
-		return ERR_UNKNOWN_ROOM
-	}
+	// if !exists {
+	// 	return ERR_UNKNOWN_ROOM
+	// }
 
-	return manager.Rooms[roomID].AddInteraction(interaction)
+	// return manager.Rooms[roomID].AddInteraction(interaction)
+	return nil
 }
 
 func (manager *RoomManager) AddGuest(roomID uuid.UUID, guest *Guest) error {

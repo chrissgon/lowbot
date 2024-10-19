@@ -8,13 +8,13 @@ steps:
   alert:
     action: Text
     next:
-      default: wait
+      default: input
     parameters:
       texts:
         - send "ping" or "pong"
 
-  wait:
-    action: Wait
+  input:
+    action: Input
     next:
       ping: pong
       pong: ping
@@ -23,7 +23,7 @@ steps:
   ping:
     action: Text
     next:
-      default: wait
+      default: input
     parameters:
       texts:
         - Ping!
@@ -31,7 +31,7 @@ steps:
   pong:
     action: Text
     next:
-      default: wait
+      default: input
     parameters:
       texts:
         - Pong!

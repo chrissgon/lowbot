@@ -46,7 +46,15 @@ func (bot *Bot) StartConsumerChannel(channel IChannel) {
 	listener := channel.GetChannel().Broadcast.Listen()
 
 	for interaction := range listener {
-		err := bot.Consumer.Run(interaction, channel)
+		answersInteraction, err := bot.Consumer.Run(interaction)
+
+		if answersInteraction == nil {
+			continue
+		}
+
+		for _, answerInteraction := range answersInteraction {
+			SendInteraction(channel, answerInteraction)
+		}
 
 		// TODO: improve how to receive the consumer errors
 		if err != nil {

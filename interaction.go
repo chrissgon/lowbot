@@ -1,7 +1,6 @@
 package lowbot
 
 type Interaction struct {
-	Channel     *Channel
 	Destination *Who
 	Sender      *Who
 	Replier     *Who
@@ -26,9 +25,8 @@ type InteractionParameters struct {
 	Custom  map[string]any
 }
 
-func NewInteractionMessageButton(channel IChannel, destination *Who, sender *Who, buttons []string, text string) *Interaction {
+func NewInteractionMessageButton(destination *Who, sender *Who, buttons []string, text string) *Interaction {
 	return &Interaction{
-		Channel:     channel.GetChannel(),
 		Destination: destination,
 		Sender:      sender,
 		Type:        MESSAGE_BUTTON,
@@ -40,9 +38,8 @@ func NewInteractionMessageButton(channel IChannel, destination *Who, sender *Who
 	}
 }
 
-func NewInteractionMessageFile(channel IChannel, destination *Who, sender *Who, path string, text string) *Interaction {
+func NewInteractionMessageFile(destination *Who, sender *Who, path string, text string) *Interaction {
 	return &Interaction{
-		Channel:     channel.GetChannel(),
 		Destination: destination,
 		Sender:      sender,
 		Type:        MESSAGE_FILE,
@@ -54,9 +51,9 @@ func NewInteractionMessageFile(channel IChannel, destination *Who, sender *Who, 
 	}
 }
 
-func NewInteractionMessageText(channel IChannel, destination *Who, sender *Who, text string) *Interaction {
+func NewInteractionMessageText(destination *Who, sender *Who, text string) *Interaction {
 	return &Interaction{
-		Channel:     channel.GetChannel(),
+		// Channel:     channel.GetChannel(),
 		Destination: destination,
 		Sender:      sender,
 		Type:        MESSAGE_TEXT,

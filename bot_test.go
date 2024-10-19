@@ -82,7 +82,7 @@ func TestBot_StartConsumerChannel(t *testing.T) {
 		t.Fatalf("bot should consumer channel once")
 	}
 
-	interaction := NewInteractionMessageButton(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, BUTTONS, TEXT)
+	interaction := NewInteractionMessageButton(DESTINATION_MOCK, SENDER_MOCK, BUTTONS, TEXT)
 	channel.GetChannel().Broadcast.Send(interaction)
 
 	time.Sleep(1 * time.Millisecond)

@@ -36,7 +36,6 @@ func (f *FakeChannel) Start() error {
 	for {
 		time.Sleep(3 * time.Second)
 		f.Channel.Broadcast.Send(lowbot.NewInteractionMessageText(
-			f,
 			fakeGuest,
 			fakeGuest,
 			"Fake automatic message",

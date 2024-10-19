@@ -1,14 +1,15 @@
 package lowbot
 
-type ActionsMap map[string]func(*Flow, *Interaction, IChannel) (bool, error)
+type ActionsMap map[string]ActionFunc
+
+type ActionFunc func(*Flow, *Interaction) (*Interaction, bool)
 
 var actions = ActionsMap{
 	"Button": RunActionButton,
 	"File":   RunActionFile,
 	"Input":  RunActionInput,
 	"Text":   RunActionText,
-	"Wait":   RunActionWait,
-	"Room":   RunActionRoom,
+	// "Room":   RunActionRoom,
 }
 
 func SetCustomActions(custom ActionsMap) {
@@ -17,92 +18,105 @@ func SetCustomActions(custom ActionsMap) {
 	}
 }
 
-func RunAction(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
+func GetAction(flow *Flow, interaction *Interaction) (ActionFunc, error) {
 	if flow == nil {
-		return false, ERR_NIL_FLOW
+		return nil, ERR_NIL_FLOW
 	}
 
 	step := flow.CurrentStep
 
 	if step == nil {
-		return false, ERR_NIL_STEP
+		return nil, ERR_NIL_STEP
 	}
 
 	action, exists := actions[step.Action]
 
 	if !exists {
-		return false, ERR_UNKNOWN_ACTION
+		return nil, ERR_UNKNOWN_ACTION
 	}
 
-	if channel == nil {
-		return false, ERR_NIL_CHANNEL
-	}
-
-	return action(flow, interaction, channel)
+	return action, nil
 }
 
-func RunActionButton(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
+// func RunAction(flow *Flow, interaction *Interaction) (*Interaction, bool, error) {
+// 	if flow == nil {
+// 		return nil, false, ERR_NIL_FLOW
+// 	}
+
+// 	step := flow.CurrentStep
+
+// 	if step == nil {
+// 		return nil, false, ERR_NIL_STEP
+// 	}
+
+// 	action, exists := actions[step.Action]
+
+// 	if !exists {
+// 		return nil, false, ERR_UNKNOWN_ACTION
+// 	}
+
+// 	answerInteraction, wait := action(flow, interaction)
+
+// 	return answerInteraction, wait, nil
+// }
+
+func RunActionButton(flow *Flow, interaction *Interaction) (*Interaction, bool) {
 	step := flow.CurrentStep
 
 	text := ParseTemplate(step.Parameters.Texts)
 
-	newInteraction := NewInteractionMessageButton(channel, interaction.Destination, interaction.Sender, step.Parameters.Buttons, text)
+	newInteraction := NewInteractionMessageButton(interaction.Destination, interaction.Sender, step.Parameters.Buttons, text)
 
-	return true, channel.SendButton(newInteraction)
+	return newInteraction, true
 }
 
-func RunActionFile(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
+func RunActionFile(flow *Flow, interaction *Interaction) (*Interaction, bool) {
 	step := flow.CurrentStep
 
 	text := ParseTemplate(step.Parameters.Texts)
 
-	newInteraction := NewInteractionMessageFile(channel, interaction.Destination, interaction.Sender, step.Parameters.Path, text)
+	newInteraction := NewInteractionMessageFile(interaction.Destination, interaction.Sender, step.Parameters.Path, text)
 
 	if newInteraction.Parameters.File.IsAudio() {
-		return false, channel.SendAudio(newInteraction)
+		return newInteraction, false
 	}
 	if newInteraction.Parameters.File.IsImage() {
-		return false, channel.SendImage(newInteraction)
+		return newInteraction, false
 	}
 	if newInteraction.Parameters.File.IsVideo() {
-		return false, channel.SendVideo(newInteraction)
+		return newInteraction, false
 	}
 
-	return false, channel.SendDocument(newInteraction)
+	return newInteraction, false
 }
 
-func RunActionInput(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
-	_, err := RunActionText(flow, interaction, channel)
+func RunActionInput(flow *Flow, interaction *Interaction) (*Interaction, bool) {
+	answerInteraction, _ := RunActionText(flow, interaction)
 
-	return true, err
+	return answerInteraction, true
 }
 
-func RunActionText(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
+func RunActionText(flow *Flow, interaction *Interaction) (*Interaction, bool) {
 	step := flow.CurrentStep
 
 	text := ParseTemplate(step.Parameters.Texts)
 
-	newInteraction := NewInteractionMessageText(channel, interaction.Destination, interaction.Sender, text)
+	newInteraction := NewInteractionMessageText(interaction.Destination, interaction.Sender, text)
 
-	return false, channel.SendText(newInteraction)
+	return newInteraction, false
 }
+// func RunActionRoom(flow *Flow, interaction *Interaction) (*Interaction, bool) {
+// 	RunActionText(flow, interaction)
 
-func RunActionWait(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
-	return true, nil
-}
+// 	guests := RoomGuests{
+// 		interaction.Sender.WhoID: NewGuest(interaction.Sender),
+// 	}
 
-func RunActionRoom(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) {
-	RunActionText(flow, interaction, channel)
+// 	room := NewRoom(guests)
 
-	guests := RoomGuests{
-		interaction.Sender.WhoID: NewGuest(interaction.Sender, channel),
-	}
+// 	interaction.Custom["RoomID"] = room.RoomID
 
-	room := NewRoom(guests)
+// 	roomManager.AddRoom(room)
 
-	interaction.Custom["RoomID"] = room.RoomID
-
-	roomManager.AddRoom(room)
-
-	return false, nil
-}
+// 	return nil, false
+// }

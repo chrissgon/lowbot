@@ -22,7 +22,7 @@ func main() {
 
 	// set custom action
 	lowbot.SetCustomActions(lowbot.ActionsMap{
-		"Fakechat": func(flow *lowbot.Flow, interaction *lowbot.Interaction, channel lowbot.IChannel) (bool, error) {
+		"Fakechat": func(flow *lowbot.Flow, interaction *lowbot.Interaction) (*lowbot.Interaction, bool) {
 			roomID, exists := flow.GetLastResponse().Custom["RoomID"].(uuid.UUID)
 
 			if exists {
@@ -32,7 +32,7 @@ func main() {
 				roomManager.AddGuest(roomID, guest)
 			}
 
-			return true, nil
+			return nil, true
 		},
 	})
 

@@ -23,7 +23,7 @@ func (m *mockConsumer) GetConsumer() *Consumer {
 }
 
 // Run implements IConsumer.
-func (m *mockConsumer) Run(*Interaction, IChannel) error {
+func (m *mockConsumer) Run(*Interaction) ([]*Interaction, error) {
 	m.ranTimes++
-	return nil
+	return nil, nil
 }

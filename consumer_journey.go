@@ -27,7 +27,7 @@ func (consumer *JourneyConsumer) GetConsumer() *Consumer {
 	return consumer.Consumer
 }
 
-func (consumer *JourneyConsumer) Run(interaction *Interaction, channel IChannel) error {
+func (consumer *JourneyConsumer) Run(interaction *Interaction) ([]*Interaction, error) {
 	flow, err := consumer.Persist.Get(interaction.Sender.WhoID)
 
 	flowNotExistsOrWasFinished := err != nil || flow.Ended()
@@ -38,34 +38,38 @@ func (consumer *JourneyConsumer) Run(interaction *Interaction, channel IChannel)
 		flow = &copyFlow
 	}
 
-	err = consumer.processStep(flow, channel, interaction)
+	interactions, err := consumer.getInteractions(flow, interaction)
 
 	consumer.Persist.Set(interaction.Sender.WhoID, flow)
 
 	printLog(fmt.Sprintf("WhoID:<%v> Step:<%s> ERR: %v\n", interaction.Sender.WhoID, flow.CurrentStepName, err))
 
-	return err
+	return interactions, err
 }
 
-func (consumer *JourneyConsumer) processStep(flow *Flow, channel IChannel, interaction *Interaction) error {
-	err := flow.Next(interaction)
+func (consumer *JourneyConsumer) getInteractions(flow *Flow, interaction *Interaction) ([]*Interaction, error) {
+	next := true
+	interactions := []*Interaction{}
 
-	if err != nil {
-		return err
+	for next {
+		err := flow.Next(interaction)
+
+		if err != nil {
+			return interactions, err
+		}
+
+		action, err := GetAction(flow, interaction)
+
+		if err != nil {
+			return interactions, err
+		}
+
+		answerInteraction, wait := action(flow, interaction)
+
+		next = !wait
+
+		interactions = append(interactions, answerInteraction)
 	}
 
-	replier := NewWho(flow.FlowID.String(), flow.Name)
-	interaction.SetReplier(replier)
-
-	wait, err := RunAction(flow, interaction, channel)
-
-	if err != nil {
-		return err
-	}
-
-	if wait {
-		return nil
-	}
-
-	return consumer.processStep(flow, channel, interaction)
+	return interactions, nil
 }
