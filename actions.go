@@ -38,28 +38,6 @@ func GetAction(flow *Flow, interaction *Interaction) (ActionFunc, error) {
 	return action, nil
 }
 
-// func RunAction(flow *Flow, interaction *Interaction) (*Interaction, bool, error) {
-// 	if flow == nil {
-// 		return nil, false, ERR_NIL_FLOW
-// 	}
-
-// 	step := flow.CurrentStep
-
-// 	if step == nil {
-// 		return nil, false, ERR_NIL_STEP
-// 	}
-
-// 	action, exists := actions[step.Action]
-
-// 	if !exists {
-// 		return nil, false, ERR_UNKNOWN_ACTION
-// 	}
-
-// 	answerInteraction, wait := action(flow, interaction)
-
-// 	return answerInteraction, wait, nil
-// }
-
 func RunActionButton(flow *Flow, interaction *Interaction) (*Interaction, bool) {
 	step := flow.CurrentStep
 

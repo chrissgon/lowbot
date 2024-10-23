@@ -19,6 +19,7 @@ type IFile interface {
 type File struct {
 	FileID    uuid.UUID
 	FileType  FileType
+	Name      string
 	Bytes     []byte
 	Path      string
 	Extension string
@@ -47,6 +48,7 @@ func NewFile(path string) IFile {
 	}
 
 	file.Extension = filepath.Ext(path)
+	file.Name = filepath.Base(path)
 
 	file.SetFilePath(path)
 	file.SetFileType()

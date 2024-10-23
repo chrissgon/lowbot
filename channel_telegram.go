@@ -1,29 +1,26 @@
 package lowbot
 
 import (
+	"bytes"
+	"context"
 	"strconv"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/go-telegram/bot"
+	"github.com/go-telegram/bot/models"
 	"github.com/google/uuid"
 )
 
 type TelegramChannel struct {
 	*Channel
-	conn    *tgbotapi.BotAPI
-	updates tgbotapi.UpdatesChannel
-	running  bool
+	running bool
+	conn    *bot.Bot
+	ctx     context.Context
+	cancel  context.CancelFunc
 }
 
 func NewTelegramChannel(token string) (IChannel, error) {
 	if token == "" {
 		return nil, ERR_UNKNOWN_TELEGRAM_TOKEN
-	}
-
-	conn, err := tgbotapi.NewBotAPI(token)
-	conn.Debug = false
-
-	if err != nil {
-		return nil, err
 	}
 
 	channel := &TelegramChannel{
@@ -32,11 +29,51 @@ func NewTelegramChannel(token string) (IChannel, error) {
 			Name:      CHANNEL_TELEGRAM_NAME,
 			Broadcast: NewBroadcast[*Interaction](),
 		},
-		conn:   conn,
 		running: false,
 	}
 
+	opts := []bot.Option{
+		bot.WithDefaultHandler(channel.telegramMessageHandler),
+		bot.WithCallbackQueryDataHandler("button", bot.MatchTypePrefix, channel.telegramCallbackHandler),
+	}
+
+	bot, err := bot.New(token, opts...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	channel.conn = bot
+
 	return channel, nil
+}
+
+func (channel *TelegramChannel) telegramMessageHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+	if !channel.running {
+		return
+	}
+
+	if update.Message != nil {
+		destination := NewWho(strconv.Itoa(int(update.Message.Chat.ID)), update.Message.From.Username)
+		interaction := NewInteractionMessageText(destination, destination, update.Message.Text)
+		channel.Broadcast.Send(interaction)
+		return
+	}
+
+	destination := NewWho(strconv.Itoa(int(update.CallbackQuery.From.ID)), update.CallbackQuery.From.Username)
+	interaction := NewInteractionMessageText(destination, destination, update.CallbackQuery.Data)
+	channel.Broadcast.Send(interaction)
+}
+
+func (channel *TelegramChannel) telegramCallbackHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+	if !channel.running {
+		return
+	}
+
+	b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+		CallbackQueryID: update.CallbackQuery.ID,
+		ShowAlert:       false,
+	})
 }
 
 func (channel *TelegramChannel) GetChannel() *Channel {
@@ -48,34 +85,9 @@ func (channel *TelegramChannel) Start() error {
 		return ERR_CHANNEL_RUNNING
 	}
 
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
+	channel.ctx, channel.cancel = context.WithCancel(context.Background())
 
-	if channel.updates == nil {
-		channel.updates = channel.conn.GetUpdatesChan(u)
-	}
-
-	go func() {
-		for update := range channel.updates {
-			if !channel.running {
-				return
-			}
-
-			var interaction *Interaction
-
-			if update.Message != nil {
-				destination := NewWho(strconv.Itoa(int(update.Message.Chat.ID)), update.Message.From.UserName)
-				interaction = NewInteractionMessageText(destination, destination, update.Message.Text)
-			}
-
-			if update.CallbackQuery != nil {
-				destination := NewWho(strconv.Itoa(int(update.CallbackQuery.From.ID)), update.CallbackQuery.From.UserName)
-				interaction = NewInteractionMessageText(destination, destination, update.CallbackData())
-			}
-
-			channel.Broadcast.Send(interaction)
-		}
-	}()
+	go channel.conn.Start(channel.ctx)
 
 	channel.running = true
 
@@ -88,81 +100,115 @@ func (channel *TelegramChannel) Stop() error {
 	}
 
 	channel.Broadcast.Close()
+	channel.cancel()
 	channel.running = false
+
 	return nil
 }
 
 func (channel *TelegramChannel) SendAudio(interaction *Interaction) error {
-	channel.SendText(interaction)
-
-	file := channel.getRequestFileDate(interaction.Parameters.File.GetFile().Path)
 	chatID, err := strconv.Atoi(interaction.Destination.WhoID)
 
 	if err != nil {
 		return err
 	}
 
-	message := tgbotapi.NewAudio(int64(chatID), file)
-	_, err = channel.conn.Send(message)
+	err = interaction.Parameters.File.Read()
+
+	if err != nil {
+		return err
+	}
+
+	_, err = channel.conn.SendAudio(channel.ctx, &bot.SendAudioParams{
+		ChatID:  int64(chatID),
+		Caption: interaction.Parameters.Text,
+		Audio: &models.InputFileUpload{
+			Data:     bytes.NewReader(interaction.Parameters.File.GetFile().Bytes),
+			Filename: interaction.Parameters.File.GetFile().Name,
+		},
+	})
 
 	return err
 }
 
 func (channel *TelegramChannel) SendButton(interaction *Interaction) error {
-	button := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			channel.getButtons(interaction)...,
-		),
-	)
-
 	chatID, err := strconv.Atoi(interaction.Destination.WhoID)
 
 	if err != nil {
 		return err
 	}
 
-	message := tgbotapi.NewMessage(int64(chatID), interaction.Parameters.Text)
-	message.ReplyMarkup = button
-	_, err = channel.conn.Send(message)
+	kb := &models.InlineKeyboardMarkup{
+		InlineKeyboard: [][]models.InlineKeyboardButton{
+			channel.getButtons(interaction),
+		},
+	}
+
+	_, err = channel.conn.SendMessage(channel.ctx, &bot.SendMessageParams{
+		ChatID:      int64(chatID),
+		Text:        interaction.Parameters.Text,
+		ReplyMarkup: kb,
+	})
 
 	return err
 }
 
-func (*TelegramChannel) getButtons(interaction *Interaction) (buttons []tgbotapi.InlineKeyboardButton) {
+func (*TelegramChannel) getButtons(interaction *Interaction) (buttons []models.InlineKeyboardButton) {
 	for _, button := range interaction.Parameters.Buttons {
-		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(button, button))
+		buttons = append(buttons, models.InlineKeyboardButton{
+			Text:         button,
+			CallbackData: button,
+		})
 	}
 	return
 }
 
 func (channel *TelegramChannel) SendDocument(interaction *Interaction) error {
-	channel.SendText(interaction)
-
-	file := channel.getRequestFileDate(interaction.Parameters.File.GetFile().Path)
 	chatID, err := strconv.Atoi(interaction.Destination.WhoID)
 
 	if err != nil {
 		return err
 	}
 
-	message := tgbotapi.NewDocument(int64(chatID), file)
-	_, err = channel.conn.Send(message)
+	err = interaction.Parameters.File.Read()
+
+	if err != nil {
+		return err
+	}
+
+	_, err = channel.conn.SendDocument(channel.ctx, &bot.SendDocumentParams{
+		ChatID:  int64(chatID),
+		Caption: interaction.Parameters.Text,
+		Document: &models.InputFileUpload{
+			Data:     bytes.NewReader(interaction.Parameters.File.GetFile().Bytes),
+			Filename: interaction.Parameters.File.GetFile().Name,
+		},
+	})
 
 	return err
 }
 
 func (channel *TelegramChannel) SendImage(interaction *Interaction) error {
-	channel.SendText(interaction)
-
-	file := channel.getRequestFileDate(interaction.Parameters.File.GetFile().Path)
 	chatID, err := strconv.Atoi(interaction.Destination.WhoID)
 
 	if err != nil {
 		return err
 	}
 
-	message := tgbotapi.NewPhoto(int64(chatID), file)
-	_, err = channel.conn.Send(message)
+	err = interaction.Parameters.File.Read()
+
+	if err != nil {
+		return err
+	}
+
+	_, err = channel.conn.SendPhoto(channel.ctx, &bot.SendPhotoParams{
+		ChatID:  int64(chatID),
+		Caption: interaction.Parameters.Text,
+		Photo: &models.InputFileUpload{
+			Data:     bytes.NewReader(interaction.Parameters.File.GetFile().Bytes),
+			Filename: interaction.Parameters.File.GetFile().Name,
+		},
+	})
 
 	return err
 }
@@ -174,34 +220,35 @@ func (channel *TelegramChannel) SendText(interaction *Interaction) error {
 		return err
 	}
 
-	message := tgbotapi.NewMessage(int64(chatID), interaction.Parameters.Text)
-	_, err = channel.conn.Send(message)
+	_, err = channel.conn.SendMessage(channel.ctx, &bot.SendMessageParams{
+		ChatID: int64(chatID),
+		Text:   interaction.Parameters.Text,
+	})
 
 	return err
 }
 
 func (channel *TelegramChannel) SendVideo(interaction *Interaction) error {
-	channel.SendText(interaction)
-
-	file := channel.getRequestFileDate(interaction.Parameters.File.GetFile().Path)
 	chatID, err := strconv.Atoi(interaction.Destination.WhoID)
 
 	if err != nil {
 		return err
 	}
 
-	message := tgbotapi.NewDocument(int64(chatID), file)
-	_, err = channel.conn.Send(message)
+	err = interaction.Parameters.File.Read()
 
-	return err
-}
-
-func (*TelegramChannel) getRequestFileDate(str string) (file tgbotapi.RequestFileData) {
-	if IsURL(str) {
-		file = tgbotapi.FileURL(str)
+	if err != nil {
+		return err
 	}
 
-	file = tgbotapi.FilePath(str)
+	_, err = channel.conn.SendVideo(channel.ctx, &bot.SendVideoParams{
+		ChatID:  int64(chatID),
+		Caption: interaction.Parameters.Text,
+		Video: &models.InputFileUpload{
+			Data:     bytes.NewReader(interaction.Parameters.File.GetFile().Bytes),
+			Filename: interaction.Parameters.File.GetFile().Name,
+		},
+	})
 
-	return
+	return err
 }

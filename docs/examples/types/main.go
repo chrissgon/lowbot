@@ -7,26 +7,8 @@ import (
 	"github.com/google/uuid"
 )
 
-var fakeChannel = NewFakeChannel()
-var fakeGuest = lowbot.NewWho("123", "fake guest")
-
 func main() {
-	// set custom action
-	lowbot.SetCustomActions(lowbot.ActionsMap{
-		"Fakechat": func(flow *lowbot.Flow, interaction *lowbot.Interaction) (*lowbot.Interaction, bool) {
-			roomID, exists := flow.GetLastResponse().Custom["RoomID"].(uuid.UUID)
-
-			if exists {
-				roomManager := lowbot.GetRoomManager()
-				guest := lowbot.NewGuest(fakeGuest, fakeChannel)
-
-				roomManager.AddGuest(roomID, guest)
-			}
-
-			return nil, true
-		},
-	})
-
+	lowbot.DEBUG = true
 	// make a flow
 	flow, _ := lowbot.NewFlow("./flow.yaml")
 
