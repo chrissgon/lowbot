@@ -13,6 +13,6 @@ func TestGuest_NewGuest(t *testing.T) {
 	have := NewGuest(WHO_MOCK, CHANNEL_MOCK)
 
 	if !reflect.DeepEqual(expect, have) {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }

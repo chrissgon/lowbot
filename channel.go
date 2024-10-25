@@ -1,6 +1,8 @@
 package lowbot
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 )
 
@@ -23,6 +25,7 @@ type Channel struct {
 }
 
 func SendInteraction(channel IChannel, interaction *Interaction) error {
+	fmt.Println("SendInteraction")
 	if interaction.Type == MESSAGE_TEXT {
 		return channel.SendText(interaction)
 	}

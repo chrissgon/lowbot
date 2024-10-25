@@ -68,7 +68,9 @@ func (consumer *JourneyConsumer) getInteractions(flow *Flow, interaction *Intera
 
 		next = !wait
 
-		interactions = append(interactions, answerInteraction)
+		if (answerInteraction != nil) {
+			interactions = append(interactions, answerInteraction)
+		}
 	}
 
 	return interactions, nil

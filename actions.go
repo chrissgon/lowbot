@@ -71,6 +71,10 @@ func RunActionFile(flow *Flow, interaction *Interaction) (*Interaction, bool) {
 func RunActionInput(flow *Flow, interaction *Interaction) (*Interaction, bool) {
 	answerInteraction, _ := RunActionText(flow, interaction)
 
+	if answerInteraction.Parameters.Text == "" {
+		return nil, true
+	}
+
 	return answerInteraction, true
 }
 
@@ -83,6 +87,7 @@ func RunActionText(flow *Flow, interaction *Interaction) (*Interaction, bool) {
 
 	return newInteraction, false
 }
+
 // func RunActionRoom(flow *Flow, interaction *Interaction) (*Interaction, bool) {
 // 	RunActionText(flow, interaction)
 
