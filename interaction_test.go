@@ -22,23 +22,23 @@ func TestInteraction_NewInteractionMessageButton(t *testing.T) {
 	have := NewInteractionMessageButton(DESTINATION_MOCK, SENDER_MOCK, BUTTONS, TEXT)
 
 	if DESTINATION_MOCK != have.Destination {
-		t.Errorf(FormatTestError(DESTINATION_MOCK, have.Destination))
+		t.Error(FormatTestError(DESTINATION_MOCK, have.Destination))
 	}
 
 	if SENDER_MOCK != have.Sender {
-		t.Errorf(FormatTestError(SENDER_MOCK, have.Sender))
+		t.Error(FormatTestError(SENDER_MOCK, have.Sender))
 	}
 
 	if MESSAGE_BUTTON != have.Type {
-		t.Errorf(FormatTestError(MESSAGE_BUTTON, have.Type))
+		t.Error(FormatTestError(MESSAGE_BUTTON, have.Type))
 	}
 
 	if TEXT != have.Parameters.Text {
-		t.Errorf(FormatTestError(TEXT, have.Parameters.Text))
+		t.Error(FormatTestError(TEXT, have.Parameters.Text))
 	}
 
 	if len(BUTTONS) != len(have.Parameters.Buttons) {
-		t.Errorf(FormatTestError(BUTTONS, have.Parameters.Buttons))
+		t.Error(FormatTestError(BUTTONS, have.Parameters.Buttons))
 	}
 }
 
@@ -46,25 +46,25 @@ func TestInteraction_NewInteractionMessageFile(t *testing.T) {
 	have := NewInteractionMessageFile(DESTINATION_MOCK, SENDER_MOCK, FILE, TEXT)
 
 	if DESTINATION_MOCK != have.Destination {
-		t.Errorf(FormatTestError(DESTINATION_MOCK, have.Destination))
+		t.Error(FormatTestError(DESTINATION_MOCK, have.Destination))
 	}
 
 	if SENDER_MOCK != have.Sender {
-		t.Errorf(FormatTestError(SENDER_MOCK, have.Sender))
+		t.Error(FormatTestError(SENDER_MOCK, have.Sender))
 	}
 
 	if MESSAGE_FILE != have.Type {
-		t.Errorf(FormatTestError(MESSAGE_FILE, have.Type))
+		t.Error(FormatTestError(MESSAGE_FILE, have.Type))
 	}
 
 	if TEXT != have.Parameters.Text {
-		t.Errorf(FormatTestError(TEXT, have.Parameters.Text))
+		t.Error(FormatTestError(TEXT, have.Parameters.Text))
 	}
 
 	abs, _ := filepath.Abs(FILE)
 
 	if abs != have.Parameters.File.GetFile().Path {
-		t.Errorf(FormatTestError(abs, have.Parameters.File.GetFile().Path))
+		t.Error(FormatTestError(abs, have.Parameters.File.GetFile().Path))
 	}
 }
 
@@ -72,19 +72,19 @@ func TestInteraction_NewInteractionMessageText(t *testing.T) {
 	have := NewInteractionMessageText(DESTINATION_MOCK, SENDER_MOCK, TEXT)
 
 	if DESTINATION_MOCK != have.Destination {
-		t.Errorf(FormatTestError(DESTINATION_MOCK, have.Destination))
+		t.Error(FormatTestError(DESTINATION_MOCK, have.Destination))
 	}
 
 	if SENDER_MOCK != have.Sender {
-		t.Errorf(FormatTestError(SENDER_MOCK, have.Sender))
+		t.Error(FormatTestError(SENDER_MOCK, have.Sender))
 	}
 
 	if MESSAGE_TEXT != have.Type {
-		t.Errorf(FormatTestError(MESSAGE_TEXT, have.Type))
+		t.Error(FormatTestError(MESSAGE_TEXT, have.Type))
 	}
 
 	if TEXT != have.Parameters.Text {
-		t.Errorf(FormatTestError(TEXT, have.Parameters.Text))
+		t.Error(FormatTestError(TEXT, have.Parameters.Text))
 	}
 }
 
@@ -97,7 +97,7 @@ func TestInteraction_SetReplier(t *testing.T) {
 	expect := WHO_MOCK
 
 	if !reflect.DeepEqual(expect, have) {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
 
@@ -110,6 +110,6 @@ func TestInteraction_SetDestination(t *testing.T) {
 	expect := WHO_MOCK
 
 	if !reflect.DeepEqual(expect, have) {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }

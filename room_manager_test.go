@@ -8,7 +8,7 @@ package lowbot
 // 	}
 
 // 	if !reflect.DeepEqual(expect, have) {
-// 		t.Errorf(FormatTestError(expect, have))
+// 		t.Error(FormatTestError(expect, have))
 // 	}
 // }
 
@@ -17,7 +17,7 @@ package lowbot
 // 	expect := roomManager
 
 // 	if !reflect.DeepEqual(expect, have) {
-// 		t.Errorf(FormatTestError(expect, have))
+// 		t.Error(FormatTestError(expect, have))
 // 	}
 // }
 
@@ -33,27 +33,27 @@ package lowbot
 // 	_, exists := manager.ChannelGuestRoomRelation[channelID]
 
 // 	if exists {
-// 		t.Errorf(FormatTestError(false, exists))
+// 		t.Error(FormatTestError(false, exists))
 // 	}
 
 // 	have = manager.AddChannel(CHANNEL_MOCK)
 // 	expect = CHANNEL_MOCK.GetChannel().ChannelID
 
 // 	if expect != have {
-// 		t.Errorf(FormatTestError(expect, have))
+// 		t.Error(FormatTestError(expect, have))
 // 	}
 
 // 	_, exists = manager.ChannelGuestRoomRelation[channelID]
 
 // 	if !exists {
-// 		t.Errorf(FormatTestError(true, exists))
+// 		t.Error(FormatTestError(true, exists))
 // 	}
 
 // 	have = manager.ChannelGuestRoomRelation[channelID]
 // 	expect = GuestRoomRelation{}
 
 // 	if !reflect.DeepEqual(expect, have) {
-// 		t.Errorf(FormatTestError(expect, have))
+// 		t.Error(FormatTestError(expect, have))
 // 	}
 
 // 	time.Sleep(1 * time.Millisecond)
@@ -62,7 +62,7 @@ package lowbot
 // 	expect = 1
 
 // 	if expect != have {
-// 		t.Errorf(FormatTestError(expect, have))
+// 		t.Error(FormatTestError(expect, have))
 // 	}
 // }
 
@@ -77,7 +77,7 @@ package lowbot
 // 	expect := 1
 
 // 	if expect != have {
-// 		t.Errorf(FormatTestError(expect, have))
+// 		t.Error(FormatTestError(expect, have))
 // 	}
 
 // 	interaction := NewInteractionMessageText(WHO_MOCK, WHO_MOCK, TEXT)
@@ -86,7 +86,7 @@ package lowbot
 // 	time.Sleep(1 * time.Millisecond)
 
 // 	if !errors.Is(manager.Err, ERR_UNKNOWN_ROOM) {
-// 		t.Errorf(FormatTestError(ERR_UNKNOWN_ROOM, manager.Err))
+// 		t.Error(FormatTestError(ERR_UNKNOWN_ROOM, manager.Err))
 // 	}
 // 	room := NewRoom(RoomGuests{
 // 		WHO_MOCK.WhoID: NewGuest(WHO_MOCK, CHANNEL_MOCK),
@@ -101,7 +101,7 @@ package lowbot
 // 	expect = 1
 
 // 	if expect != have {
-// 		t.Errorf(FormatTestError(expect, have))
+// 		t.Error(FormatTestError(expect, have))
 // 	}
 // }
 
@@ -116,33 +116,33 @@ package lowbot
 // 	err := manager.AddRoom(room)
 
 // 	if err != nil {
-// 		t.Errorf(FormatTestError(nil, err))
+// 		t.Error(FormatTestError(nil, err))
 // 	}
 
 // 	_, exists := manager.Rooms[room.RoomID]
 
 // 	if !exists {
-// 		t.Errorf(FormatTestError(true, exists))
+// 		t.Error(FormatTestError(true, exists))
 // 	}
 
 // 	channelID := CHANNEL_MOCK.GetChannel().ChannelID
 // 	relation, exists := manager.ChannelGuestRoomRelation[channelID]
 
 // 	if !exists {
-// 		t.Errorf(FormatTestError(true, exists))
+// 		t.Error(FormatTestError(true, exists))
 // 	}
 
 // 	roomID, exists := relation[WHO_MOCK.WhoID]
 
 // 	if !exists {
-// 		t.Errorf(FormatTestError(true, exists))
+// 		t.Error(FormatTestError(true, exists))
 // 	}
 
 // 	expect := room.RoomID
 // 	have := roomID
 
 // 	if expect != have {
-// 		t.Errorf(FormatTestError(expect, have))
+// 		t.Error(FormatTestError(expect, have))
 // 	}
 // }
 
@@ -155,7 +155,7 @@ package lowbot
 // 	err := manager.AddInteraction(interaction)
 
 // 	if !errors.Is(err, ERR_UNKNOWN_ROOM) {
-// 		t.Errorf(FormatTestError(ERR_UNKNOWN_ROOM, err))
+// 		t.Error(FormatTestError(ERR_UNKNOWN_ROOM, err))
 // 	}
 
 // 	room := NewRoom(RoomGuests{
@@ -166,14 +166,14 @@ package lowbot
 // 	err = manager.AddInteraction(interaction)
 
 // 	if err != nil {
-// 		t.Errorf(FormatTestError(nil, err))
+// 		t.Error(FormatTestError(nil, err))
 // 	}
 
 // 	have := len(manager.Rooms[room.RoomID].Interactions)
 // 	expect := 1
 
 // 	if expect != have {
-// 		t.Errorf(FormatTestError(expect, have))
+// 		t.Error(FormatTestError(expect, have))
 // 	}
 // }
 
@@ -191,7 +191,7 @@ package lowbot
 // 	expect := room
 
 // 	if !reflect.DeepEqual(expect, have) {
-// 		t.Errorf(FormatTestError(expect, have))
+// 		t.Error(FormatTestError(expect, have))
 // 	}
 // }
 
@@ -207,37 +207,37 @@ package lowbot
 // 	err := manager.AddGuest(uuid.New(), guest)
 
 // 	if !errors.Is(err, ERR_UNKNOWN_ROOM) {
-// 		t.Errorf(FormatTestError(ERR_UNKNOWN_ROOM, err))
+// 		t.Error(FormatTestError(ERR_UNKNOWN_ROOM, err))
 // 	}
 
 // 	manager.AddRoom(room)
 // 	err = manager.AddGuest(room.RoomID, guest)
 
 // 	if err != nil {
-// 		t.Errorf(FormatTestError(nil, err))
+// 		t.Error(FormatTestError(nil, err))
 // 	}
 
 // 	have := len(manager.GetRoom(room.RoomID).Guests)
 // 	expect := 2
 
 // 	if expect != have {
-// 		t.Errorf(FormatTestError(expect, have))
+// 		t.Error(FormatTestError(expect, have))
 // 	}
 
 // 	channelID := CHANNEL_MOCK.GetChannel().ChannelID
 // 	relation, exists := manager.ChannelGuestRoomRelation[channelID]
 
 // 	if !exists {
-// 		t.Errorf(FormatTestError(true, exists))
+// 		t.Error(FormatTestError(true, exists))
 // 	}
 
 // 	roomID, exists := relation[guest.Who.WhoID]
 
 // 	if !exists {
-// 		t.Errorf(FormatTestError(true, exists))
+// 		t.Error(FormatTestError(true, exists))
 // 	}
 
 // 	if roomID != room.RoomID {
-// 		t.Errorf(FormatTestError(room.RoomID, roomID))
+// 		t.Error(FormatTestError(room.RoomID, roomID))
 // 	}
 // }

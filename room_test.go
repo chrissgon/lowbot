@@ -27,7 +27,7 @@ func TestRoom_NewRoom(t *testing.T) {
 	have.RoomID = expect.RoomID
 
 	if !reflect.DeepEqual(expect, have) {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
 
@@ -38,7 +38,7 @@ func TestRoom_AddGuest(t *testing.T) {
 	expect := 1
 
 	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 
 	room.AddGuest(NewGuest(NewWho("2", "amanda"), CHANNEL_MOCK))
@@ -47,7 +47,7 @@ func TestRoom_AddGuest(t *testing.T) {
 	expect = 2
 
 	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
 
@@ -62,7 +62,7 @@ func TestRoom_AddInteraction(t *testing.T) {
 	expect := 0
 
 	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 
 	room.AddInteraction(NewInteractionMessageText(WHO_MOCK, WHO_MOCK, TEXT))
@@ -71,14 +71,14 @@ func TestRoom_AddInteraction(t *testing.T) {
 	expect = 1
 
 	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 
 	have = channelCount
 	expect = 2
 
 	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
 
@@ -93,14 +93,14 @@ func TestRoom_SendInteractionExcludingSender(t *testing.T) {
 
 	errs := room.SendInteractionExcludingSender(interaction)
 
-	if (len(errs) == 0){
-		t.Errorf(FormatTestError(1, len(errs)))
+	if len(errs) == 0 {
+		t.Error(FormatTestError(1, len(errs)))
 	}
 
 	have := channelCount
 	expect := 2
 
 	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }

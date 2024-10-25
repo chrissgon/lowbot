@@ -11,11 +11,11 @@ func TestFlowMemory_NewMemoryFlowPersist(t *testing.T) {
 	have, err := NewMemoryFlowPersist()
 
 	if err != nil {
-		t.Errorf(FormatTestError(nil, err))
+		t.Error(FormatTestError(nil, err))
 	}
 
 	if !reflect.DeepEqual(expect, have) {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
 
@@ -27,7 +27,7 @@ func TestFlowMemory_Set(t *testing.T) {
 	err := persist.Set(ID, flow)
 
 	if err != nil {
-		t.Errorf(FormatTestError(nil, err))
+		t.Error(FormatTestError(nil, err))
 	}
 }
 
@@ -38,8 +38,8 @@ func TestFlowMemory_Get(t *testing.T) {
 
 	_, err := persist.Get(ID)
 
-	if !errors.Is(err, ERR_NIL_FLOW){
-		t.Errorf(FormatTestError(ERR_NIL_FLOW, err))
+	if !errors.Is(err, ERR_NIL_FLOW) {
+		t.Error(FormatTestError(ERR_NIL_FLOW, err))
 	}
 
 	persist.Set(ID, flow)
@@ -48,10 +48,10 @@ func TestFlowMemory_Get(t *testing.T) {
 	have, err := persist.Get(ID)
 
 	if err != nil {
-		t.Errorf(FormatTestError(nil, err))
+		t.Error(FormatTestError(nil, err))
 	}
 
 	if !reflect.DeepEqual(expect, have) {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }

@@ -33,7 +33,7 @@ func TestFile_NewFile(t *testing.T) {
 	have.GetFile().FileID = fileID
 
 	if !reflect.DeepEqual(expect, have) {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
 
@@ -42,7 +42,7 @@ func TestFile_GetFile(t *testing.T) {
 	have := expect.GetFile()
 
 	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
 
@@ -52,11 +52,11 @@ func TestFile_Read(t *testing.T) {
 	err := file.Read()
 
 	if err != nil {
-		t.Errorf(FormatTestError(nil, err))
+		t.Error(FormatTestError(nil, err))
 	}
 
 	if file.GetFile().Bytes == nil {
-		t.Errorf(FormatTestError([]byte{}, nil))
+		t.Error(FormatTestError([]byte{}, nil))
 	}
 
 	file = NewFile("https://myurl.com/features.txt")
@@ -64,7 +64,7 @@ func TestFile_Read(t *testing.T) {
 	err = file.Read()
 
 	if !errors.Is(err, ERR_FEATURE_UNIMPLEMENTED) {
-		t.Errorf(FormatTestError(ERR_FEATURE_UNIMPLEMENTED, err))
+		t.Error(FormatTestError(ERR_FEATURE_UNIMPLEMENTED, err))
 	}
 }
 
@@ -73,28 +73,28 @@ func TestFile_SetFileType(t *testing.T) {
 	have := FILE_AUDIO_MOCK.GetFile().FileType
 
 	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 
 	expect = FILETYPE_DOCUMENT
 	have = FILE_DOCUMENT_MOCK.GetFile().FileType
 
 	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 
 	expect = FILETYPE_IMAGE
 	have = FILE_IMAGE_MOCK.GetFile().FileType
 
 	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 
 	expect = FILETYPE_VIDEO
 	have = FILE_VIDEO_MOCK.GetFile().FileType
 
 	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
 
@@ -107,7 +107,7 @@ func TestFile_IsAudio(t *testing.T) {
 	have := file.IsAudio()
 
 	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
 
@@ -120,7 +120,7 @@ func TestFile_IsDocument(t *testing.T) {
 	have := file.IsDocument()
 
 	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
 
@@ -133,7 +133,7 @@ func TestFile_IsImage(t *testing.T) {
 	have := file.IsImage()
 
 	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
 
@@ -146,6 +146,6 @@ func TestFile_IsVideo(t *testing.T) {
 	have := file.IsVideo()
 
 	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }

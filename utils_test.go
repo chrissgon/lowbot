@@ -9,7 +9,7 @@ func TestUtils_ParseTemplate(t *testing.T) {
 	have := ParseTemplate([]string{"One", "Two"})
 
 	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
 

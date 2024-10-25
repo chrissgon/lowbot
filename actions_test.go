@@ -20,7 +20,7 @@ package lowbot
 // 	_, err := RunAction(nil, interaction, nil)
 
 // 	if !errors.Is(err, ERR_NIL_FLOW) {
-// 		t.Errorf(FormatTestError(ERR_NIL_FLOW, err))
+// 		t.Error(FormatTestError(ERR_NIL_FLOW, err))
 // 	}
 
 // 	flow := newFlowMock()
@@ -29,7 +29,7 @@ package lowbot
 // 	_, err = RunAction(flow, interaction, nil)
 
 // 	if !errors.Is(err, ERR_NIL_STEP) {
-// 		t.Errorf(FormatTestError(ERR_NIL_STEP, err))
+// 		t.Error(FormatTestError(ERR_NIL_STEP, err))
 // 	}
 
 // 	flow.Steps["audio"].Action = "undefined"
@@ -38,20 +38,20 @@ package lowbot
 // 	_, err = RunAction(flow, interaction, nil)
 
 // 	if !errors.Is(err, ERR_UNKNOWN_ACTION) {
-// 		t.Errorf(FormatTestError(ERR_UNKNOWN_ACTION, err))
+// 		t.Error(FormatTestError(ERR_UNKNOWN_ACTION, err))
 // 	}
 
 // 	flow.CurrentStep = flow.Steps["button"]
 // 	_, err = RunAction(flow, interaction, nil)
 
 // 	if !errors.Is(err, ERR_NIL_CHANNEL) {
-// 		t.Errorf(FormatTestError(ERR_NIL_CHANNEL, err))
+// 		t.Error(FormatTestError(ERR_NIL_CHANNEL, err))
 // 	}
 
 // 	_, err = RunAction(flow, interaction, CHANNEL_MOCK)
 
 // 	if err != nil {
-// 		t.Errorf(FormatTestError(nil, err))
+// 		t.Error(FormatTestError(nil, err))
 // 	}
 // }
 
@@ -67,35 +67,35 @@ package lowbot
 // 	wait, err := RunActionButton(flow, interaction, CHANNEL_MOCK)
 
 // 	if err != nil {
-// 		t.Errorf(FormatTestError(nil, err))
+// 		t.Error(FormatTestError(nil, err))
 // 	}
 
 // 	if !wait {
-// 		t.Errorf(FormatTestError(true, false))
+// 		t.Error(FormatTestError(true, false))
 // 	}
 
 // 	if channelCount != 1 {
-// 		t.Errorf(FormatTestError(1, channelCount))
+// 		t.Error(FormatTestError(1, channelCount))
 // 	}
 
 // 	if channelLastMethodCalled != "SendButton" {
-// 		t.Errorf(FormatTestError("SendButton", channelLastMethodCalled))
+// 		t.Error(FormatTestError("SendButton", channelLastMethodCalled))
 // 	}
 
 // 	if len(channelLastInteractionSent.Parameters.Buttons) != 2 {
-// 		t.Errorf(FormatTestError(2, len(channelLastInteractionSent.Parameters.Buttons)))
+// 		t.Error(FormatTestError(2, len(channelLastInteractionSent.Parameters.Buttons)))
 // 	}
 
 // 	if channelLastInteractionSent.Parameters.Buttons[0] != "yes" {
-// 		t.Errorf(FormatTestError("yes", channelLastInteractionSent.Parameters.Buttons[0]))
+// 		t.Error(FormatTestError("yes", channelLastInteractionSent.Parameters.Buttons[0]))
 // 	}
 
 // 	if channelLastInteractionSent.Parameters.Buttons[1] != "no" {
-// 		t.Errorf(FormatTestError("no", channelLastInteractionSent.Parameters.Buttons[1]))
+// 		t.Error(FormatTestError("no", channelLastInteractionSent.Parameters.Buttons[1]))
 // 	}
 
 // 	if channelLastInteractionSent.Parameters.Text != "text" {
-// 		t.Errorf(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
+// 		t.Error(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
 // 	}
 // }
 
@@ -111,27 +111,27 @@ package lowbot
 // 	wait, err := RunActionFile(flow, interaction, CHANNEL_MOCK)
 
 // 	if err != nil {
-// 		t.Errorf(FormatTestError(nil, err))
+// 		t.Error(FormatTestError(nil, err))
 // 	}
 
 // 	if wait {
-// 		t.Errorf(FormatTestError(false, wait))
+// 		t.Error(FormatTestError(false, wait))
 // 	}
 
 // 	if channelCount != 1 {
-// 		t.Errorf(FormatTestError(1, channelCount))
+// 		t.Error(FormatTestError(1, channelCount))
 // 	}
 
 // 	if channelLastMethodCalled != "SendAudio" {
-// 		t.Errorf(FormatTestError("SendAudio", channelLastMethodCalled))
+// 		t.Error(FormatTestError("SendAudio", channelLastMethodCalled))
 // 	}
 
 // 	if channelLastInteractionSent.Parameters.Text != "text" {
-// 		t.Errorf(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
+// 		t.Error(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
 // 	}
 
 // 	if channelLastInteractionSent.Parameters.File == nil {
-// 		t.Errorf(FormatTestError(File{}, nil))
+// 		t.Error(FormatTestError(File{}, nil))
 // 	}
 // }
 
@@ -147,27 +147,27 @@ package lowbot
 // 	wait, err := RunActionFile(flow, interaction, CHANNEL_MOCK)
 
 // 	if err != nil {
-// 		t.Errorf(FormatTestError(nil, err))
+// 		t.Error(FormatTestError(nil, err))
 // 	}
 
 // 	if wait {
-// 		t.Errorf(FormatTestError(false, wait))
+// 		t.Error(FormatTestError(false, wait))
 // 	}
 
 // 	if channelCount != 1 {
-// 		t.Errorf(FormatTestError(1, channelCount))
+// 		t.Error(FormatTestError(1, channelCount))
 // 	}
 
 // 	if channelLastMethodCalled != "SendDocument" {
-// 		t.Errorf(FormatTestError("SendDocument", channelLastMethodCalled))
+// 		t.Error(FormatTestError("SendDocument", channelLastMethodCalled))
 // 	}
 
 // 	if channelLastInteractionSent.Parameters.Text != "text" {
-// 		t.Errorf(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
+// 		t.Error(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
 // 	}
 
 // 	if channelLastInteractionSent.Parameters.File == nil {
-// 		t.Errorf(FormatTestError(File{}, nil))
+// 		t.Error(FormatTestError(File{}, nil))
 // 	}
 // }
 
@@ -183,27 +183,27 @@ package lowbot
 // 	wait, err := RunActionFile(flow, interaction, CHANNEL_MOCK)
 
 // 	if err != nil {
-// 		t.Errorf(FormatTestError(nil, err))
+// 		t.Error(FormatTestError(nil, err))
 // 	}
 
 // 	if wait {
-// 		t.Errorf(FormatTestError(false, wait))
+// 		t.Error(FormatTestError(false, wait))
 // 	}
 
 // 	if channelCount != 1 {
-// 		t.Errorf(FormatTestError(1, channelCount))
+// 		t.Error(FormatTestError(1, channelCount))
 // 	}
 
 // 	if channelLastMethodCalled != "SendImage" {
-// 		t.Errorf(FormatTestError("SendImage", channelLastMethodCalled))
+// 		t.Error(FormatTestError("SendImage", channelLastMethodCalled))
 // 	}
 
 // 	if channelLastInteractionSent.Parameters.Text != "text" {
-// 		t.Errorf(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
+// 		t.Error(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
 // 	}
 
 // 	if channelLastInteractionSent.Parameters.File == nil {
-// 		t.Errorf(FormatTestError(File{}, nil))
+// 		t.Error(FormatTestError(File{}, nil))
 // 	}
 // }
 
@@ -219,27 +219,27 @@ package lowbot
 // 	wait, err := RunActionFile(flow, interaction, CHANNEL_MOCK)
 
 // 	if err != nil {
-// 		t.Errorf(FormatTestError(nil, err))
+// 		t.Error(FormatTestError(nil, err))
 // 	}
 
 // 	if wait {
-// 		t.Errorf(FormatTestError(false, wait))
+// 		t.Error(FormatTestError(false, wait))
 // 	}
 
 // 	if channelCount != 1 {
-// 		t.Errorf(FormatTestError(1, channelCount))
+// 		t.Error(FormatTestError(1, channelCount))
 // 	}
 
 // 	if channelLastMethodCalled != "SendVideo" {
-// 		t.Errorf(FormatTestError("SendVideo", channelLastMethodCalled))
+// 		t.Error(FormatTestError("SendVideo", channelLastMethodCalled))
 // 	}
 
 // 	if channelLastInteractionSent.Parameters.Text != "text" {
-// 		t.Errorf(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
+// 		t.Error(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
 // 	}
 
 // 	if channelLastInteractionSent.Parameters.File == nil {
-// 		t.Errorf(FormatTestError(File{}, nil))
+// 		t.Error(FormatTestError(File{}, nil))
 // 	}
 // }
 
@@ -255,23 +255,23 @@ package lowbot
 // 	wait, err := RunActionInput(flow, interaction, CHANNEL_MOCK)
 
 // 	if err != nil {
-// 		t.Errorf(FormatTestError(nil, err))
+// 		t.Error(FormatTestError(nil, err))
 // 	}
 
 // 	if !wait {
-// 		t.Errorf(FormatTestError(true, false))
+// 		t.Error(FormatTestError(true, false))
 // 	}
 
 // 	if channelCount != 1 {
-// 		t.Errorf(FormatTestError(1, channelCount))
+// 		t.Error(FormatTestError(1, channelCount))
 // 	}
 
 // 	if channelLastMethodCalled != "SendText" {
-// 		t.Errorf(FormatTestError("SendText", channelLastMethodCalled))
+// 		t.Error(FormatTestError("SendText", channelLastMethodCalled))
 // 	}
 
 // 	if channelLastInteractionSent.Parameters.Text != "text" {
-// 		t.Errorf(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
+// 		t.Error(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
 // 	}
 // }
 
@@ -287,23 +287,23 @@ package lowbot
 // 	wait, err := RunActionText(flow, interaction, CHANNEL_MOCK)
 
 // 	if err != nil {
-// 		t.Errorf(FormatTestError(nil, err))
+// 		t.Error(FormatTestError(nil, err))
 // 	}
 
 // 	if wait {
-// 		t.Errorf(FormatTestError(false, true))
+// 		t.Error(FormatTestError(false, true))
 // 	}
 
 // 	if channelCount != 1 {
-// 		t.Errorf(FormatTestError(1, channelCount))
+// 		t.Error(FormatTestError(1, channelCount))
 // 	}
 
 // 	if channelLastMethodCalled != "SendText" {
-// 		t.Errorf(FormatTestError("SendText", channelLastMethodCalled))
+// 		t.Error(FormatTestError("SendText", channelLastMethodCalled))
 // 	}
 
 // 	if channelLastInteractionSent.Parameters.Text != "text" {
-// 		t.Errorf(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
+// 		t.Error(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
 // 	}
 // }
 
@@ -319,11 +319,11 @@ package lowbot
 // 	wait, err := RunActionWait(flow, interaction, CHANNEL_MOCK)
 
 // 	if err != nil {
-// 		t.Errorf(FormatTestError(nil, err))
+// 		t.Error(FormatTestError(nil, err))
 // 	}
 
 // 	if !wait {
-// 		t.Errorf(FormatTestError(true, false))
+// 		t.Error(FormatTestError(true, false))
 // 	}
 // }
 
@@ -339,30 +339,30 @@ package lowbot
 // 	wait, err := RunActionRoom(flow, interaction, CHANNEL_MOCK)
 
 // 	if err != nil {
-// 		t.Errorf(FormatTestError(nil, err))
+// 		t.Error(FormatTestError(nil, err))
 // 	}
 
 // 	if wait {
-// 		t.Errorf(FormatTestError(false, true))
+// 		t.Error(FormatTestError(false, true))
 // 	}
 
 // 	if channelCount != 1 {
-// 		t.Errorf(FormatTestError(1, channelCount))
+// 		t.Error(FormatTestError(1, channelCount))
 // 	}
 
 // 	if channelLastMethodCalled != "SendText" {
-// 		t.Errorf(FormatTestError("SendText", channelLastMethodCalled))
+// 		t.Error(FormatTestError("SendText", channelLastMethodCalled))
 // 	}
 
 // 	if channelLastInteractionSent.Parameters.Text != "text" {
-// 		t.Errorf(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
+// 		t.Error(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
 // 	}
 
 // 	if interaction.Custom["RoomID"] == nil {
-// 		t.Errorf(FormatTestError("uuid", interaction.Custom["RoomID"]))
+// 		t.Error(FormatTestError("uuid", interaction.Custom["RoomID"]))
 // 	}
 
 // 	if len(roomManager.Rooms) != 1 {
-// 		t.Errorf(FormatTestError(1, len(roomManager.Rooms)))
+// 		t.Error(FormatTestError(1, len(roomManager.Rooms)))
 // 	}
 // }

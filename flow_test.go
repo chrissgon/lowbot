@@ -10,18 +10,18 @@ func TestFlow_NewFlow(t *testing.T) {
 	_, err := NewFlow("")
 
 	if err == nil {
-		t.Errorf(FormatTestError("any error", nil))
+		t.Error(FormatTestError("any error", nil))
 	}
 
 	expect := newFlowMock()
 	have, err := NewFlow("./mocks/flow.yaml")
 
 	if err != nil {
-		t.Errorf(FormatTestError(nil, err))
+		t.Error(FormatTestError(nil, err))
 	}
 
 	if !reflect.DeepEqual(expect, have) {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
 func TestFlow_NewFlowByJSON(t *testing.T) {
@@ -110,29 +110,29 @@ func TestFlow_NewFlowByJSON(t *testing.T) {
 	have, err := NewFlowByJSON(strJSON)
 
 	if err != nil {
-		t.Errorf(FormatTestError(nil, err))
+		t.Error(FormatTestError(nil, err))
 	}
 
 	if !reflect.DeepEqual(expect, have) {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
 func TestFlow_NewFlowByJSONFile(t *testing.T) {
 	_, err := NewFlowByJSONFile("")
 
 	if err == nil {
-		t.Errorf(FormatTestError("any error", nil))
+		t.Error(FormatTestError("any error", nil))
 	}
 
 	expect := newFlowMock()
 	have, err := NewFlowByJSONFile("./mocks/flow.json")
 
 	if err != nil {
-		t.Errorf(FormatTestError(nil, err))
+		t.Error(FormatTestError(nil, err))
 	}
 
 	if !reflect.DeepEqual(expect, have) {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
 
@@ -144,14 +144,14 @@ func TestFlow_StartFlow(t *testing.T) {
 	err := flow.Start()
 
 	if !errors.Is(err, ERR_UNKNOWN_INIT_STEP) {
-		t.Errorf(FormatTestError(ERR_UNKNOWN_INIT_STEP, err))
+		t.Error(FormatTestError(ERR_UNKNOWN_INIT_STEP, err))
 	}
 
 	expect := flow.Steps["init"]
 	have := flow.CurrentStep
 
 	if !reflect.DeepEqual(expect, have) {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
 
@@ -164,7 +164,7 @@ func TestFlow_StartFlow(t *testing.T) {
 // 	err := flow.Next(interaction)
 
 // 	if !errors.Is(err, ERR_ENDED_FLOW) {
-// 		t.Errorf(FormatTestError(ERR_ENDED_FLOW, err))
+// 		t.Error(FormatTestError(ERR_ENDED_FLOW, err))
 // 	}
 
 // 	flow, _ = NewFlow("./mocks/flow.yaml")
@@ -173,7 +173,7 @@ func TestFlow_StartFlow(t *testing.T) {
 // 	err = flow.Next(interaction)
 
 // 	if !errors.Is(err, ERR_UNKNOWN_NEXT_STEP) {
-// 		t.Errorf(FormatTestError(ERR_UNKNOWN_NEXT_STEP, err))
+// 		t.Error(FormatTestError(ERR_UNKNOWN_NEXT_STEP, err))
 // 	}
 
 // 	flow, _ = NewFlow("./mocks/flow.yaml")
@@ -182,7 +182,7 @@ func TestFlow_StartFlow(t *testing.T) {
 // 	err = flow.Next(interaction)
 
 // 	if !errors.Is(err, ERR_UNKNOWN_DEFAULT_STEP) {
-// 		t.Errorf(FormatTestError(ERR_UNKNOWN_DEFAULT_STEP, err))
+// 		t.Error(FormatTestError(ERR_UNKNOWN_DEFAULT_STEP, err))
 // 	}
 
 // 	flow, _ = NewFlow("./mocks/flow.yaml")
@@ -193,7 +193,7 @@ func TestFlow_StartFlow(t *testing.T) {
 // 	have := flow.CurrentStep
 
 // 	if !reflect.DeepEqual(expect, have) {
-// 		t.Errorf(FormatTestError(expect, have))
+// 		t.Error(FormatTestError(expect, have))
 // 	}
 // }
 
@@ -236,7 +236,7 @@ func TestFlow_StartFlow(t *testing.T) {
 // 	flow, err := NewFlowByJSON(strJSON)
 
 // 	if err != nil {
-// 		t.Errorf(FormatTestError(nil, err))
+// 		t.Error(FormatTestError(nil, err))
 // 	}
 
 // 	flow.CurrentStep = flow.Steps["invalid"]
@@ -245,7 +245,7 @@ func TestFlow_StartFlow(t *testing.T) {
 // 	err = flow.goNextStep(NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, ""))
 
 // 	if !errors.Is(ERR_PATTERN_NEXT_STEP, err) {
-// 		t.Errorf(FormatTestError(ERR_PATTERN_NEXT_STEP, err))
+// 		t.Error(FormatTestError(ERR_PATTERN_NEXT_STEP, err))
 // 	}
 
 // 	flow.CurrentStep = flow.Steps["matched"]
@@ -254,11 +254,11 @@ func TestFlow_StartFlow(t *testing.T) {
 // 	err = flow.goNextStep(NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "yes"))
 
 // 	if err != nil {
-// 		t.Errorf(FormatTestError(nil, err))
+// 		t.Error(FormatTestError(nil, err))
 // 	}
 
 // 	if flow.CurrentStepName != "end" {
-// 		t.Errorf(FormatTestError("end", flow.CurrentStepName))
+// 		t.Error(FormatTestError("end", flow.CurrentStepName))
 // 	}
 // }
 
@@ -268,7 +268,7 @@ func TestFlow_NoHasNext(t *testing.T) {
 	flow.CurrentStep.Next = nil
 
 	if !flow.NoHasNext() {
-		t.Errorf(FormatTestError(true, false))
+		t.Error(FormatTestError(true, false))
 	}
 }
 
@@ -280,10 +280,10 @@ func TestFlow_NoHasNext(t *testing.T) {
 // 	expect := 1
 // 	have := len(flow.Responses)
 
-// 	if expect != have {
-// 		t.Errorf(FormatTestError(expect, have))
-// 	}
-// }
+//		if expect != have {
+//			t.Error(FormatTestError(expect, have))
+//		}
+//	}
 func TestFlow_AddResponseValue(t *testing.T) {
 	flow, _ := NewFlow("./mocks/flow.yaml")
 
@@ -293,9 +293,10 @@ func TestFlow_AddResponseValue(t *testing.T) {
 	have := flow.Ended()
 
 	if expect != have {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
+
 // func TestFlow_GetLastResponse(t *testing.T) {
 // 	flow, _ := NewFlow("./mocks/flow.yaml")
 // 	flow.Start()
@@ -307,7 +308,7 @@ func TestFlow_AddResponseValue(t *testing.T) {
 // 	have := flow.GetLastResponse()
 
 // 	if !reflect.DeepEqual(expect, have) {
-// 		t.Errorf(FormatTestError(expect, have))
+// 		t.Error(FormatTestError(expect, have))
 // 	}
 // }
 // func TestFlow_GetLastResponsetText(t *testing.T) {
@@ -321,7 +322,7 @@ func TestFlow_AddResponseValue(t *testing.T) {
 // 	have := flow.GetLastResponseText()
 
 // 	if expect != have {
-// 		t.Errorf(FormatTestError(expect, have))
+// 		t.Error(FormatTestError(expect, have))
 // 	}
 // }
 // func TestFlow_Ended(t *testing.T) {
@@ -334,7 +335,7 @@ func TestFlow_AddResponseValue(t *testing.T) {
 // 	have := flow.Responses[0]
 
 // 	if !reflect.DeepEqual(expect, have) {
-// 		t.Errorf(FormatTestError(expect, have))
+// 		t.Error(FormatTestError(expect, have))
 // 	}
 // }
 

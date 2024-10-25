@@ -20,7 +20,7 @@ type mockChannel struct {
 	*Channel
 	startedTimes int
 	stoppedTimes int
-	fail bool
+	fail         bool
 }
 
 var CHANNEL_MOCK = newMockChannel()
@@ -34,7 +34,7 @@ func newMockChannel() IChannel {
 		},
 		startedTimes: 0,
 		stoppedTimes: 0,
-		fail: false,
+		fail:         false,
 	}
 }
 
@@ -115,15 +115,15 @@ func TestChannel_SendInteractionText(t *testing.T) {
 	err := SendInteraction(CHANNEL_MOCK, interaction)
 
 	if !errors.Is(err, ErrMock) {
-		t.Errorf(FormatTestError(ErrMock, err))
+		t.Error(FormatTestError(ErrMock, err))
 	}
 
 	if channelCount != 1 {
-		t.Errorf(FormatTestError(1, channelCount))
+		t.Error(FormatTestError(1, channelCount))
 	}
 
 	if channelLastMethodCalled != "SendText" {
-		t.Errorf(FormatTestError("SendText", channelLastMethodCalled))
+		t.Error(FormatTestError("SendText", channelLastMethodCalled))
 	}
 }
 
@@ -135,15 +135,15 @@ func TestChannel_SendInteractionButton(t *testing.T) {
 	err := SendInteraction(CHANNEL_MOCK, interaction)
 
 	if err != nil {
-		t.Errorf(FormatTestError(nil, err))
+		t.Error(FormatTestError(nil, err))
 	}
 
 	if channelCount != 1 {
-		t.Errorf(FormatTestError(1, channelCount))
+		t.Error(FormatTestError(1, channelCount))
 	}
 
 	if channelLastMethodCalled != "SendButton" {
-		t.Errorf(FormatTestError("SendButton", channelLastMethodCalled))
+		t.Error(FormatTestError("SendButton", channelLastMethodCalled))
 	}
 }
 
@@ -155,15 +155,15 @@ func TestChannel_SendInteractionAudio(t *testing.T) {
 	err := SendInteraction(CHANNEL_MOCK, interaction)
 
 	if err != nil {
-		t.Errorf(FormatTestError(nil, err))
+		t.Error(FormatTestError(nil, err))
 	}
 
 	if channelCount != 1 {
-		t.Errorf(FormatTestError(1, channelCount))
+		t.Error(FormatTestError(1, channelCount))
 	}
 
 	if channelLastMethodCalled != "SendAudio" {
-		t.Errorf(FormatTestError("SendAudio", channelLastMethodCalled))
+		t.Error(FormatTestError("SendAudio", channelLastMethodCalled))
 	}
 }
 
@@ -175,15 +175,15 @@ func TestChannel_SendInteractionDocument(t *testing.T) {
 	err := SendInteraction(CHANNEL_MOCK, interaction)
 
 	if err != nil {
-		t.Errorf(FormatTestError(nil, err))
+		t.Error(FormatTestError(nil, err))
 	}
 
 	if channelCount != 1 {
-		t.Errorf(FormatTestError(1, channelCount))
+		t.Error(FormatTestError(1, channelCount))
 	}
 
 	if channelLastMethodCalled != "SendDocument" {
-		t.Errorf(FormatTestError("SendDocument", channelLastMethodCalled))
+		t.Error(FormatTestError("SendDocument", channelLastMethodCalled))
 	}
 }
 
@@ -195,15 +195,15 @@ func TestChannel_SendInteractionImage(t *testing.T) {
 	err := SendInteraction(CHANNEL_MOCK, interaction)
 
 	if err != nil {
-		t.Errorf(FormatTestError(nil, err))
+		t.Error(FormatTestError(nil, err))
 	}
 
 	if channelCount != 1 {
-		t.Errorf(FormatTestError(1, channelCount))
+		t.Error(FormatTestError(1, channelCount))
 	}
 
 	if channelLastMethodCalled != "SendImage" {
-		t.Errorf(FormatTestError("SendImage", channelLastMethodCalled))
+		t.Error(FormatTestError("SendImage", channelLastMethodCalled))
 	}
 }
 
@@ -215,14 +215,14 @@ func TestChannel_SendInteractionVideo(t *testing.T) {
 	err := SendInteraction(CHANNEL_MOCK, interaction)
 
 	if err != nil {
-		t.Errorf(FormatTestError(nil, err))
+		t.Error(FormatTestError(nil, err))
 	}
 
 	if channelCount != 1 {
-		t.Errorf(FormatTestError(1, channelCount))
+		t.Error(FormatTestError(1, channelCount))
 	}
 
 	if channelLastMethodCalled != "SendVideo" {
-		t.Errorf(FormatTestError("SendVideo", channelLastMethodCalled))
+		t.Error(FormatTestError("SendVideo", channelLastMethodCalled))
 	}
 }

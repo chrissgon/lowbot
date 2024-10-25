@@ -16,6 +16,6 @@ func TestWho_NewWho(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(expect, have) {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }

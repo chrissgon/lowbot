@@ -13,7 +13,7 @@ func TestBroadcast_NewBroadcast(t *testing.T) {
 	expect := NewBroadcast[int]()
 
 	if !reflect.DeepEqual(expect, have) {
-		t.Errorf(FormatTestError(expect, have))
+		t.Error(FormatTestError(expect, have))
 	}
 }
 
@@ -21,16 +21,16 @@ func TestBroadcast_Listen(t *testing.T) {
 	broadcast := NewBroadcast[int]()
 
 	if len(broadcast.listeners) != 0 {
-		t.Errorf(FormatTestError(0, len(broadcast.listeners)))
+		t.Error(FormatTestError(0, len(broadcast.listeners)))
 	}
 
 	channel := broadcast.Listen()
 
 	if len(broadcast.listeners) != 1 {
-		t.Errorf(FormatTestError(1, len(broadcast.listeners)))
+		t.Error(FormatTestError(1, len(broadcast.listeners)))
 	}
 	if channel == nil {
-		t.Errorf(FormatTestError("not nil channel", nil))
+		t.Error(FormatTestError("not nil channel", nil))
 	}
 }
 
@@ -52,7 +52,7 @@ func TestBroadcast_Send(t *testing.T) {
 	time.Sleep(1 * time.Millisecond)
 
 	if !passed {
-		t.Errorf(FormatTestError(true, false))
+		t.Error(FormatTestError(true, false))
 	}
 }
 func TestBroadcast_Close(t *testing.T) {
@@ -63,6 +63,6 @@ func TestBroadcast_Close(t *testing.T) {
 	broadcast.Close()
 
 	if len(broadcast.listeners) != 0 {
-		t.Errorf(FormatTestError(0, len(broadcast.listeners)))
+		t.Error(FormatTestError(0, len(broadcast.listeners)))
 	}
 }
