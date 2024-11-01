@@ -3,6 +3,7 @@ package lowbot
 import (
 	"bytes"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -123,12 +124,12 @@ func (channel *DiscordChannel) SendButton(interaction *Interaction) error {
 }
 
 func (*DiscordChannel) getButtons(interaction *Interaction) (buttons []discordgo.MessageComponent) {
-	for _, button := range interaction.Parameters.Buttons {
+	for i, button := range interaction.Parameters.Buttons {
 		buttons = append(buttons, discordgo.Button{
 			Label:    button,
 			Style:    discordgo.PrimaryButton,
 			Disabled: false,
-			CustomID: button,
+			CustomID: strconv.Itoa(i+1),
 		})
 	}
 	return

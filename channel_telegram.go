@@ -156,10 +156,10 @@ func (channel *TelegramChannel) SendButton(interaction *Interaction) error {
 }
 
 func (*TelegramChannel) getButtons(interaction *Interaction) (buttons []models.InlineKeyboardButton) {
-	for _, button := range interaction.Parameters.Buttons {
+	for i, button := range interaction.Parameters.Buttons {
 		buttons = append(buttons, models.InlineKeyboardButton{
 			Text:         button,
-			CallbackData: button,
+			CallbackData: strconv.Itoa(i+1),
 		})
 	}
 	return

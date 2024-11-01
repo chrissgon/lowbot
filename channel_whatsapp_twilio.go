@@ -70,8 +70,14 @@ func (channel *WhatsappTwilioChannel) Start() error {
 		channel.Broadcast.Send(interaction)
 	})
 
+	port := os.Getenv("WHATSAPP_TWILIO_PORT")
+
+	if port == ""{
+		port = "8080"
+	}
+
 	channel.server = &http.Server{
-		Addr:    fmt.Sprintf(":%v", os.Getenv("WHATSAPP_TWILIO_PORT")),
+		Addr:    fmt.Sprintf(":%v", port),
 		Handler: router,
 	}
 
@@ -108,10 +114,13 @@ func (channel *WhatsappTwilioChannel) SendAudio(interaction *Interaction) error 
 }
 
 func (channel *WhatsappTwilioChannel) SendButton(interaction *Interaction) error {
-	contentSID, exists := interaction.Parameters.Custom["contentSID"].(string)
-	contentVariables := interaction.Parameters.Custom["contentVariables"].(string)
+	_, contentSIDExists := interaction.Parameters.Custom["contentSID"]
+	_, contentVariablesExists := interaction.Parameters.Custom["contentVariables"]
 
-	if exists {
+	if contentSIDExists && contentVariablesExists {
+		contentSID, _ := interaction.Parameters.Custom["contentSID"].(string)
+		contentVariables, _ := interaction.Parameters.Custom["contentVariables"].(string)
+
 		to := interaction.From.WhoID
 		from := interaction.To.WhoID
 
@@ -132,9 +141,9 @@ func (channel *WhatsappTwilioChannel) SendButton(interaction *Interaction) error
 	sb.WriteString(interaction.Parameters.Text)
 	sb.WriteString("\n")
 
-	for _, button := range interaction.Parameters.Buttons {
+	for i, button := range interaction.Parameters.Buttons {
 		sb.WriteString("\n")
-		sb.WriteString(fmt.Sprintf("- %v", button))
+		sb.WriteString(fmt.Sprintf("%v. %v", i+1, button))
 	}
 
 	interaction.Parameters.Text = sb.String()
@@ -170,8 +179,6 @@ func (channel *WhatsappTwilioChannel) SendImage(interaction *Interaction) error 
 func (channel *WhatsappTwilioChannel) SendText(interaction *Interaction) error {
 	to := interaction.From.WhoID
 	from := interaction.To.WhoID
-
-	fmt.Println("recebi", to, from)
 
 	params := &openapi.CreateMessageParams{}
 	params.SetTo(to)

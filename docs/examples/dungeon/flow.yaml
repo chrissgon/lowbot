@@ -8,7 +8,7 @@ steps:
   intro:
     action: Button
     next:
-      Right: minotaur
+      2: minotaur
       default: found
     parameters:
       texts:
@@ -23,8 +23,8 @@ steps:
   minotaur:
     action: Button
     next:
-      Archery 🏹: minotaurKillYou
-      Sword 🗡: minotaurDead
+      1: minotaurKillYou
+      2: minotaurDead
     parameters:
       texts:
         - 😱 Ooh no, you found a minotaur
