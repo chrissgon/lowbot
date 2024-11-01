@@ -17,7 +17,7 @@ func SetCustomActions(custom ActionsMap) {
 	}
 }
 
-func GetAction(flow *Flow, interaction *Interaction) (ActionFunc, error) {
+func GetAction(flow *Flow) (ActionFunc, error) {
 	if flow == nil {
 		return nil, ERR_NIL_FLOW
 	}
@@ -38,9 +38,9 @@ func GetAction(flow *Flow, interaction *Interaction) (ActionFunc, error) {
 }
 
 func RunActionButton(interaction *Interaction) (*Interaction, bool) {
-	text := ParseTemplate(interaction.StepParameters.Texts)
+	text := ParseTemplate(interaction.Step.Parameters.Texts)
 
-	newInteraction := NewInteractionMessageButton(interaction.StepParameters.Buttons, text)
+	newInteraction := NewInteractionMessageButton(interaction.Step.Parameters.Buttons, text)
 	newInteraction.SetFrom(interaction.From)
 	newInteraction.SetTo(interaction.To)
 	newInteraction.SetReplier(NewWho(CONSUMER_JOURNEY_NAME, CONSUMER_JOURNEY_NAME))
@@ -49,22 +49,12 @@ func RunActionButton(interaction *Interaction) (*Interaction, bool) {
 }
 
 func RunActionFile(interaction *Interaction) (*Interaction, bool) {
-	text := ParseTemplate(interaction.StepParameters.Texts)
+	text := ParseTemplate(interaction.Step.Parameters.Texts)
 
-	newInteraction := NewInteractionMessageFile(interaction.StepParameters.Path, text)
+	newInteraction := NewInteractionMessageFile(interaction.Step.Parameters.Path, text)
 	newInteraction.SetFrom(interaction.From)
 	newInteraction.SetTo(interaction.To)
 	newInteraction.SetReplier(NewWho(CONSUMER_JOURNEY_NAME, CONSUMER_JOURNEY_NAME))
-
-	if newInteraction.Parameters.File.IsAudio() {
-		return newInteraction, false
-	}
-	if newInteraction.Parameters.File.IsImage() {
-		return newInteraction, false
-	}
-	if newInteraction.Parameters.File.IsVideo() {
-		return newInteraction, false
-	}
 
 	return newInteraction, false
 }
@@ -80,7 +70,7 @@ func RunActionInput(interaction *Interaction) (*Interaction, bool) {
 }
 
 func RunActionText(interaction *Interaction) (*Interaction, bool) {
-	text := ParseTemplate(interaction.StepParameters.Texts)
+	text := ParseTemplate(interaction.Step.Parameters.Texts)
 
 	newInteraction := NewInteractionMessageText(text)
 	newInteraction.SetFrom(interaction.From)

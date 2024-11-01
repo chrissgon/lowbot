@@ -5,13 +5,10 @@ type Interaction struct {
 	From    *Who
 	Replier *Who
 
-	// Destination    *Who
-	// Sender         *Who
-	// Replier        *Who
-	Type           InteractionType
-	Parameters     InteractionParameters
-	StepParameters StepParameters
-	Custom         map[string]any
+	Type       InteractionType
+	Parameters InteractionParameters
+	Step       Step
+	Custom     map[string]any
 }
 
 type InteractionType string
@@ -74,5 +71,10 @@ func (interaction *Interaction) SetFrom(from *Who) *Interaction {
 
 func (interaction *Interaction) SetReplier(replier *Who) *Interaction {
 	interaction.Replier = replier
+	return interaction
+}
+
+func (interaction *Interaction) SetStep(step Step) *Interaction {
+	interaction.Step = step
 	return interaction
 }

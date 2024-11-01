@@ -32,10 +32,18 @@ steps:
 
   image:
     next:
-      default: text
+      default: input
     action: File
     parameters:
       path: ./mocks/image.jpg
+
+  input:
+    next:
+      default: text
+    action: Input
+    parameters:
+      texts:
+        - texts
 
   text:
     next:

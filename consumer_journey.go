@@ -58,17 +58,17 @@ func (consumer *JourneyConsumer) getInteractions(flow *Flow, interaction *Intera
 			return interactions, err
 		}
 
-		action, err := GetAction(flow, interaction)
+		action, err := GetAction(flow)
 
 		if err != nil {
 			return interactions, err
 		}
 
-		interaction.StepParameters = flow.CurrentStep.Parameters
+		interaction.SetStep(*flow.CurrentStep)
 
 		answerInteraction, wait := action(interaction)
 
-		answerInteraction.StepParameters = flow.CurrentStep.Parameters
+		answerInteraction.SetStep(*flow.CurrentStep)
 
 		next = !wait
 

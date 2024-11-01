@@ -72,7 +72,7 @@ func (channel *WhatsappTwilioChannel) Start() error {
 
 	port := os.Getenv("WHATSAPP_TWILIO_PORT")
 
-	if port == ""{
+	if port == "" {
 		port = "8080"
 	}
 
@@ -114,12 +114,12 @@ func (channel *WhatsappTwilioChannel) SendAudio(interaction *Interaction) error 
 }
 
 func (channel *WhatsappTwilioChannel) SendButton(interaction *Interaction) error {
-	_, contentSIDExists := interaction.Parameters.Custom["contentSID"]
-	_, contentVariablesExists := interaction.Parameters.Custom["contentVariables"]
+	_, contentSIDExists := interaction.Step.Parameters.Custom["contentSID"]
+	_, contentVariablesExists := interaction.Step.Parameters.Custom["contentVariable"]
 
 	if contentSIDExists && contentVariablesExists {
-		contentSID, _ := interaction.Parameters.Custom["contentSID"].(string)
-		contentVariables, _ := interaction.Parameters.Custom["contentVariables"].(string)
+		contentSID, _ := interaction.Step.Parameters.Custom["contentSID"].(string)
+		contentVariables, _ := interaction.Step.Parameters.Custom["contentVariable"].(string)
 
 		to := interaction.From.WhoID
 		from := interaction.To.WhoID

@@ -1,4 +1,6 @@
 github.com/chrissgon/lowbot/docs/
+github.com/chrissgon/lowbot/channel_whatsapp_device.go
+github.com/chrissgon/lowbot/channel_whatsapp_twilio.go
 github.com/chrissgon/lowbot/channel_discord.go
 github.com/chrissgon/lowbot/channel_telegram.go
 github.com/chrissgon/lowbot/consumer_chatgpt.go

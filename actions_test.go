@@ -1,368 +1,290 @@
 package lowbot
 
-// func TestActions_SetCustomActions(t *testing.T) {
-// 	name := "Custom"
+import (
+	"errors"
+	"testing"
+)
 
-// 	SetCustomActions(ActionsMap{
-// 		name: func(flow *Flow, interaction *Interaction, channel IChannel) (bool, error) { return true, nil },
-// 	})
+func TestActions_SetCustomActions(t *testing.T) {
+	name := "Custom"
 
-// 	_, exists := actions[name]
+	SetCustomActions(ActionsMap{
+		name: func(i *Interaction) (*Interaction, bool) { return nil, true },
+	})
 
-// 	if !exists {
-// 		t.Errorf("not found action: %s", name)
-// 	}
-// }
+	_, exists := actions[name]
 
-// func TestActions_RunAction(t *testing.T) {
-// 	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "")
+	if !exists {
+		t.Fatalf("not found action: %s", name)
+	}
+}
 
-// 	_, err := RunAction(nil, interaction, nil)
+func TestActions_GetAction(t *testing.T) {
+	_, err := GetAction(nil)
 
-// 	if !errors.Is(err, ERR_NIL_FLOW) {
-// 		t.Error(FormatTestError(ERR_NIL_FLOW, err))
-// 	}
+	if !errors.Is(err, ERR_NIL_FLOW) {
+		t.Fatal(FormatTestError(ERR_NIL_FLOW, err))
+	}
 
-// 	flow := newFlowMock()
-// 	flow.CurrentStep = nil
+	flow := newFlowMock()
+	flow.CurrentStep = nil
 
-// 	_, err = RunAction(flow, interaction, nil)
+	_, err = GetAction(flow)
 
-// 	if !errors.Is(err, ERR_NIL_STEP) {
-// 		t.Error(FormatTestError(ERR_NIL_STEP, err))
-// 	}
+	if !errors.Is(err, ERR_NIL_STEP) {
+		t.Fatal(FormatTestError(ERR_NIL_STEP, err))
+	}
 
-// 	flow.Steps["audio"].Action = "undefined"
-// 	flow.CurrentStep = flow.Steps["audio"]
+	flow.Steps["audio"].Action = "undefined"
+	flow.CurrentStep = flow.Steps["audio"]
 
-// 	_, err = RunAction(flow, interaction, nil)
+	_, err = GetAction(flow)
 
-// 	if !errors.Is(err, ERR_UNKNOWN_ACTION) {
-// 		t.Error(FormatTestError(ERR_UNKNOWN_ACTION, err))
-// 	}
+	if !errors.Is(err, ERR_UNKNOWN_ACTION) {
+		t.Fatal(FormatTestError(ERR_UNKNOWN_ACTION, err))
+	}
 
-// 	flow.CurrentStep = flow.Steps["button"]
-// 	_, err = RunAction(flow, interaction, nil)
+	flow.CurrentStep = flow.Steps["button"]
 
-// 	if !errors.Is(err, ERR_NIL_CHANNEL) {
-// 		t.Error(FormatTestError(ERR_NIL_CHANNEL, err))
-// 	}
+	_, err = GetAction(flow)
 
-// 	_, err = RunAction(flow, interaction, CHANNEL_MOCK)
+	if err != nil {
+		t.Fatal(FormatTestError(nil, err))
+	}
+}
 
-// 	if err != nil {
-// 		t.Error(FormatTestError(nil, err))
-// 	}
-// }
+func TestActions_RunActionButton(t *testing.T) {
+	interaction := NewInteractionMessageText("")
+	flow := newFlowMock()
 
-// func TestActions_RunActionButton(t *testing.T) {
-// 	channelCount = 0
-// 	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "")
-// 	flow := newFlowMock()
+	flow.Steps["button"].Parameters.Buttons = []string{"yes", "no"}
+	flow.Steps["button"].Parameters.Texts = []string{"text"}
+	flow.CurrentStep = flow.Steps["button"]
 
-// 	flow.Steps["button"].Parameters.Buttons = []string{"yes", "no"}
-// 	flow.Steps["button"].Parameters.Texts = []string{"text"}
-// 	flow.CurrentStep = flow.Steps["button"]
+	action, err := GetAction(flow)
 
-// 	wait, err := RunActionButton(flow, interaction, CHANNEL_MOCK)
+	if err != nil {
+		t.Fatal(FormatTestError(nil, err))
+	}
 
-// 	if err != nil {
-// 		t.Error(FormatTestError(nil, err))
-// 	}
+	interaction, wait := action(interaction)
 
-// 	if !wait {
-// 		t.Error(FormatTestError(true, false))
-// 	}
+	if interaction == nil {
+		t.Fatal(FormatTestError("interaction", nil))
+	}
 
-// 	if channelCount != 1 {
-// 		t.Error(FormatTestError(1, channelCount))
-// 	}
+	if !wait {
+		t.Fatal(FormatTestError(true, false))
+	}
 
-// 	if channelLastMethodCalled != "SendButton" {
-// 		t.Error(FormatTestError("SendButton", channelLastMethodCalled))
-// 	}
+	if interaction.Type != MESSAGE_BUTTON {
+		t.Fatal(FormatTestError(MESSAGE_BUTTON, interaction.Type))
+	}
+}
 
-// 	if len(channelLastInteractionSent.Parameters.Buttons) != 2 {
-// 		t.Error(FormatTestError(2, len(channelLastInteractionSent.Parameters.Buttons)))
-// 	}
+func TestActions_RunActionFileAudio(t *testing.T) {
+	interaction := NewInteractionMessageText("")
+	flow := newFlowMock()
 
-// 	if channelLastInteractionSent.Parameters.Buttons[0] != "yes" {
-// 		t.Error(FormatTestError("yes", channelLastInteractionSent.Parameters.Buttons[0]))
-// 	}
+	flow.Steps["audio"].Parameters.Path = "./mocks/music.mp3"
+	flow.Steps["audio"].Parameters.Texts = []string{"text"}
+	flow.CurrentStep = flow.Steps["audio"]
 
-// 	if channelLastInteractionSent.Parameters.Buttons[1] != "no" {
-// 		t.Error(FormatTestError("no", channelLastInteractionSent.Parameters.Buttons[1]))
-// 	}
+	action, err := GetAction(flow)
 
-// 	if channelLastInteractionSent.Parameters.Text != "text" {
-// 		t.Error(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
-// 	}
-// }
+	interaction.Step = *flow.CurrentStep
 
-// func TestActions_RunActionFileAudio(t *testing.T) {
-// 	channelCount = 0
-// 	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "")
-// 	flow := newFlowMock()
+	if err != nil {
+		t.Fatal(FormatTestError(nil, err))
+	}
 
-// 	flow.Steps["audio"].Parameters.Path = "./mocks/music.mp3"
-// 	flow.Steps["audio"].Parameters.Texts = []string{"text"}
-// 	flow.CurrentStep = flow.Steps["audio"]
+	interaction, wait := action(interaction)
 
-// 	wait, err := RunActionFile(flow, interaction, CHANNEL_MOCK)
-
-// 	if err != nil {
-// 		t.Error(FormatTestError(nil, err))
-// 	}
-
-// 	if wait {
-// 		t.Error(FormatTestError(false, wait))
-// 	}
-
-// 	if channelCount != 1 {
-// 		t.Error(FormatTestError(1, channelCount))
-// 	}
-
-// 	if channelLastMethodCalled != "SendAudio" {
-// 		t.Error(FormatTestError("SendAudio", channelLastMethodCalled))
-// 	}
-
-// 	if channelLastInteractionSent.Parameters.Text != "text" {
-// 		t.Error(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
-// 	}
-
-// 	if channelLastInteractionSent.Parameters.File == nil {
-// 		t.Error(FormatTestError(File{}, nil))
-// 	}
-// }
+	if interaction == nil {
+		t.Fatal(FormatTestError("interaction", nil))
+	}
 
-// func TestActions_RunActionFileDocument(t *testing.T) {
-// 	channelCount = 0
-// 	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "")
-// 	flow := newFlowMock()
+	if wait {
+		t.Fatal(FormatTestError(false, wait))
+	}
 
-// 	flow.Steps["document"].Parameters.Path = "./mocks/features.txt"
-// 	flow.Steps["document"].Parameters.Texts = []string{"text"}
-// 	flow.CurrentStep = flow.Steps["document"]
+	if interaction.Type != MESSAGE_FILE {
+		t.Fatal(FormatTestError(MESSAGE_FILE, interaction.Type))
+	}
 
-// 	wait, err := RunActionFile(flow, interaction, CHANNEL_MOCK)
-
-// 	if err != nil {
-// 		t.Error(FormatTestError(nil, err))
-// 	}
-
-// 	if wait {
-// 		t.Error(FormatTestError(false, wait))
-// 	}
-
-// 	if channelCount != 1 {
-// 		t.Error(FormatTestError(1, channelCount))
-// 	}
-
-// 	if channelLastMethodCalled != "SendDocument" {
-// 		t.Error(FormatTestError("SendDocument", channelLastMethodCalled))
-// 	}
-
-// 	if channelLastInteractionSent.Parameters.Text != "text" {
-// 		t.Error(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
-// 	}
-
-// 	if channelLastInteractionSent.Parameters.File == nil {
-// 		t.Error(FormatTestError(File{}, nil))
-// 	}
-// }
+	if !interaction.Parameters.File.GetFile().IsAudio() {
+		t.Fatal(FormatTestError(FILETYPE_AUDIO, interaction.Parameters.File.GetFile().FileType))
+	}
+}
 
-// func TestActions_RunActionFileImage(t *testing.T) {
-// 	channelCount = 0
-// 	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "")
-// 	flow := newFlowMock()
+func TestActions_RunActionFileDocument(t *testing.T) {
+	channelCount = 0
+	interaction := NewInteractionMessageText("")
+	flow := newFlowMock()
 
-// 	flow.Steps["image"].Parameters.Path = "./mocks/image.jpg"
-// 	flow.Steps["image"].Parameters.Texts = []string{"text"}
-// 	flow.CurrentStep = flow.Steps["image"]
-
-// 	wait, err := RunActionFile(flow, interaction, CHANNEL_MOCK)
-
-// 	if err != nil {
-// 		t.Error(FormatTestError(nil, err))
-// 	}
-
-// 	if wait {
-// 		t.Error(FormatTestError(false, wait))
-// 	}
-
-// 	if channelCount != 1 {
-// 		t.Error(FormatTestError(1, channelCount))
-// 	}
-
-// 	if channelLastMethodCalled != "SendImage" {
-// 		t.Error(FormatTestError("SendImage", channelLastMethodCalled))
-// 	}
-
-// 	if channelLastInteractionSent.Parameters.Text != "text" {
-// 		t.Error(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
-// 	}
-
-// 	if channelLastInteractionSent.Parameters.File == nil {
-// 		t.Error(FormatTestError(File{}, nil))
-// 	}
-// }
-
-// func TestActions_RunActionFileVideo(t *testing.T) {
-// 	channelCount = 0
-// 	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "")
-// 	flow := newFlowMock()
-
-// 	flow.Steps["video"].Parameters.Path = "./mocks/video.mp4"
-// 	flow.Steps["video"].Parameters.Texts = []string{"text"}
-// 	flow.CurrentStep = flow.Steps["video"]
-
-// 	wait, err := RunActionFile(flow, interaction, CHANNEL_MOCK)
-
-// 	if err != nil {
-// 		t.Error(FormatTestError(nil, err))
-// 	}
-
-// 	if wait {
-// 		t.Error(FormatTestError(false, wait))
-// 	}
-
-// 	if channelCount != 1 {
-// 		t.Error(FormatTestError(1, channelCount))
-// 	}
-
-// 	if channelLastMethodCalled != "SendVideo" {
-// 		t.Error(FormatTestError("SendVideo", channelLastMethodCalled))
-// 	}
-
-// 	if channelLastInteractionSent.Parameters.Text != "text" {
-// 		t.Error(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
-// 	}
-
-// 	if channelLastInteractionSent.Parameters.File == nil {
-// 		t.Error(FormatTestError(File{}, nil))
-// 	}
-// }
+	flow.Steps["document"].Parameters.Path = "./mocks/features.txt"
+	flow.Steps["document"].Parameters.Texts = []string{"text"}
+	flow.CurrentStep = flow.Steps["document"]
 
-// func TestActions_RunActionInput(t *testing.T) {
-// 	channelTriggerError = false
-// 	channelCount = 0
-// 	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "")
-// 	flow := newFlowMock()
+	action, err := GetAction(flow)
 
-// 	flow.Steps["button"].Parameters.Texts = []string{"text"}
-// 	flow.CurrentStep = flow.Steps["button"]
+	interaction.Step = *flow.CurrentStep
 
-// 	wait, err := RunActionInput(flow, interaction, CHANNEL_MOCK)
-
-// 	if err != nil {
-// 		t.Error(FormatTestError(nil, err))
-// 	}
-
-// 	if !wait {
-// 		t.Error(FormatTestError(true, false))
-// 	}
-
-// 	if channelCount != 1 {
-// 		t.Error(FormatTestError(1, channelCount))
-// 	}
-
-// 	if channelLastMethodCalled != "SendText" {
-// 		t.Error(FormatTestError("SendText", channelLastMethodCalled))
-// 	}
-
-// 	if channelLastInteractionSent.Parameters.Text != "text" {
-// 		t.Error(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
-// 	}
-// }
-
-// func TestActions_RunActionText(t *testing.T) {
-// 	channelTriggerError = false
-// 	channelCount = 0
-// 	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "")
-// 	flow := newFlowMock()
-
-// 	flow.Steps["button"].Parameters.Texts = []string{"text"}
-// 	flow.CurrentStep = flow.Steps["button"]
-
-// 	wait, err := RunActionText(flow, interaction, CHANNEL_MOCK)
-
-// 	if err != nil {
-// 		t.Error(FormatTestError(nil, err))
-// 	}
-
-// 	if wait {
-// 		t.Error(FormatTestError(false, true))
-// 	}
-
-// 	if channelCount != 1 {
-// 		t.Error(FormatTestError(1, channelCount))
-// 	}
-
-// 	if channelLastMethodCalled != "SendText" {
-// 		t.Error(FormatTestError("SendText", channelLastMethodCalled))
-// 	}
-
-// 	if channelLastInteractionSent.Parameters.Text != "text" {
-// 		t.Error(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
-// 	}
-// }
-
-// func TestActions_RunActionWait(t *testing.T) {
-// 	channelTriggerError = false
-// 	channelCount = 0
-// 	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "")
-// 	flow := newFlowMock()
-
-// 	flow.Steps["button"].Parameters.Texts = []string{"text"}
-// 	flow.CurrentStep = flow.Steps["button"]
-
-// 	wait, err := RunActionWait(flow, interaction, CHANNEL_MOCK)
-
-// 	if err != nil {
-// 		t.Error(FormatTestError(nil, err))
-// 	}
-
-// 	if !wait {
-// 		t.Error(FormatTestError(true, false))
-// 	}
-// }
-
-// func TestActions_RunActionRoom(t *testing.T) {
-// 	channelTriggerError = false
-// 	channelCount = 0
-// 	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "")
-// 	flow := newFlowMock()
-
-// 	flow.Steps["button"].Parameters.Texts = []string{"text"}
-// 	flow.CurrentStep = flow.Steps["button"]
-
-// 	wait, err := RunActionRoom(flow, interaction, CHANNEL_MOCK)
-
-// 	if err != nil {
-// 		t.Error(FormatTestError(nil, err))
-// 	}
-
-// 	if wait {
-// 		t.Error(FormatTestError(false, true))
-// 	}
-
-// 	if channelCount != 1 {
-// 		t.Error(FormatTestError(1, channelCount))
-// 	}
-
-// 	if channelLastMethodCalled != "SendText" {
-// 		t.Error(FormatTestError("SendText", channelLastMethodCalled))
-// 	}
-
-// 	if channelLastInteractionSent.Parameters.Text != "text" {
-// 		t.Error(FormatTestError("text", channelLastInteractionSent.Parameters.Text))
-// 	}
-
-// 	if interaction.Custom["RoomID"] == nil {
-// 		t.Error(FormatTestError("uuid", interaction.Custom["RoomID"]))
-// 	}
-
-// 	if len(roomManager.Rooms) != 1 {
-// 		t.Error(FormatTestError(1, len(roomManager.Rooms)))
-// 	}
-// }
+	if err != nil {
+		t.Fatal(FormatTestError(nil, err))
+	}
+
+	interaction, wait := action(interaction)
+
+	if interaction == nil {
+		t.Fatal(FormatTestError("interaction", nil))
+	}
+
+	if wait {
+		t.Fatal(FormatTestError(false, wait))
+	}
+
+	if interaction.Type != MESSAGE_FILE {
+		t.Fatal(FormatTestError(MESSAGE_FILE, interaction.Type))
+	}
+
+	if !interaction.Parameters.File.GetFile().IsDocument() {
+		t.Fatal(FormatTestError(FILETYPE_DOCUMENT, interaction.Parameters.File.GetFile().FileType))
+	}
+}
+
+func TestActions_RunActionFileImage(t *testing.T) {
+	channelCount = 0
+	interaction := NewInteractionMessageText("")
+	flow := newFlowMock()
+
+	flow.Steps["image"].Parameters.Path = "./mocks/image.jpg"
+	flow.Steps["image"].Parameters.Texts = []string{"text"}
+	flow.CurrentStep = flow.Steps["image"]
+
+	action, err := GetAction(flow)
+
+	interaction.Step = *flow.CurrentStep
+
+	if err != nil {
+		t.Fatal(FormatTestError(nil, err))
+	}
+
+	interaction, wait := action(interaction)
+
+	if interaction == nil {
+		t.Fatal(FormatTestError("interaction", nil))
+	}
+
+	if wait {
+		t.Fatal(FormatTestError(false, wait))
+	}
+
+	if interaction.Type != MESSAGE_FILE {
+		t.Fatal(FormatTestError(MESSAGE_FILE, interaction.Type))
+	}
+
+	if !interaction.Parameters.File.GetFile().IsImage() {
+		t.Fatal(FormatTestError(FILETYPE_IMAGE, interaction.Parameters.File.GetFile().FileType))
+	}
+}
+
+func TestActions_RunActionFileVideo(t *testing.T) {
+	channelCount = 0
+	interaction := NewInteractionMessageText("")
+	flow := newFlowMock()
+
+	flow.Steps["video"].Parameters.Path = "./mocks/video.mp4"
+	flow.Steps["video"].Parameters.Texts = []string{"text"}
+	flow.CurrentStep = flow.Steps["video"]
+
+	action, err := GetAction(flow)
+
+	interaction.Step = *flow.CurrentStep
+
+	if err != nil {
+		t.Fatal(FormatTestError(nil, err))
+	}
+
+	interaction, wait := action(interaction)
+
+	if interaction == nil {
+		t.Fatal(FormatTestError("interaction", nil))
+	}
+
+	if wait {
+		t.Fatal(FormatTestError(false, wait))
+	}
+
+	if interaction.Type != MESSAGE_FILE {
+		t.Fatal(FormatTestError(MESSAGE_FILE, interaction.Type))
+	}
+
+	if !interaction.Parameters.File.GetFile().IsVideo() {
+		t.Fatal(FormatTestError(FILETYPE_VIDEO, interaction.Parameters.File.GetFile().FileType))
+	}
+}
+
+func TestActions_RunActionInput(t *testing.T) {
+	channelTriggerError = false
+	channelCount = 0
+	interaction := NewInteractionMessageText("")
+	flow := newFlowMock()
+
+	flow.Steps["input"].Parameters.Texts = []string{"text"}
+	flow.CurrentStep = flow.Steps["input"]
+
+	action, err := GetAction(flow)
+
+	interaction.Step = *flow.CurrentStep
+
+	if err != nil {
+		t.Fatal(FormatTestError(nil, err))
+	}
+
+	interaction, wait := action(interaction)
+
+	if interaction == nil {
+		t.Fatal(FormatTestError("interaction", nil))
+	}
+
+	if !wait {
+		t.Fatal(FormatTestError(true, wait))
+	}
+
+	if interaction.Type != MESSAGE_TEXT {
+		t.Fatal(FormatTestError(MESSAGE_FILE, interaction.Type))
+	}
+}
+
+func TestActions_RunActionText(t *testing.T) {
+	channelTriggerError = false
+	channelCount = 0
+	interaction := NewInteractionMessageText("")
+	flow := newFlowMock()
+
+	flow.Steps["text"].Parameters.Texts = []string{"text"}
+	flow.CurrentStep = flow.Steps["text"]
+
+	action, err := GetAction(flow)
+
+	interaction.Step = *flow.CurrentStep
+
+	if err != nil {
+		t.Fatal(FormatTestError(nil, err))
+	}
+
+	interaction, wait := action(interaction)
+
+	if interaction == nil {
+		t.Fatal(FormatTestError("interaction", nil))
+	}
+
+	if wait {
+		t.Fatal(FormatTestError(false, wait))
+	}
+
+	if interaction.Type != MESSAGE_TEXT {
+		t.Fatal(FormatTestError(MESSAGE_FILE, interaction.Type))
+	}
+}

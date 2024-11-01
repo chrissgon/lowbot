@@ -68,11 +68,21 @@ func TestFlow_NewFlowByJSON(t *testing.T) {
 
 			"image": {
 				"next": {
-					"default": "text"
+					"default": "input"
 				},
 				"action": "File",
 				"parameters": {
 					"path": "./mocks/image.jpg"
+				}
+			},
+
+			"input": {
+				"next": {
+					"default": "text"
+				},
+				"action": "Input",
+				"parameters": {
+					"texts": ["texts"]
 				}
 			},
 
@@ -155,112 +165,112 @@ func TestFlow_StartFlow(t *testing.T) {
 	}
 }
 
-// func TestFlow_NextFlow(t *testing.T) {
-// 	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "")
+func TestFlow_NextFlow(t *testing.T) {
+	interaction := NewInteractionMessageText("")
 
-// 	flow, _ := NewFlow("./mocks/flow.yaml")
-// 	flow.Start()
-// 	flow.CurrentStepName = FLOW_END_STEP_NAME
-// 	err := flow.Next(interaction)
+	flow, _ := NewFlow("./mocks/flow.yaml")
+	flow.Start()
+	flow.CurrentStepName = FLOW_END_STEP_NAME
+	err := flow.Next(interaction)
 
-// 	if !errors.Is(err, ERR_ENDED_FLOW) {
-// 		t.Error(FormatTestError(ERR_ENDED_FLOW, err))
-// 	}
+	if !errors.Is(err, ERR_ENDED_FLOW) {
+		t.Error(FormatTestError(ERR_ENDED_FLOW, err))
+	}
 
-// 	flow, _ = NewFlow("./mocks/flow.yaml")
-// 	flow.Start()
-// 	flow.CurrentStep.Next = nil
-// 	err = flow.Next(interaction)
+	flow, _ = NewFlow("./mocks/flow.yaml")
+	flow.Start()
+	flow.CurrentStep.Next = nil
+	err = flow.Next(interaction)
 
-// 	if !errors.Is(err, ERR_UNKNOWN_NEXT_STEP) {
-// 		t.Error(FormatTestError(ERR_UNKNOWN_NEXT_STEP, err))
-// 	}
+	if !errors.Is(err, ERR_UNKNOWN_NEXT_STEP) {
+		t.Error(FormatTestError(ERR_UNKNOWN_NEXT_STEP, err))
+	}
 
-// 	flow, _ = NewFlow("./mocks/flow.yaml")
-// 	flow.Start()
-// 	delete(flow.CurrentStep.Next, "default")
-// 	err = flow.Next(interaction)
+	flow, _ = NewFlow("./mocks/flow.yaml")
+	flow.Start()
+	delete(flow.CurrentStep.Next, "default")
+	err = flow.Next(interaction)
 
-// 	if !errors.Is(err, ERR_UNKNOWN_DEFAULT_STEP) {
-// 		t.Error(FormatTestError(ERR_UNKNOWN_DEFAULT_STEP, err))
-// 	}
+	if !errors.Is(err, ERR_UNKNOWN_DEFAULT_STEP) {
+		t.Error(FormatTestError(ERR_UNKNOWN_DEFAULT_STEP, err))
+	}
 
-// 	flow, _ = NewFlow("./mocks/flow.yaml")
-// 	flow.Start()
-// 	flow.Next(NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, ""))
+	flow, _ = NewFlow("./mocks/flow.yaml")
+	flow.Start()
+	flow.Next(NewInteractionMessageText(""))
 
-// 	expect := flow.Steps["audio"]
-// 	have := flow.CurrentStep
+	expect := flow.Steps["audio"]
+	have := flow.CurrentStep
 
-// 	if !reflect.DeepEqual(expect, have) {
-// 		t.Error(FormatTestError(expect, have))
-// 	}
-// }
+	if !reflect.DeepEqual(expect, have) {
+		t.Error(FormatTestError(expect, have))
+	}
+}
 
-// func TestFlow_goNextStep(t *testing.T) {
-// 	strJSON := `
-// 	{
-// 		"name": "pingpong",
-// 		"steps": {
-// 			"init": {
-// 				"next": {
-// 					"default": "invalid"
-// 				}
-// 			},
+func TestFlow_goNextStep(t *testing.T) {
+	strJSON := `
+	{
+		"name": "pingpong",
+		"steps": {
+			"init": {
+				"next": {
+					"default": "invalid"
+				}
+			},
 
-// 			"invalid": {
-// 				"action": "Wait",
-// 				"next": {
-// 					"$*)": "invalid",
-// 					"default": "invalid"
-// 				}
-// 			},
+			"invalid": {
+				"action": "Wait",
+				"next": {
+					"$*)": "invalid",
+					"default": "invalid"
+				}
+			},
 
-// 			"matched": {
-// 				"action": "Wait",
-// 				"next": {
-// 					"yes": "end",
-// 					"default": "matched"
-// 				}
-// 			},
+			"matched": {
+				"action": "Wait",
+				"next": {
+					"yes": "end",
+					"default": "matched"
+				}
+			},
 
-// 			"end": {
-// 				"action": "Text",
-// 				"parameters": {
-// 					"texts": ["end"]
-// 				}
-// 			}
-// 		}
-// 	}
-// 	`
-// 	flow, err := NewFlowByJSON(strJSON)
+			"end": {
+				"action": "Text",
+				"parameters": {
+					"texts": ["end"]
+				}
+			}
+		}
+	}
+	`
+	flow, err := NewFlowByJSON(strJSON)
 
-// 	if err != nil {
-// 		t.Error(FormatTestError(nil, err))
-// 	}
+	if err != nil {
+		t.Error(FormatTestError(nil, err))
+	}
 
-// 	flow.CurrentStep = flow.Steps["invalid"]
-// 	flow.CurrentStepName = "invalid"
+	flow.CurrentStep = flow.Steps["invalid"]
+	flow.CurrentStepName = "invalid"
 
-// 	err = flow.goNextStep(NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, ""))
+	err = flow.goNextStep(NewInteractionMessageText(""))
 
-// 	if !errors.Is(ERR_PATTERN_NEXT_STEP, err) {
-// 		t.Error(FormatTestError(ERR_PATTERN_NEXT_STEP, err))
-// 	}
+	if !errors.Is(ERR_PATTERN_NEXT_STEP, err) {
+		t.Error(FormatTestError(ERR_PATTERN_NEXT_STEP, err))
+	}
 
-// 	flow.CurrentStep = flow.Steps["matched"]
-// 	flow.CurrentStepName = "matched"
+	flow.CurrentStep = flow.Steps["matched"]
+	flow.CurrentStepName = "matched"
 
-// 	err = flow.goNextStep(NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "yes"))
+	err = flow.goNextStep(NewInteractionMessageText("yes"))
 
-// 	if err != nil {
-// 		t.Error(FormatTestError(nil, err))
-// 	}
+	if err != nil {
+		t.Error(FormatTestError(nil, err))
+	}
 
-// 	if flow.CurrentStepName != "end" {
-// 		t.Error(FormatTestError("end", flow.CurrentStepName))
-// 	}
-// }
+	if flow.CurrentStepName != "end" {
+		t.Error(FormatTestError("end", flow.CurrentStepName))
+	}
+}
 
 func TestFlow_NoHasNext(t *testing.T) {
 	flow, _ := NewFlow("./mocks/flow.yaml")
@@ -272,19 +282,7 @@ func TestFlow_NoHasNext(t *testing.T) {
 	}
 }
 
-// func TestFlow_AddResponse(t *testing.T) {
-// 	flow, _ := NewFlow("./mocks/flow.yaml")
-// 	flow.Start()
-// 	flow.Next(NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, ""))
-
-// 	expect := 1
-// 	have := len(flow.Responses)
-
-//		if expect != have {
-//			t.Error(FormatTestError(expect, have))
-//		}
-//	}
-func TestFlow_AddResponseValue(t *testing.T) {
+func TestFlow_Ended(t *testing.T) {
 	flow, _ := NewFlow("./mocks/flow.yaml")
 
 	flow.CurrentStepName = FLOW_END_STEP_NAME
@@ -296,48 +294,6 @@ func TestFlow_AddResponseValue(t *testing.T) {
 		t.Error(FormatTestError(expect, have))
 	}
 }
-
-// func TestFlow_GetLastResponse(t *testing.T) {
-// 	flow, _ := NewFlow("./mocks/flow.yaml")
-// 	flow.Start()
-
-// 	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "")
-// 	flow.Next(interaction)
-
-// 	expect := interaction
-// 	have := flow.GetLastResponse()
-
-// 	if !reflect.DeepEqual(expect, have) {
-// 		t.Error(FormatTestError(expect, have))
-// 	}
-// }
-// func TestFlow_GetLastResponsetText(t *testing.T) {
-// 	flow, _ := NewFlow("./mocks/flow.yaml")
-// 	flow.Start()
-
-// 	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "")
-// 	flow.Next(interaction)
-
-// 	expect := interaction.Parameters.Text
-// 	have := flow.GetLastResponseText()
-
-// 	if expect != have {
-// 		t.Error(FormatTestError(expect, have))
-// 	}
-// }
-// func TestFlow_Ended(t *testing.T) {
-// 	interaction := NewInteractionMessageText(CHANNEL_MOCK, DESTINATION_MOCK, SENDER_MOCK, "Response")
-// 	flow, _ := NewFlow("./mocks/flow.yaml")
-// 	flow.Start()
-// 	flow.Next(interaction)
-
-// 	expect := interaction
-// 	have := flow.Responses[0]
-
-// 	if !reflect.DeepEqual(expect, have) {
-// 		t.Error(FormatTestError(expect, have))
-// 	}
-// }
 
 func newFlowMock() *Flow {
 	return &Flow{
@@ -378,11 +334,20 @@ func newFlowMock() *Flow {
 			},
 			"image": {
 				Next: map[string]string{
-					"default": "text",
+					"default": "input",
 				},
 				Action: "File",
 				Parameters: StepParameters{
 					Path: "./mocks/image.jpg",
+				},
+			},
+			"input": {
+				Next: map[string]string{
+					"default": "text",
+				},
+				Action: "Input",
+				Parameters: StepParameters{
+					Texts: []string{"texts"},
 				},
 			},
 			"text": {

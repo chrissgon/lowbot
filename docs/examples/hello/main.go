@@ -12,7 +12,7 @@ func main() {
 	// set custom actions
 	lowbot.SetCustomActions(lowbot.ActionsMap{
 		"TextUsername": func(interaction *lowbot.Interaction) (*lowbot.Interaction, bool) {
-			template := lowbot.ParseTemplate(interaction.StepParameters.Texts)
+			template := lowbot.ParseTemplate(interaction.Step.Parameters.Texts)
 			templateWithUsername := fmt.Sprintf(template, interaction.Parameters.Text)
 			in := lowbot.NewInteractionMessageText(templateWithUsername)
 			in.SetFrom(interaction.From)

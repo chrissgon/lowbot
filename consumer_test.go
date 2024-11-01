@@ -17,12 +17,10 @@ func newMockConsumer() IConsumer {
 	}
 }
 
-// GetConsumer implements IConsumer.
 func (m *mockConsumer) GetConsumer() *Consumer {
 	return m.Consumer
 }
 
-// Run implements IConsumer.
 func (m *mockConsumer) Run(*Interaction) ([]*Interaction, error) {
 	m.ranTimes++
 	return nil, nil
