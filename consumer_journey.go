@@ -65,7 +65,13 @@ func (consumer *JourneyConsumer) getInteractions(flow *Flow, interaction *Intera
 			return interactions, err
 		}
 
-		answerInteraction, wait := action(flow, interaction)
+		step := flow.CurrentStep
+
+		interaction.Custom["text"] = ParseTemplate(step.Parameters.Texts)
+		interaction.Custom["path"] = step.Parameters.Path
+		interaction.Custom["buttons"] = step.Parameters.Buttons
+
+		answerInteraction, wait := action(interaction)
 
 		maps.Copy(flow.CurrentStep.Parameters.Custom, answerInteraction.Parameters.Custom)
 

@@ -2,7 +2,7 @@ package lowbot
 
 type ActionsMap map[string]ActionFunc
 
-type ActionFunc func(*Flow, *Interaction) (*Interaction, bool)
+type ActionFunc func(*Interaction) (*Interaction, bool)
 
 var actions = ActionsMap{
 	"Button": RunActionButton,
@@ -37,22 +37,14 @@ func GetAction(flow *Flow, interaction *Interaction) (ActionFunc, error) {
 	return action, nil
 }
 
-func RunActionButton(flow *Flow, interaction *Interaction) (*Interaction, bool) {
-	step := flow.CurrentStep
-
-	text := ParseTemplate(step.Parameters.Texts)
-
-	newInteraction := NewInteractionMessageButton(interaction.Destination, NewWho(CONSUMER_JOURNEY_NAME, CONSUMER_JOURNEY_NAME), step.Parameters.Buttons, text)
+func RunActionButton(interaction *Interaction) (*Interaction, bool) {
+	newInteraction := NewInteractionMessageButton(interaction.Destination, NewWho(CONSUMER_JOURNEY_NAME, CONSUMER_JOURNEY_NAME), interaction.Custom["buttons"].([]string), interaction.Custom["text"].(string))
 
 	return newInteraction, true
 }
 
-func RunActionFile(flow *Flow, interaction *Interaction) (*Interaction, bool) {
-	step := flow.CurrentStep
-
-	text := ParseTemplate(step.Parameters.Texts)
-
-	newInteraction := NewInteractionMessageFile(interaction.Destination, NewWho(CONSUMER_JOURNEY_NAME, CONSUMER_JOURNEY_NAME), step.Parameters.Path, text)
+func RunActionFile(interaction *Interaction) (*Interaction, bool) {
+	newInteraction := NewInteractionMessageFile(interaction.Destination, NewWho(CONSUMER_JOURNEY_NAME, CONSUMER_JOURNEY_NAME), interaction.Custom["path"].(string), interaction.Custom["text"].(string))
 
 	if newInteraction.Parameters.File.IsAudio() {
 		return newInteraction, false
@@ -67,8 +59,8 @@ func RunActionFile(flow *Flow, interaction *Interaction) (*Interaction, bool) {
 	return newInteraction, false
 }
 
-func RunActionInput(flow *Flow, interaction *Interaction) (*Interaction, bool) {
-	answerInteraction, _ := RunActionText(flow, interaction)
+func RunActionInput(interaction *Interaction) (*Interaction, bool) {
+	answerInteraction, _ := RunActionText(interaction)
 
 	if answerInteraction.Parameters.Text == "" {
 		return nil, true
@@ -77,12 +69,8 @@ func RunActionInput(flow *Flow, interaction *Interaction) (*Interaction, bool) {
 	return answerInteraction, true
 }
 
-func RunActionText(flow *Flow, interaction *Interaction) (*Interaction, bool) {
-	step := flow.CurrentStep
-
-	text := ParseTemplate(step.Parameters.Texts)
-
-	newInteraction := NewInteractionMessageText(interaction.Destination, NewWho(CONSUMER_JOURNEY_NAME, CONSUMER_JOURNEY_NAME), text)
+func RunActionText(interaction *Interaction) (*Interaction, bool) {
+	newInteraction := NewInteractionMessageText(interaction.Destination, NewWho(CONSUMER_JOURNEY_NAME, CONSUMER_JOURNEY_NAME), interaction.Custom["text"].(string))
 
 	return newInteraction, false
 }
