@@ -16,7 +16,6 @@ type Flow struct {
 	Steps           Steps  `yaml:"steps" json:"steps"`
 	CurrentStep     *Step
 	CurrentStepName string
-	Responses       []*Interaction
 }
 
 type Step struct {
@@ -105,8 +104,6 @@ func (flow *Flow) Next(interaction *Interaction) error {
 		return err
 	}
 
-	flow.AddResponse(interaction)
-
 	return nil
 }
 
@@ -144,16 +141,4 @@ func (flow *Flow) NoHasNext() bool {
 
 func (flow *Flow) Ended() bool {
 	return flow.CurrentStepName == FLOW_END_STEP_NAME
-}
-
-func (flow *Flow) AddResponse(interaction *Interaction) {
-	flow.Responses = append(flow.Responses, interaction)
-}
-
-func (flow *Flow) GetLastResponse() *Interaction {
-	return flow.Responses[len(flow.Responses)-1]
-}
-
-func (flow *Flow) GetLastResponseText() string {
-	return flow.Responses[len(flow.Responses)-1].Parameters.Text
 }

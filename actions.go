@@ -38,13 +38,23 @@ func GetAction(flow *Flow, interaction *Interaction) (ActionFunc, error) {
 }
 
 func RunActionButton(interaction *Interaction) (*Interaction, bool) {
-	newInteraction := NewInteractionMessageButton(interaction.Destination, NewWho(CONSUMER_JOURNEY_NAME, CONSUMER_JOURNEY_NAME), interaction.Custom["buttons"].([]string), interaction.Custom["text"].(string))
+	text := ParseTemplate(interaction.StepParameters.Texts)
+
+	newInteraction := NewInteractionMessageButton(interaction.StepParameters.Buttons, text)
+	newInteraction.SetFrom(interaction.From)
+	newInteraction.SetTo(interaction.To)
+	newInteraction.SetReplier(NewWho(CONSUMER_JOURNEY_NAME, CONSUMER_JOURNEY_NAME))
 
 	return newInteraction, true
 }
 
 func RunActionFile(interaction *Interaction) (*Interaction, bool) {
-	newInteraction := NewInteractionMessageFile(interaction.Destination, NewWho(CONSUMER_JOURNEY_NAME, CONSUMER_JOURNEY_NAME), interaction.Custom["path"].(string), interaction.Custom["text"].(string))
+	text := ParseTemplate(interaction.StepParameters.Texts)
+
+	newInteraction := NewInteractionMessageFile(interaction.StepParameters.Path, text)
+	newInteraction.SetFrom(interaction.From)
+	newInteraction.SetTo(interaction.To)
+	newInteraction.SetReplier(NewWho(CONSUMER_JOURNEY_NAME, CONSUMER_JOURNEY_NAME))
 
 	if newInteraction.Parameters.File.IsAudio() {
 		return newInteraction, false
@@ -70,7 +80,12 @@ func RunActionInput(interaction *Interaction) (*Interaction, bool) {
 }
 
 func RunActionText(interaction *Interaction) (*Interaction, bool) {
-	newInteraction := NewInteractionMessageText(interaction.Destination, NewWho(CONSUMER_JOURNEY_NAME, CONSUMER_JOURNEY_NAME), interaction.Custom["text"].(string))
+	text := ParseTemplate(interaction.StepParameters.Texts)
+
+	newInteraction := NewInteractionMessageText(text)
+	newInteraction.SetFrom(interaction.From)
+	newInteraction.SetTo(interaction.To)
+	newInteraction.SetReplier(NewWho(CONSUMER_JOURNEY_NAME, CONSUMER_JOURNEY_NAME))
 
 	return newInteraction, false
 }

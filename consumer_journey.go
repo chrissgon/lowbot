@@ -2,7 +2,6 @@ package lowbot
 
 import (
 	"fmt"
-	"maps"
 
 	"github.com/google/uuid"
 )
@@ -29,7 +28,7 @@ func (consumer *JourneyConsumer) GetConsumer() *Consumer {
 }
 
 func (consumer *JourneyConsumer) Run(interaction *Interaction) ([]*Interaction, error) {
-	flow, err := consumer.Persist.Get(interaction.Sender.WhoID)
+	flow, err := consumer.Persist.Get(interaction.From.WhoID)
 
 	flowNotExistsOrWasFinished := err != nil || flow.Ended()
 
@@ -41,9 +40,9 @@ func (consumer *JourneyConsumer) Run(interaction *Interaction) ([]*Interaction, 
 
 	interactions, err := consumer.getInteractions(flow, interaction)
 
-	consumer.Persist.Set(interaction.Sender.WhoID, flow)
+	consumer.Persist.Set(interaction.From.WhoID, flow)
 
-	printLog(fmt.Sprintf("WhoID:<%v> Step:<%s> ERR: %v\n", interaction.Sender.WhoID, flow.CurrentStepName, err))
+	printLog(fmt.Sprintf("WhoID:<%v> Step:<%s> ERR: %v\n", interaction.From.WhoID, flow.CurrentStepName, err))
 
 	return interactions, err
 }
@@ -65,15 +64,11 @@ func (consumer *JourneyConsumer) getInteractions(flow *Flow, interaction *Intera
 			return interactions, err
 		}
 
-		step := flow.CurrentStep
-
-		interaction.Custom["text"] = ParseTemplate(step.Parameters.Texts)
-		interaction.Custom["path"] = step.Parameters.Path
-		interaction.Custom["buttons"] = step.Parameters.Buttons
+		interaction.StepParameters = flow.CurrentStep.Parameters
 
 		answerInteraction, wait := action(interaction)
 
-		maps.Copy(flow.CurrentStep.Parameters.Custom, answerInteraction.Parameters.Custom)
+		answerInteraction.StepParameters = flow.CurrentStep.Parameters
 
 		next = !wait
 

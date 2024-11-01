@@ -1,12 +1,17 @@
 package lowbot
 
 type Interaction struct {
-	Destination *Who
-	Sender      *Who
-	Replier     *Who
-	Type        InteractionType
-	Parameters  InteractionParameters
-	Custom      map[string]any
+	To      *Who
+	From    *Who
+	Replier *Who
+
+	// Destination    *Who
+	// Sender         *Who
+	// Replier        *Who
+	Type           InteractionType
+	Parameters     InteractionParameters
+	StepParameters StepParameters
+	Custom         map[string]any
 }
 
 type InteractionType string
@@ -25,11 +30,9 @@ type InteractionParameters struct {
 	Custom  map[string]any
 }
 
-func NewInteractionMessageButton(destination *Who, sender *Who, buttons []string, text string) *Interaction {
+func NewInteractionMessageButton(buttons []string, text string) *Interaction {
 	return &Interaction{
-		Destination: destination,
-		Sender:      sender,
-		Type:        MESSAGE_BUTTON,
+		Type: MESSAGE_BUTTON,
 		Parameters: InteractionParameters{
 			Text:    text,
 			Buttons: buttons,
@@ -38,11 +41,9 @@ func NewInteractionMessageButton(destination *Who, sender *Who, buttons []string
 	}
 }
 
-func NewInteractionMessageFile(destination *Who, sender *Who, path string, text string) *Interaction {
+func NewInteractionMessageFile(path string, text string) *Interaction {
 	return &Interaction{
-		Destination: destination,
-		Sender:      sender,
-		Type:        MESSAGE_FILE,
+		Type: MESSAGE_FILE,
 		Parameters: InteractionParameters{
 			Text: text,
 			File: NewFile(path),
@@ -51,11 +52,9 @@ func NewInteractionMessageFile(destination *Who, sender *Who, path string, text 
 	}
 }
 
-func NewInteractionMessageText(destination *Who, sender *Who, text string) *Interaction {
+func NewInteractionMessageText(text string) *Interaction {
 	return &Interaction{
-		Destination: destination,
-		Sender:      sender,
-		Type:        MESSAGE_TEXT,
+		Type: MESSAGE_TEXT,
 		Parameters: InteractionParameters{
 			Text: text,
 		},
@@ -63,12 +62,17 @@ func NewInteractionMessageText(destination *Who, sender *Who, text string) *Inte
 	}
 }
 
-func (interaction *Interaction) SetReplier(replier *Who) *Interaction {
-	interaction.Replier = replier
+func (interaction *Interaction) SetTo(to *Who) *Interaction {
+	interaction.To = to
 	return interaction
 }
 
-func (interaction *Interaction) SetDestination(destination *Who) *Interaction {
-	interaction.Destination = destination
+func (interaction *Interaction) SetFrom(from *Who) *Interaction {
+	interaction.From = from
+	return interaction
+}
+
+func (interaction *Interaction) SetReplier(replier *Who) *Interaction {
+	interaction.Replier = replier
 	return interaction
 }

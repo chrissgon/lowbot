@@ -63,9 +63,10 @@ func (channel *WhatsappDeviceChannel) Start() error {
 					fmt.Println("Received a message!", v.Message.GetConversation())
 					// fmt.Println(v.Info.Sender.id)
 
-					destination := NewWho(v.Info.Sender.User, v.Info.Sender.User)
-					destination.Custom["JID"] = v.Info.Sender
-					interaction := NewInteractionMessageText(destination, destination, v.Message.GetConversation())
+					from := NewWho(v.Info.Sender.User, v.Info.Sender.User)
+					from.Custom["JID"] = v.Info.Sender
+					interaction := NewInteractionMessageText(v.Message.GetConversation())
+					interaction.SetFrom(from)
 
 					channel.Broadcast.Send(interaction)
 					// res, err := channel.conn.SendMessage(context.Background(), v.Info.Sender, &waProto.Message{
@@ -145,7 +146,7 @@ func (channel *WhatsappDeviceChannel) SendImage(*Interaction) error {
 }
 
 func (channel *WhatsappDeviceChannel) SendText(interaction *Interaction) error {
-	JID := interaction.Destination.Custom["JID"].(types.JID)
+	JID := interaction.From.Custom["JID"].(types.JID)
 	_, err := channel.conn.SendMessage(context.Background(), JID, &waE2E.Message{
 		Conversation: &interaction.Parameters.Text,
 	})

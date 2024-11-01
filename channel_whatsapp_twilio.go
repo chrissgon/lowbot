@@ -62,9 +62,10 @@ func (channel *WhatsappTwilioChannel) Start() error {
 		from := c.PostForm("From")
 		to := c.PostForm("To")
 
-		destination := NewWho(to, to)
-		sender := NewWho(from, from)
-		interaction := NewInteractionMessageText(destination, sender, message)
+		interaction := NewInteractionMessageText(message)
+
+		interaction.SetFrom(NewWho(from, from))
+		interaction.SetTo(NewWho(to, to))
 
 		channel.Broadcast.Send(interaction)
 	})
@@ -111,8 +112,8 @@ func (channel *WhatsappTwilioChannel) SendButton(interaction *Interaction) error
 	contentVariables := interaction.Parameters.Custom["contentVariables"].(string)
 
 	if exists {
-		to := interaction.Sender.WhoID
-		from := interaction.Destination.WhoID
+		to := interaction.From.WhoID
+		from := interaction.To.WhoID
 
 		params := &openapi.CreateMessageParams{}
 		params.SetTo(to)
@@ -142,8 +143,8 @@ func (channel *WhatsappTwilioChannel) SendButton(interaction *Interaction) error
 }
 
 func (channel *WhatsappTwilioChannel) SendDocument(interaction *Interaction) error {
-	to := interaction.Sender.WhoID
-	from := interaction.Destination.WhoID
+	to := interaction.From.WhoID
+	from := interaction.To.WhoID
 
 	if !IsURL(interaction.Parameters.File.GetFile().Path) {
 		return ERR_FILE_NOT_PUBLIC
@@ -167,8 +168,10 @@ func (channel *WhatsappTwilioChannel) SendImage(interaction *Interaction) error 
 }
 
 func (channel *WhatsappTwilioChannel) SendText(interaction *Interaction) error {
-	to := interaction.Sender.WhoID
-	from := interaction.Destination.WhoID
+	to := interaction.From.WhoID
+	from := interaction.To.WhoID
+
+	fmt.Println("recebi", to, from)
 
 	params := &openapi.CreateMessageParams{}
 	params.SetTo(to)

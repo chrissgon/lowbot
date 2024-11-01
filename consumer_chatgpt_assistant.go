@@ -53,7 +53,7 @@ func (consumer *ChatGPTAssistantConsumer) GetConsumer() *Consumer {
 func (consumer *ChatGPTAssistantConsumer) Run(interaction *Interaction) ([]*Interaction, error) {
 	threadID, err := consumer.getThreadID(interaction)
 
-	consumer.threads[interaction.Sender.WhoID] = threadID
+	consumer.threads[interaction.From.WhoID] = threadID
 
 	if err != nil {
 		return nil, err
@@ -75,15 +75,18 @@ func (consumer *ChatGPTAssistantConsumer) Run(interaction *Interaction) ([]*Inte
 		return nil, err
 	}
 
+	answerInteraction := NewInteractionMessageText(answer)
+
 	replier := NewWho(consumer.ConsumerID.String(), consumer.Name)
-	answerInteraction := NewInteractionMessageText(interaction.Destination, interaction.Sender, answer)
 	answerInteraction.SetReplier(replier)
+	answerInteraction.SetTo(interaction.To)
+	answerInteraction.SetFrom(interaction.From)
 
 	return []*Interaction{answerInteraction}, nil
 }
 
 func (consumer *ChatGPTAssistantConsumer) getThreadID(interaction *Interaction) (string, error) {
-	threadID, exists := consumer.threads[interaction.Sender.WhoID]
+	threadID, exists := consumer.threads[interaction.From.WhoID]
 
 	if exists {
 		consumer.conn.CreateMessage(consumer.ctx, threadID, openai.MessageRequest{

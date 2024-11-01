@@ -11,11 +11,12 @@ import (
 func main() {
 	// set custom actions
 	lowbot.SetCustomActions(lowbot.ActionsMap{
-		"TextUsername": func(flow *lowbot.Flow, interaction *lowbot.Interaction) (*lowbot.Interaction, bool) {
-			step := flow.CurrentStep
-			template := lowbot.ParseTemplate(step.Parameters.Texts)
-			templateWithUsername := fmt.Sprintf(template, flow.GetLastResponseText())
-			in := lowbot.NewInteractionMessageText(interaction.Destination, interaction.Sender, templateWithUsername)
+		"TextUsername": func(interaction *lowbot.Interaction) (*lowbot.Interaction, bool) {
+			template := lowbot.ParseTemplate(interaction.StepParameters.Texts)
+			templateWithUsername := fmt.Sprintf(template, interaction.Parameters.Text)
+			in := lowbot.NewInteractionMessageText(templateWithUsername)
+			in.SetFrom(interaction.From)
+			in.SetTo(interaction.To)
 			return in, true
 		},
 	})
@@ -25,6 +26,7 @@ func main() {
 
 	// make a channel. In this exemple is Telegram
 	channel, _ := lowbot.NewTelegramChannel(os.Getenv("TELEGRAM_TOKEN"))
+	// channel, _ := lowbot.NewWhatsappTwilioChannel(os.Getenv("WHATSAPP_TWILIO_TOKEN"), os.Getenv("WHATSAPP_TWILIO_SID"))
 
 	// make a persist
 	persist, _ := lowbot.NewMemoryFlowPersist()
