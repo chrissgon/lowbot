@@ -46,14 +46,11 @@ func (bot *Bot) StartConsumerChannel(channel IChannel) {
 	listener := channel.GetChannel().Broadcast.Listen()
 
 	for interaction := range listener {
-		fmt.Println("new message")
 		answersInteraction, err := bot.Consumer.Run(interaction)
 
 		if answersInteraction == nil {
 			continue
 		}
-
-		fmt.Println()
 
 		for _, answerInteraction := range answersInteraction {
 			SendInteraction(channel, answerInteraction)

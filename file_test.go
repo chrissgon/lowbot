@@ -25,6 +25,7 @@ func TestFile_NewFile(t *testing.T) {
 		FileID:    fileID,
 		FileType:  FILETYPE_DOCUMENT,
 		Extension: ".txt",
+		Name:      "features.txt",
 		Path:      p,
 		Err:       err,
 	}

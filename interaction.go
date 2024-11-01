@@ -53,7 +53,6 @@ func NewInteractionMessageFile(destination *Who, sender *Who, path string, text 
 
 func NewInteractionMessageText(destination *Who, sender *Who, text string) *Interaction {
 	return &Interaction{
-		// Channel:     channel.GetChannel(),
 		Destination: destination,
 		Sender:      sender,
 		Type:        MESSAGE_TEXT,

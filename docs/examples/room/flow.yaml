@@ -3,38 +3,35 @@ name: pingpong
 steps:
   init:
     next:
-      default: welcome
+      default: alert
 
-  welcome:
-    action: Button
-    next:
-      Yes: room
-      default: end
-    parameters:
-      texts:
-        - Hello, would you like to speak to one of our team?
-      buttons:
-        - Yes
-        - No
-
-  room:
-    action: Room
-    next:
-      default: fakechat
-    parameters:
-      texts:
-        - Okay, wait a few minutes, we're redirecting you for our team
-
-  fakechat:
-    action: Fakechat
-    next:
-      default: fakechat
-    parameters:
-      custom:
-        url: test
-
-  end:
+  alert:
     action: Text
+    next:
+      default: input
     parameters:
       texts:
-        - Okay, see you later
+        - send "ping" or "pong"
+
+  input:
+    action: Input
+    next:
+      ping: pong
+      pong: ping
+      default: alert
+
+  ping:
+    action: Text
+    next:
+      default: input
+    parameters:
+      texts:
+        - Ping!
+
+  pong:
+    action: Text
+    next:
+      default: input
+    parameters:
+      texts:
+        - Pong!

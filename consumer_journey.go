@@ -2,6 +2,7 @@ package lowbot
 
 import (
 	"fmt"
+	"maps"
 
 	"github.com/google/uuid"
 )
@@ -66,9 +67,11 @@ func (consumer *JourneyConsumer) getInteractions(flow *Flow, interaction *Intera
 
 		answerInteraction, wait := action(flow, interaction)
 
+		maps.Copy(flow.CurrentStep.Parameters.Custom, answerInteraction.Parameters.Custom)
+
 		next = !wait
 
-		if (answerInteraction != nil) {
+		if answerInteraction != nil {
 			interactions = append(interactions, answerInteraction)
 		}
 	}

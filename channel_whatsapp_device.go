@@ -16,14 +16,14 @@ import (
 	"go.mau.fi/whatsmeow/types/events"
 )
 
-type WhatsappChannel struct {
+type WhatsappDeviceChannel struct {
 	*Channel
 	running bool
 	conn    *whatsmeow.Client
 }
 
-func NewWhatsappDeviceChannel() (IChannel, error) {
-	return &WhatsappChannel{
+func newWhatsappDeviceChannel() (IChannel, error) {
+	return &WhatsappDeviceChannel{
 		Channel: &Channel{
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_TELEGRAM_NAME,
@@ -33,11 +33,11 @@ func NewWhatsappDeviceChannel() (IChannel, error) {
 	}, nil
 }
 
-func (channel *WhatsappChannel) GetChannel() *Channel {
+func (channel *WhatsappDeviceChannel) GetChannel() *Channel {
 	return channel.Channel
 }
 
-func (channel *WhatsappChannel) Start() error {
+func (channel *WhatsappDeviceChannel) Start() error {
 	if channel.running {
 		return ERR_CHANNEL_RUNNING
 	}
@@ -117,7 +117,7 @@ func (channel *WhatsappChannel) Start() error {
 	return nil
 }
 
-func (channel *WhatsappChannel) Stop() error {
+func (channel *WhatsappDeviceChannel) Stop() error {
 	if !channel.running {
 		return ERR_CHANNEL_NOT_RUNNING
 	}
@@ -128,23 +128,23 @@ func (channel *WhatsappChannel) Stop() error {
 	return nil
 }
 
-func (channel *WhatsappChannel) SendAudio(*Interaction) error {
+func (channel *WhatsappDeviceChannel) SendAudio(*Interaction) error {
 	panic("unimplemented")
 }
 
-func (channel *WhatsappChannel) SendButton(*Interaction) error {
+func (channel *WhatsappDeviceChannel) SendButton(*Interaction) error {
 	panic("unimplemented")
 }
 
-func (channel *WhatsappChannel) SendDocument(*Interaction) error {
+func (channel *WhatsappDeviceChannel) SendDocument(*Interaction) error {
 	panic("unimplemented")
 }
 
-func (channel *WhatsappChannel) SendImage(*Interaction) error {
+func (channel *WhatsappDeviceChannel) SendImage(*Interaction) error {
 	panic("unimplemented")
 }
 
-func (channel *WhatsappChannel) SendText(interaction *Interaction) error {
+func (channel *WhatsappDeviceChannel) SendText(interaction *Interaction) error {
 	JID := interaction.Destination.Custom["JID"].(types.JID)
 	_, err := channel.conn.SendMessage(context.Background(), JID, &waE2E.Message{
 		Conversation: &interaction.Parameters.Text,
@@ -152,6 +152,6 @@ func (channel *WhatsappChannel) SendText(interaction *Interaction) error {
 	return err
 }
 
-func (channel *WhatsappChannel) SendVideo(*Interaction) error {
+func (channel *WhatsappDeviceChannel) SendVideo(*Interaction) error {
 	panic("unimplemented")
 }

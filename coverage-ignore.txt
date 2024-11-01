@@ -4,4 +4,3 @@ github.com/chrissgon/lowbot/channel_telegram.go
 github.com/chrissgon/lowbot/consumer_chatgpt.go
 github.com/chrissgon/lowbot/consumer_chatgpt_assistant.go
 github.com/chrissgon/lowbot/consumer_journey.go
-github.com/chrissgon/lowbot/lowbot.go

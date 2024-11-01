@@ -9,7 +9,6 @@ var actions = ActionsMap{
 	"File":   RunActionFile,
 	"Input":  RunActionInput,
 	"Text":   RunActionText,
-	// "Room":   RunActionRoom,
 }
 
 func SetCustomActions(custom ActionsMap) {
@@ -43,7 +42,7 @@ func RunActionButton(flow *Flow, interaction *Interaction) (*Interaction, bool) 
 
 	text := ParseTemplate(step.Parameters.Texts)
 
-	newInteraction := NewInteractionMessageButton(interaction.Destination, interaction.Sender, step.Parameters.Buttons, text)
+	newInteraction := NewInteractionMessageButton(interaction.Destination, NewWho(CONSUMER_JOURNEY_NAME, CONSUMER_JOURNEY_NAME), step.Parameters.Buttons, text)
 
 	return newInteraction, true
 }
@@ -53,7 +52,7 @@ func RunActionFile(flow *Flow, interaction *Interaction) (*Interaction, bool) {
 
 	text := ParseTemplate(step.Parameters.Texts)
 
-	newInteraction := NewInteractionMessageFile(interaction.Destination, interaction.Sender, step.Parameters.Path, text)
+	newInteraction := NewInteractionMessageFile(interaction.Destination, NewWho(CONSUMER_JOURNEY_NAME, CONSUMER_JOURNEY_NAME), step.Parameters.Path, text)
 
 	if newInteraction.Parameters.File.IsAudio() {
 		return newInteraction, false
@@ -83,23 +82,7 @@ func RunActionText(flow *Flow, interaction *Interaction) (*Interaction, bool) {
 
 	text := ParseTemplate(step.Parameters.Texts)
 
-	newInteraction := NewInteractionMessageText(interaction.Destination, interaction.Sender, text)
+	newInteraction := NewInteractionMessageText(interaction.Destination, NewWho(CONSUMER_JOURNEY_NAME, CONSUMER_JOURNEY_NAME), text)
 
 	return newInteraction, false
 }
-
-// func RunActionRoom(flow *Flow, interaction *Interaction) (*Interaction, bool) {
-// 	RunActionText(flow, interaction)
-
-// 	guests := RoomGuests{
-// 		interaction.Sender.WhoID: NewGuest(interaction.Sender),
-// 	}
-
-// 	room := NewRoom(guests)
-
-// 	interaction.Custom["RoomID"] = room.RoomID
-
-// 	roomManager.AddRoom(room)
-
-// 	return nil, false
-// }
