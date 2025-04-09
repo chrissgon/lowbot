@@ -3,7 +3,9 @@ package lowbot
 import (
 	"bytes"
 	"context"
+	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
@@ -148,7 +150,8 @@ func (channel *TelegramChannel) SendButton(interaction *Interaction) error {
 
 	_, err = channel.conn.SendMessage(channel.ctx, &bot.SendMessageParams{
 		ChatID:      int64(chatID),
-		Text:        interaction.Parameters.Text,
+		Text:        escapeMarkdownV2(interaction.Parameters.Text),
+		ParseMode:   models.ParseModeMarkdown,
 		ReplyMarkup: kb,
 	})
 
@@ -159,7 +162,7 @@ func (*TelegramChannel) getButtons(interaction *Interaction) (buttons []models.I
 	for i, button := range interaction.Parameters.Buttons {
 		buttons = append(buttons, models.InlineKeyboardButton{
 			Text:         button,
-			CallbackData: strconv.Itoa(i+1),
+			CallbackData: strconv.Itoa(i + 1),
 		})
 	}
 	return
@@ -223,8 +226,9 @@ func (channel *TelegramChannel) SendText(interaction *Interaction) error {
 	}
 
 	_, err = channel.conn.SendMessage(channel.ctx, &bot.SendMessageParams{
-		ChatID: int64(chatID),
-		Text:   interaction.Parameters.Text,
+		ChatID:    int64(chatID),
+		Text:      escapeMarkdownV2(interaction.Parameters.Text),
+		ParseMode: models.ParseModeMarkdown,
 	})
 
 	return err
@@ -253,4 +257,44 @@ func (channel *TelegramChannel) SendVideo(interaction *Interaction) error {
 	})
 
 	return err
+}
+
+func escapeMarkdownV2(text string) string {
+	linkRegex := regexp.MustCompile(`\[(.*?)\]\((.*?)\)`)
+	links := linkRegex.FindAllStringSubmatchIndex(text, -1)
+
+	if len(links) == 0 {
+		return escapeText(text)
+	}
+
+	var result strings.Builder
+	lastIndex := 0
+
+	for _, match := range links {
+		result.WriteString(escapeText(text[lastIndex:match[0]]))
+		linkText := escapeText(text[match[2]:match[3]])
+		linkURL := escapeURL(text[match[4]:match[5]])
+		result.WriteString("[" + linkText + "](" + linkURL + ")")
+		lastIndex = match[1]
+	}
+
+	if lastIndex < len(text) {
+		result.WriteString(escapeText(text[lastIndex:]))
+	}
+
+	return result.String()
+}
+
+func escapeText(text string) string {
+	replacer := strings.NewReplacer(
+		"\\", "\\\\", "_", "\\_", "*", "\\*", "[", "\\[", "]", "\\]",
+		"(", "\\(", ")", "\\)", "~", "\\~", "`", "\\`", ">", "\\>",
+		"#", "\\#", "+", "\\+", "-", "\\-", "=", "\\=", "|", "\\|",
+		"{", "\\{", "}", "\\}", ".", "\\.", "!", "\\!")
+	return replacer.Replace(text)
+}
+
+func escapeURL(url string) string {
+	replacer := strings.NewReplacer("\\", "\\\\", ")", "\\)", ".", "\\.", "!", "\\!")
+	return replacer.Replace(url)
 }

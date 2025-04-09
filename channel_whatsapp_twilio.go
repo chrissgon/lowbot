@@ -24,7 +24,6 @@ type WhatsappTwilioChannel struct {
 }
 
 func NewWhatsappTwilioChannel(token, SID string) (IChannel, error) {
-
 	conn := twilio.NewRestClientWithParams(twilio.ClientParams{
 		Username: SID,
 		Password: token,
@@ -100,10 +99,14 @@ func (channel *WhatsappTwilioChannel) Stop() error {
 	if err != nil {
 		return err
 	}
-
+	
+	err = channel.Broadcast.Close()
+	
+	if err != nil {
+		return err
+	}
+	
 	channel.cancel()
-
-	channel.Broadcast.Close()
 	channel.running = false
 
 	return nil

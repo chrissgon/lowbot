@@ -22,7 +22,7 @@ var (
 	ERR_PATTERN_NEXT_STEP           = errors.New("step pattern invalid")
 	ERR_ENDED_FLOW                  = errors.New("flow ended")
 	ERR_ROOM_STOPPED_FLOW           = errors.New("flow finished by room")
-	ERR_FILE_NOT_PUBLIC           = errors.New("file is not public")
+	ERR_FILE_NOT_PUBLIC             = errors.New("file is not public")
 
 	ERR_FEATURE_UNIMPLEMENTED = errors.New("feature unimplemented")
 )
@@ -30,6 +30,7 @@ var (
 const (
 	CHANNEL_TELEGRAM_NAME        = "telegram"
 	CHANNEL_WHATSAPP_TWILIO_NAME = "whatsapp twilio"
+	CHANNEL_WHATSAPP_DEVICE_NAME = "whatsapp device"
 	CHANNEL_DISCORD_NAME         = "discord"
 	CONSUMER_JOURNEY_NAME        = "journey"
 	CONSUMER_CHATGPT_NAME        = "chatgpt"

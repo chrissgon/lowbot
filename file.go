@@ -1,8 +1,11 @@
 package lowbot
 
 import (
+	"mime"
 	"os"
 	"path/filepath"
+
+	"slices"
 
 	"github.com/google/uuid"
 )
@@ -23,6 +26,7 @@ type File struct {
 	Bytes     []byte
 	Path      string
 	Extension string
+	Mime      string
 	Err       error
 }
 
@@ -49,6 +53,7 @@ func NewFile(path string) IFile {
 
 	file.Extension = filepath.Ext(path)
 	file.Name = filepath.Base(path)
+	file.Mime = mime.TypeByExtension(file.Extension)
 
 	file.SetFilePath(path)
 	file.SetFileType()
@@ -85,23 +90,17 @@ func (file *File) SetFilePath(path string) {
 }
 
 func (file *File) SetFileType() {
-	for _, ext := range FILETYPE_AUDIO_EXT {
-		if file.Extension == ext {
-			file.FileType = FILETYPE_AUDIO
-			return
-		}
+	if slices.Contains(FILETYPE_AUDIO_EXT, file.Extension) {
+		file.FileType = FILETYPE_AUDIO
+		return
 	}
-	for _, ext := range FILETYPE_IMAGE_EXT {
-		if file.Extension == ext {
-			file.FileType = FILETYPE_IMAGE
-			return
-		}
+	if slices.Contains(FILETYPE_IMAGE_EXT, file.Extension) {
+		file.FileType = FILETYPE_IMAGE
+		return
 	}
-	for _, ext := range FILETYPE_VIDEO_EXT {
-		if file.Extension == ext {
-			file.FileType = FILETYPE_VIDEO
-			return
-		}
+	if slices.Contains(FILETYPE_VIDEO_EXT, file.Extension) {
+		file.FileType = FILETYPE_VIDEO
+		return
 	}
 }
 
