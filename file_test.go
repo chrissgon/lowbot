@@ -26,6 +26,7 @@ func TestFile_NewFile(t *testing.T) {
 		FileType:  FILETYPE_DOCUMENT,
 		Extension: ".txt",
 		Name:      "features.txt",
+		Mime:      "text/plain; charset=utf-8",
 		Path:      p,
 		Err:       err,
 	}

@@ -1,4 +1,4 @@
 local.json
 main
 coverage.out
-whatsapp.db
+**/**.db
