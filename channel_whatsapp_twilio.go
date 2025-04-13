@@ -1,11 +1,11 @@
 package lowbot
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -15,15 +15,64 @@ import (
 
 type WhatsappTwilioChannel struct {
 	*Channel
+
 	running bool
 	conn    *twilio.RestClient
-	server  *http.Server
-	ctx     context.Context
-	cancel  context.CancelFunc
 	sid     string
+	number  string
 }
 
-func NewWhatsappTwilioChannel(token, SID string) (IChannel, error) {
+var whatsappTwilioWebhook *gin.Engine
+var whatsappTwilioCallbacks map[string]func(c *gin.Context) error = map[string]func(c *gin.Context) error{}
+var whatsappTwilioCallbacksMutex = sync.Mutex{}
+
+func init() {
+	gin.SetMode(gin.ReleaseMode)
+
+	whatsappTwilioWebhook = gin.Default()
+
+	whatsappTwilioWebhook.GET("/ping", func(c *gin.Context) {
+		c.String(http.StatusOK, "pong")
+	})
+
+	whatsappTwilioWebhook.POST("/twilio/:ID", func(c *gin.Context) {
+		whatsappTwilioCallbacksMutex.Lock()
+		defer whatsappTwilioCallbacksMutex.Unlock()
+
+		ID := c.Param("ID")
+		callback, exists := whatsappTwilioCallbacks[ID]
+
+		if !exists {
+			c.Status(http.StatusNotFound)
+			return
+		}
+
+		err := callback(c)
+
+		if err != nil {
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		c.Status(http.StatusOK)
+	})
+
+	port := os.Getenv("WHATSAPP_TWILIO_PORT")
+
+	if port == "" {
+		port = "8081"
+	}
+
+	go func() {
+		err := whatsappTwilioWebhook.Run(fmt.Sprintf(":%v", port))
+
+		if err != nil {
+			panic(err)
+		}
+	}()
+}
+
+func NewWhatsappTwilioChannel(number, token, SID string) (IChannel, error) {
 	conn := twilio.NewRestClientWithParams(twilio.ClientParams{
 		Username: SID,
 		Password: token,
@@ -38,6 +87,7 @@ func NewWhatsappTwilioChannel(token, SID string) (IChannel, error) {
 		running: false,
 		conn:    conn,
 		sid:     SID,
+		number:  number,
 	}, nil
 }
 
@@ -50,13 +100,10 @@ func (channel *WhatsappTwilioChannel) Start() error {
 		return ERR_CHANNEL_RUNNING
 	}
 
-	router := gin.Default()
+	whatsappTwilioCallbacksMutex.Lock()
+	defer whatsappTwilioCallbacksMutex.Unlock()
 
-	router.GET("/ping", func(c *gin.Context) {
-		c.String(http.StatusOK, "pong")
-	})
-
-	router.POST(fmt.Sprintf("/twilio/%v", channel.sid), func(c *gin.Context) {
+	whatsappTwilioCallbacks[channel.number] = func(c *gin.Context) error {
 		message := c.PostForm("Body")
 		from := c.PostForm("From")
 		to := c.PostForm("To")
@@ -67,22 +114,9 @@ func (channel *WhatsappTwilioChannel) Start() error {
 		interaction.SetTo(NewWho(to, to))
 
 		channel.Broadcast.Send(interaction)
-	})
 
-	port := os.Getenv("WHATSAPP_TWILIO_PORT")
-
-	if port == "" {
-		port = "8080"
+		return nil
 	}
-
-	channel.server = &http.Server{
-		Addr:    fmt.Sprintf(":%v", port),
-		Handler: router,
-	}
-
-	channel.ctx, channel.cancel = context.WithCancel(context.Background())
-
-	go channel.server.ListenAndServe()
 
 	channel.running = true
 
@@ -94,19 +128,12 @@ func (channel *WhatsappTwilioChannel) Stop() error {
 		return ERR_CHANNEL_NOT_RUNNING
 	}
 
-	err := channel.server.Shutdown(channel.ctx)
+	err := channel.Broadcast.Close()
 
 	if err != nil {
 		return err
 	}
-	
-	err = channel.Broadcast.Close()
-	
-	if err != nil {
-		return err
-	}
-	
-	channel.cancel()
+
 	channel.running = false
 
 	return nil
