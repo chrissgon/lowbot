@@ -13,7 +13,6 @@ func main() {
 
 	// make a channel. In this exemple is Telegram
 	channel, _ := lowbot.NewTelegramChannel(os.Getenv("TELEGRAM_TOKEN"))
-	// channel, _ := lowbot.NewWhatsappTwilioChannel(os.Getenv("WHATSAPP_TWILIO_TOKEN"), os.Getenv("WHATSAPP_TWILIO_SID"))
 
 	// make a persist
 	persist, _ := lowbot.NewMemoryFlowPersist()

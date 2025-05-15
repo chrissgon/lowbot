@@ -3,7 +3,6 @@ package lowbot
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"sync"
 
@@ -22,20 +21,11 @@ type WhatsappTwilioChannel struct {
 	number  string
 }
 
-var whatsappTwilioWebhook *gin.Engine
 var whatsappTwilioCallbacks map[string]func(c *gin.Context) error = map[string]func(c *gin.Context) error{}
 var whatsappTwilioCallbacksMutex = sync.Mutex{}
 
-func init() {
-	gin.SetMode(gin.ReleaseMode)
-
-	whatsappTwilioWebhook = gin.Default()
-
-	whatsappTwilioWebhook.GET("/ping", func(c *gin.Context) {
-		c.String(http.StatusOK, "pong")
-	})
-
-	whatsappTwilioWebhook.POST("/twilio/:ID", func(c *gin.Context) {
+func InitWhatsappTwilioChannel(webhook *gin.Engine, path string) {
+	webhook.POST(fmt.Sprintf("%s/:ID", path), func(c *gin.Context) {
 		whatsappTwilioCallbacksMutex.Lock()
 		defer whatsappTwilioCallbacksMutex.Unlock()
 
@@ -56,20 +46,6 @@ func init() {
 
 		c.Status(http.StatusOK)
 	})
-
-	port := os.Getenv("WHATSAPP_TWILIO_PORT")
-
-	if port == "" {
-		port = "8081"
-	}
-
-	go func() {
-		err := whatsappTwilioWebhook.Run(fmt.Sprintf(":%v", port))
-
-		if err != nil {
-			panic(err)
-		}
-	}()
 }
 
 func NewWhatsappTwilioChannel(number, token, SID string) (IChannel, error) {

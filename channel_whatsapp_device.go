@@ -29,7 +29,7 @@ type WhatsappDeviceChannel struct {
 
 var whatsSQLContainer *sqlstore.Container
 
-func init() {
+func InitWhatsappDeviceChannel() {
 	var err error
 	address := os.Getenv("WHATSAPP_DEVICE_STORE_ADDRESS")
 
@@ -37,11 +37,13 @@ func init() {
 		address = "whatsapp_credentials.db?_foreign_keys=on"
 	}
 
-	whatsSQLContainer, err = sqlstore.New("sqlite3", address, nil)
-
-	if err != nil {
-		panic(err)
-	}
+	go func() {
+		whatsSQLContainer, err = sqlstore.New("sqlite3", address, nil)
+	
+		if err != nil {
+			panic(err)
+		}
+	}()
 }
 
 func NewWhatsappDeviceChannel(JID *types.JID, callback func(whatsmeow.QRChannelItem, *types.JID) error) (IChannel, error) {
