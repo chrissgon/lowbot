@@ -1,5 +1,5 @@
 package lowbot
 
-type WebhookChannel struct{
+type WebhookChannel struct {
 	*Channel
 }

@@ -57,7 +57,7 @@ func (consumer *ChatGPTConsumer) Run(interaction *Interaction) ([]*Interaction, 
 	}
 
 	answerInteraction := NewInteractionMessageText(resp.Choices[0].Message.Content)
-	
+
 	replier := NewWho(consumer.ConsumerID.String(), consumer.Name)
 	answerInteraction.SetReplier(replier)
 	answerInteraction.SetTo(interaction.To)

@@ -15,9 +15,9 @@ import (
 type WhatsappTwilioChannel struct {
 	*Channel
 
-	conn    *twilio.RestClient
-	sid     string
-	number  string
+	conn   *twilio.RestClient
+	sid    string
+	number string
 }
 
 var whatsappTwilioCallbacks map[string]func(c *gin.Context) error = map[string]func(c *gin.Context) error{}
@@ -58,11 +58,11 @@ func NewWhatsappTwilioChannel(number, token, SID string) (IChannel, error) {
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_WHATSAPP_TWILIO_NAME,
 			Broadcast: NewBroadcast[*Interaction](),
-			Running: false,
+			Running:   false,
 		},
-		conn:    conn,
-		sid:     SID,
-		number:  number,
+		conn:   conn,
+		sid:    SID,
+		number: number,
 	}, nil
 }
 

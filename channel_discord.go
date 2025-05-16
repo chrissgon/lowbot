@@ -12,7 +12,7 @@ import (
 
 type DiscordChannel struct {
 	*Channel
-	conn    *discordgo.Session
+	conn *discordgo.Session
 }
 
 func NewDiscordChannel(token string) (IChannel, error) {
@@ -31,9 +31,9 @@ func NewDiscordChannel(token string) (IChannel, error) {
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_DISCORD_NAME,
 			Broadcast: NewBroadcast[*Interaction](),
-			Running: false,
+			Running:   false,
 		},
-		conn:    conn,
+		conn: conn,
 	}
 
 	return channel, nil

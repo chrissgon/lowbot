@@ -14,10 +14,10 @@ import (
 
 type TelegramChannel struct {
 	*Channel
-	conn    *bot.Bot
-	
-	ctx     context.Context
-	cancel  context.CancelFunc
+	conn *bot.Bot
+
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 func NewTelegramChannel(token string) (IChannel, error) {
@@ -30,7 +30,7 @@ func NewTelegramChannel(token string) (IChannel, error) {
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_TELEGRAM_NAME,
 			Broadcast: NewBroadcast[*Interaction](),
-			Running: false,
+			Running:   false,
 		},
 	}
 
@@ -104,11 +104,11 @@ func (channel *TelegramChannel) Stop() error {
 	}
 
 	err := channel.Broadcast.Close()
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	channel.cancel()
 	channel.Running = false
 
