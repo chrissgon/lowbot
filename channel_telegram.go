@@ -14,8 +14,8 @@ import (
 
 type TelegramChannel struct {
 	*Channel
-	running bool
 	conn    *bot.Bot
+	
 	ctx     context.Context
 	cancel  context.CancelFunc
 }
@@ -30,8 +30,8 @@ func NewTelegramChannel(token string) (IChannel, error) {
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_TELEGRAM_NAME,
 			Broadcast: NewBroadcast[*Interaction](),
+			Running: false,
 		},
-		running: false,
 	}
 
 	opts := []bot.Option{
@@ -51,7 +51,7 @@ func NewTelegramChannel(token string) (IChannel, error) {
 }
 
 func (channel *TelegramChannel) telegramMessageHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	if !channel.running {
+	if !channel.Running {
 		return
 	}
 
@@ -70,7 +70,7 @@ func (channel *TelegramChannel) telegramMessageHandler(ctx context.Context, b *b
 }
 
 func (channel *TelegramChannel) telegramCallbackHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	if !channel.running {
+	if !channel.Running {
 		return
 	}
 
@@ -85,7 +85,7 @@ func (channel *TelegramChannel) GetChannel() *Channel {
 }
 
 func (channel *TelegramChannel) Start() error {
-	if channel.running {
+	if channel.Running {
 		return ERR_CHANNEL_RUNNING
 	}
 
@@ -93,19 +93,24 @@ func (channel *TelegramChannel) Start() error {
 
 	go channel.conn.Start(channel.ctx)
 
-	channel.running = true
+	channel.Running = true
 
 	return nil
 }
 
 func (channel *TelegramChannel) Stop() error {
-	if !channel.running {
+	if !channel.Running {
 		return ERR_CHANNEL_NOT_RUNNING
 	}
 
-	channel.Broadcast.Close()
+	err := channel.Broadcast.Close()
+	
+	if err != nil {
+		return err
+	}
+	
 	channel.cancel()
-	channel.running = false
+	channel.Running = false
 
 	return nil
 }

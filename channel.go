@@ -19,6 +19,7 @@ type IChannel interface {
 type Channel struct {
 	ChannelID uuid.UUID
 	Name      string
+	Running   bool
 	Broadcast *Broadcast[*Interaction]
 }
 

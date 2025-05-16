@@ -15,7 +15,6 @@ import (
 type WhatsappTwilioChannel struct {
 	*Channel
 
-	running bool
 	conn    *twilio.RestClient
 	sid     string
 	number  string
@@ -59,8 +58,8 @@ func NewWhatsappTwilioChannel(number, token, SID string) (IChannel, error) {
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_WHATSAPP_TWILIO_NAME,
 			Broadcast: NewBroadcast[*Interaction](),
+			Running: false,
 		},
-		running: false,
 		conn:    conn,
 		sid:     SID,
 		number:  number,
@@ -72,7 +71,7 @@ func (channel *WhatsappTwilioChannel) GetChannel() *Channel {
 }
 
 func (channel *WhatsappTwilioChannel) Start() error {
-	if channel.running {
+	if channel.Running {
 		return ERR_CHANNEL_RUNNING
 	}
 
@@ -94,13 +93,13 @@ func (channel *WhatsappTwilioChannel) Start() error {
 		return nil
 	}
 
-	channel.running = true
+	channel.Running = true
 
 	return nil
 }
 
 func (channel *WhatsappTwilioChannel) Stop() error {
-	if !channel.running {
+	if !channel.Running {
 		return ERR_CHANNEL_NOT_RUNNING
 	}
 
@@ -110,7 +109,7 @@ func (channel *WhatsappTwilioChannel) Stop() error {
 		return err
 	}
 
-	channel.running = false
+	channel.Running = false
 
 	return nil
 }

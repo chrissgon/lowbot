@@ -20,7 +20,7 @@ func IsURL(str string) bool {
 	return matched
 }
 
-func printLog(msg string) {
+func PrintLog(msg string) {
 	if DEBUG {
 		log.Print(msg)
 	}

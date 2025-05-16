@@ -2,10 +2,12 @@ package lowbot
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/proto"
@@ -17,42 +19,36 @@ import (
 	"go.mau.fi/whatsmeow/store/sqlstore"
 	"go.mau.fi/whatsmeow/types"
 	"go.mau.fi/whatsmeow/types/events"
+	waLog "go.mau.fi/whatsmeow/util/log"
 )
 
-type WhatsappDeviceChannel struct {
+type WhatsappMeowChannel struct {
 	*Channel
-	running bool
-	conn    *whatsmeow.Client
-	device  *store.Device
-	JID     *types.JID
+	conn      *whatsmeow.Client
+	device    *store.Device
+	JID       *types.JID
+	handlerID uint32
+
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
-var whatsSQLContainer *sqlstore.Container
+var whatsMeowSQLContainer *sqlstore.Container
+var WhatsMeowReplyDuration time.Duration = 2 * time.Second
 
-func InitWhatsappDeviceChannel() {
-	var err error
-	address := os.Getenv("WHATSAPP_DEVICE_STORE_ADDRESS")
+func InitWhatsappMeowChannel(ctx context.Context, db *sql.DB, dialect string, log waLog.Logger) error {
+	whatsMeowSQLContainer = sqlstore.NewWithDB(db, dialect, log)
 
-	if address == "" {
-		address = "whatsapp_credentials.db?_foreign_keys=on"
-	}
-
-	go func() {
-		whatsSQLContainer, err = sqlstore.New("sqlite3", address, nil)
-	
-		if err != nil {
-			panic(err)
-		}
-	}()
+	return whatsMeowSQLContainer.Upgrade(ctx)
 }
 
-func NewWhatsappDeviceChannel(JID *types.JID, callback func(whatsmeow.QRChannelItem, *types.JID) error) (IChannel, error) {
+func NewWhatsappMeowChannel(JID *types.JID, callback func(whatsmeow.QRChannelItem, *types.JID) error) (IChannel, error) {
 	var device *store.Device
 	var conn *whatsmeow.Client
 	var err error
 
 	if JID == nil {
-		device = whatsSQLContainer.NewDevice()
+		device = whatsMeowSQLContainer.NewDevice()
 		conn = whatsmeow.NewClient(device, nil)
 
 		qrChan, err := conn.GetQRChannel(context.Background())
@@ -74,43 +70,53 @@ func NewWhatsappDeviceChannel(JID *types.JID, callback func(whatsmeow.QRChannelI
 				return nil, err
 			}
 		}
-
-		conn.Disconnect()
 	} else {
-		device, err = whatsSQLContainer.GetDevice(*JID)
+		device, err = whatsMeowSQLContainer.GetDevice(context.Background(), *JID)
 
 		if err != nil {
 			return nil, err
 		}
 
+		if device == nil {
+			return nil, errors.New("unknown device")
+		}
+
 		conn = whatsmeow.NewClient(device, nil)
+
+		conn.Connect()
 	}
 
-	return &WhatsappDeviceChannel{
+	ctx, cancel := context.WithCancel(context.Background())
+
+	return &WhatsappMeowChannel{
 		Channel: &Channel{
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_WHATSAPP_DEVICE_NAME,
 			Broadcast: NewBroadcast[*Interaction](),
+			Running:   false,
 		},
-		device:  device,
-		conn:    conn,
-		running: false,
+		ctx:       ctx,
+		cancel:    cancel,
+		device:    device,
+		conn:      conn,
+		handlerID: 0,
 	}, nil
 }
 
-func (channel *WhatsappDeviceChannel) GetChannel() *Channel {
+func (channel *WhatsappMeowChannel) GetChannel() *Channel {
 	return channel.Channel
 }
 
-func (channel *WhatsappDeviceChannel) Start() error {
-	if channel.running {
+func (channel *WhatsappMeowChannel) Start() error {
+	if channel.Running {
 		return ERR_CHANNEL_RUNNING
 	}
 
-	channel.conn.AddEventHandler(func(evt any) {
+	channel.handlerID = channel.conn.AddEventHandler(func(evt any) {
 		switch v := evt.(type) {
 		case *events.Message:
 			{
+
 				re := regexp.MustCompile(`:\d+`)
 				rootUser := re.ReplaceAllString(v.Info.Sender.User, "")
 
@@ -123,41 +129,29 @@ func (channel *WhatsappDeviceChannel) Start() error {
 		}
 	})
 
-	err := channel.conn.Connect()
-
-	if err != nil {
-		return err
-	}
-
-	channel.running = true
+	channel.Running = true
 
 	return nil
 }
 
-func (channel *WhatsappDeviceChannel) Stop() error {
-	if !channel.running {
+func (channel *WhatsappMeowChannel) Stop() error {
+	if !channel.Running {
 		return ERR_CHANNEL_NOT_RUNNING
 	}
 
-	err := channel.device.Delete()
+	err := channel.Broadcast.Close()
 
 	if err != nil {
 		return err
 	}
 
-	err = channel.Broadcast.Close()
-
-	if err != nil {
-		return err
-	}
-
-	channel.conn.Disconnect()
-	channel.running = false
+	channel.conn.RemoveEventHandler(channel.handlerID)
+	channel.Running = false
 
 	return nil
 }
 
-func (channel *WhatsappDeviceChannel) SendAudio(interaction *Interaction) error {
+func (channel *WhatsappMeowChannel) SendAudio(interaction *Interaction) error {
 	err := channel.SendText(interaction)
 
 	if err != nil {
@@ -170,7 +164,7 @@ func (channel *WhatsappDeviceChannel) SendAudio(interaction *Interaction) error 
 		return err
 	}
 
-	resp, err := channel.conn.Upload(context.Background(), interaction.Parameters.File.GetFile().Bytes, whatsmeow.MediaAudio)
+	resp, err := channel.conn.Upload(channel.ctx, interaction.Parameters.File.GetFile().Bytes, whatsmeow.MediaAudio)
 
 	if err != nil {
 		return err
@@ -189,15 +183,17 @@ func (channel *WhatsappDeviceChannel) SendAudio(interaction *Interaction) error 
 
 	JID := interaction.From.Custom["JID"].(types.JID)
 
-	_, err = channel.conn.SendMessage(context.Background(), JID, &waE2E.Message{
+	// sleep to look like a human reply
+	time.Sleep(WhatsMeowReplyDuration)
+
+	_, err = channel.conn.SendMessage(channel.ctx, JID, &waE2E.Message{
 		AudioMessage: message,
 	})
 
 	return err
 }
 
-func (channel *WhatsappDeviceChannel) SendButton(interaction *Interaction) error {
-
+func (channel *WhatsappMeowChannel) SendButton(interaction *Interaction) error {
 	sb := strings.Builder{}
 
 	sb.WriteString(interaction.Parameters.Text)
@@ -213,14 +209,14 @@ func (channel *WhatsappDeviceChannel) SendButton(interaction *Interaction) error
 	return channel.SendText(interaction)
 }
 
-func (channel *WhatsappDeviceChannel) SendDocument(interaction *Interaction) error {
+func (channel *WhatsappMeowChannel) SendDocument(interaction *Interaction) error {
 	err := interaction.Parameters.File.Read()
 
 	if err != nil {
 		return err
 	}
 
-	resp, err := channel.conn.Upload(context.Background(), interaction.Parameters.File.GetFile().Bytes, whatsmeow.MediaDocument)
+	resp, err := channel.conn.Upload(channel.ctx, interaction.Parameters.File.GetFile().Bytes, whatsmeow.MediaDocument)
 
 	if err != nil {
 		return err
@@ -241,21 +237,24 @@ func (channel *WhatsappDeviceChannel) SendDocument(interaction *Interaction) err
 
 	JID := interaction.From.Custom["JID"].(types.JID)
 
-	_, err = channel.conn.SendMessage(context.Background(), JID, &waE2E.Message{
+	// sleep to look like a human reply
+	time.Sleep(WhatsMeowReplyDuration)
+
+	_, err = channel.conn.SendMessage(channel.ctx, JID, &waE2E.Message{
 		DocumentMessage: message,
 	})
 
 	return err
 }
 
-func (channel *WhatsappDeviceChannel) SendImage(interaction *Interaction) error {
+func (channel *WhatsappMeowChannel) SendImage(interaction *Interaction) error {
 	err := interaction.Parameters.File.Read()
 
 	if err != nil {
 		return err
 	}
 
-	resp, err := channel.conn.Upload(context.Background(), interaction.Parameters.File.GetFile().Bytes, whatsmeow.MediaImage)
+	resp, err := channel.conn.Upload(channel.ctx, interaction.Parameters.File.GetFile().Bytes, whatsmeow.MediaImage)
 
 	if err != nil {
 		return err
@@ -275,29 +274,37 @@ func (channel *WhatsappDeviceChannel) SendImage(interaction *Interaction) error 
 
 	JID := interaction.From.Custom["JID"].(types.JID)
 
-	_, err = channel.conn.SendMessage(context.Background(), JID, &waE2E.Message{
+	// sleep to look like a human reply
+	time.Sleep(WhatsMeowReplyDuration)
+
+	_, err = channel.conn.SendMessage(channel.ctx, JID, &waE2E.Message{
 		ImageMessage: message,
 	})
 
 	return err
 }
 
-func (channel *WhatsappDeviceChannel) SendText(interaction *Interaction) error {
+func (channel *WhatsappMeowChannel) SendText(interaction *Interaction) error {
 	JID := interaction.From.Custom["JID"].(types.JID)
-	_, err := channel.conn.SendMessage(context.Background(), JID, &waE2E.Message{
+
+	// sleep to look like a human reply
+	time.Sleep(WhatsMeowReplyDuration)
+
+	_, err := channel.conn.SendMessage(channel.ctx, JID, &waE2E.Message{
 		Conversation: &interaction.Parameters.Text,
 	})
+
 	return err
 }
 
-func (channel *WhatsappDeviceChannel) SendVideo(interaction *Interaction) error {
+func (channel *WhatsappMeowChannel) SendVideo(interaction *Interaction) error {
 	err := interaction.Parameters.File.Read()
 
 	if err != nil {
 		return err
 	}
 
-	resp, err := channel.conn.Upload(context.Background(), interaction.Parameters.File.GetFile().Bytes, whatsmeow.MediaVideo)
+	resp, err := channel.conn.Upload(channel.ctx, interaction.Parameters.File.GetFile().Bytes, whatsmeow.MediaVideo)
 
 	if err != nil {
 		return err
@@ -317,7 +324,10 @@ func (channel *WhatsappDeviceChannel) SendVideo(interaction *Interaction) error 
 
 	JID := interaction.From.Custom["JID"].(types.JID)
 
-	_, err = channel.conn.SendMessage(context.Background(), JID, &waE2E.Message{
+	// sleep to look like a human reply
+	time.Sleep(WhatsMeowReplyDuration)
+
+	_, err = channel.conn.SendMessage(channel.ctx, JID, &waE2E.Message{
 		VideoMessage: message,
 	})
 

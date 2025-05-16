@@ -42,7 +42,7 @@ func (consumer *JourneyConsumer) Run(interaction *Interaction) ([]*Interaction, 
 
 	consumer.Persist.Set(interaction.From.WhoID, flow)
 
-	printLog(fmt.Sprintf("WhoID:<%v> Step:<%s> ERR: %v\n", interaction.From.WhoID, flow.CurrentStepName, err))
+	PrintLog(fmt.Sprintf("WhoID:<%v> Step:<%s> ERR: %v\n", interaction.From.WhoID, flow.CurrentStepName, err))
 
 	return interactions, err
 }

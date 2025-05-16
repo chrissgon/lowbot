@@ -12,8 +12,7 @@ import (
 
 type DiscordChannel struct {
 	*Channel
-	conn   *discordgo.Session
-	running bool
+	conn    *discordgo.Session
 }
 
 func NewDiscordChannel(token string) (IChannel, error) {
@@ -32,9 +31,9 @@ func NewDiscordChannel(token string) (IChannel, error) {
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_DISCORD_NAME,
 			Broadcast: NewBroadcast[*Interaction](),
+			Running: false,
 		},
-		conn:   conn,
-		running: false,
+		conn:    conn,
 	}
 
 	return channel, nil
@@ -45,12 +44,12 @@ func (channel *DiscordChannel) GetChannel() *Channel {
 }
 
 func (channel *DiscordChannel) Start() error {
-	if channel.running {
+	if channel.Running {
 		return ERR_CHANNEL_RUNNING
 	}
 
 	channel.conn.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if !channel.running {
+		if !channel.Running {
 			return
 		}
 		if m.Author.ID == s.State.User.ID {
@@ -79,19 +78,31 @@ func (channel *DiscordChannel) Start() error {
 		return err
 	}
 
-	channel.running = true
+	channel.Running = true
 
 	return nil
 }
 
 func (channel *DiscordChannel) Stop() error {
-	if !channel.running {
+	if !channel.Running {
 		return ERR_CHANNEL_NOT_RUNNING
 	}
 
-	channel.running = false
-	channel.Broadcast.Close()
-	return channel.conn.Close()
+	err := channel.Broadcast.Close()
+
+	if err != nil {
+		return err
+	}
+
+	err = channel.conn.Close()
+
+	if err != nil {
+		return err
+	}
+
+	channel.Running = false
+
+	return nil
 }
 
 func (channel *DiscordChannel) RespondInteraction(in *discordgo.Interaction) {
@@ -129,7 +140,7 @@ func (*DiscordChannel) getButtons(interaction *Interaction) (buttons []discordgo
 			Label:    button,
 			Style:    discordgo.PrimaryButton,
 			Disabled: false,
-			CustomID: strconv.Itoa(i+1),
+			CustomID: strconv.Itoa(i + 1),
 		})
 	}
 	return
