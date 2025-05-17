@@ -3,7 +3,6 @@ package lowbot
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -42,7 +41,7 @@ func InitWhatsappMeowChannel(ctx context.Context, db *sql.DB, dialect string, lo
 	return whatsMeowSQLContainer.Upgrade(ctx)
 }
 
-func NewWhatsappMeowChannel(JID *types.JID, callback func(whatsmeow.QRChannelItem, *types.JID) error) (IChannel, error) {
+func NewWhatsappMeowChannel(ctx context.Context, JID *types.JID, qrcodeChan chan whatsmeow.QRChannelItem) (IChannel, error) {
 	var device *store.Device
 	var conn *whatsmeow.Client
 	var err error
@@ -51,7 +50,7 @@ func NewWhatsappMeowChannel(JID *types.JID, callback func(whatsmeow.QRChannelIte
 		device = whatsMeowSQLContainer.NewDevice()
 		conn = whatsmeow.NewClient(device, nil)
 
-		qrChan, err := conn.GetQRChannel(context.Background())
+		qrChan, err := conn.GetQRChannel(ctx)
 
 		if err != nil {
 			return nil, err
@@ -64,21 +63,17 @@ func NewWhatsappMeowChannel(JID *types.JID, callback func(whatsmeow.QRChannelIte
 		}
 
 		for evt := range qrChan {
-			err := callback(evt, device.ID)
-
-			if err != nil {
-				return nil, err
-			}
+			qrcodeChan <- evt
 		}
 	} else {
-		device, err = whatsMeowSQLContainer.GetDevice(context.Background(), *JID)
+		device, err = whatsMeowSQLContainer.GetDevice(ctx, *JID)
 
 		if err != nil {
 			return nil, err
 		}
 
 		if device == nil {
-			return nil, errors.New("unknown device")
+			return nil, fmt.Errorf("unknown device")
 		}
 
 		conn = whatsmeow.NewClient(device, nil)

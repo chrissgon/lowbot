@@ -1,7 +1,7 @@
 package lowbot
 
 import (
-	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -12,7 +12,7 @@ var (
 	channelLastInteractionSent *Interaction = nil
 	channelTriggerError                     = true
 
-	ErrMock = errors.New("error mock")
+	ErrMock = fmt.Errorf("error mock")
 )
 
 type mockChannel struct {

@@ -2,7 +2,7 @@ package lowbot
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -136,5 +136,5 @@ func (consumer *ChatGPTAssistantConsumer) waitMessage(run openai.Run) (string, e
 		return consumer.waitMessage(run)
 	}
 
-	return "", errors.New(run.LastError.Message)
+	return "", fmt.Errorf(run.LastError.Message)
 }
