@@ -33,8 +33,8 @@ type WhatsappMeowChannel struct {
 }
 
 type WhatsappMeowUpdate struct {
-	qrcode whatsmeow.QRChannelItem
-	JID    types.JID
+	QR  whatsmeow.QRChannelItem
+	JID types.JID
 }
 
 var whatsMeowSQLContainer *sqlstore.Container
@@ -69,7 +69,7 @@ func NewWhatsappMeowChannel(ctx context.Context, JID types.JID, qrcodeChan chan 
 
 		for evt := range qrChan {
 			qrcodeChan <- WhatsappMeowUpdate{
-				qrcode: evt,
+				QR: evt,
 				JID:    *device.ID,
 			}
 		}
