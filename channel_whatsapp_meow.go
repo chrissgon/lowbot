@@ -32,6 +32,11 @@ type WhatsappMeowChannel struct {
 	cancel context.CancelFunc
 }
 
+type WhatsappMeowUpdate struct {
+	qrcode whatsmeow.QRChannelItem
+	JID    types.JID
+}
+
 var whatsMeowSQLContainer *sqlstore.Container
 var WhatsMeowReplyDuration time.Duration = 2 * time.Second
 
@@ -41,12 +46,12 @@ func InitWhatsappMeowChannel(ctx context.Context, db *sql.DB, dialect string, lo
 	return whatsMeowSQLContainer.Upgrade(ctx)
 }
 
-func NewWhatsappMeowChannel(ctx context.Context, JID *types.JID, qrcodeChan chan whatsmeow.QRChannelItem) (IChannel, error) {
+func NewWhatsappMeowChannel(ctx context.Context, JID types.JID, qrcodeChan chan WhatsappMeowUpdate) (IChannel, error) {
 	var device *store.Device
 	var conn *whatsmeow.Client
 	var err error
 
-	if JID == nil {
+	if JID.IsEmpty() {
 		device = whatsMeowSQLContainer.NewDevice()
 		conn = whatsmeow.NewClient(device, nil)
 
@@ -63,10 +68,13 @@ func NewWhatsappMeowChannel(ctx context.Context, JID *types.JID, qrcodeChan chan
 		}
 
 		for evt := range qrChan {
-			qrcodeChan <- evt
+			qrcodeChan <- WhatsappMeowUpdate{
+				qrcode: evt,
+				JID:    *device.ID,
+			}
 		}
 	} else {
-		device, err = whatsMeowSQLContainer.GetDevice(ctx, *JID)
+		device, err = whatsMeowSQLContainer.GetDevice(ctx, JID)
 
 		if err != nil {
 			return nil, err
