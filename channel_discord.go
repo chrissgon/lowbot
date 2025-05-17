@@ -176,6 +176,10 @@ func (channel *DiscordChannel) SendImage(interaction *Interaction) error {
 }
 
 func (channel *DiscordChannel) SendText(interaction *Interaction) error {
+	if interaction.IsEmptyText() {
+		return nil
+	}
+
 	sessionID := interaction.From.WhoID
 
 	_, err := channel.conn.ChannelMessageSend(sessionID, interaction.Parameters.Text)

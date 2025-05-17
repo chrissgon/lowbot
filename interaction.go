@@ -1,5 +1,7 @@
 package lowbot
 
+import "strings"
+
 type Interaction struct {
 	To      *Who
 	From    *Who
@@ -77,4 +79,8 @@ func (interaction *Interaction) SetReplier(replier *Who) *Interaction {
 func (interaction *Interaction) SetStep(step Step) *Interaction {
 	interaction.Step = step
 	return interaction
+}
+
+func (interaction *Interaction) IsEmptyText() bool {
+	return interaction.Parameters.Text == "" || strings.TrimSpace(interaction.Parameters.Text) == ""
 }

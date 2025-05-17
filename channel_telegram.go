@@ -224,6 +224,10 @@ func (channel *TelegramChannel) SendImage(interaction *Interaction) error {
 }
 
 func (channel *TelegramChannel) SendText(interaction *Interaction) error {
+	if interaction.IsEmptyText() {
+		return nil
+	}
+
 	chatID, err := strconv.Atoi(interaction.From.WhoID)
 
 	if err != nil {

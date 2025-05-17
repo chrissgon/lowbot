@@ -288,6 +288,10 @@ func (channel *WhatsappMeowChannel) SendImage(interaction *Interaction) error {
 }
 
 func (channel *WhatsappMeowChannel) SendText(interaction *Interaction) error {
+	if interaction.IsEmptyText() {
+		return nil
+	}
+
 	JID := interaction.From.Custom["JID"].(types.JID)
 
 	// sleep to look like a human reply

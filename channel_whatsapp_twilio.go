@@ -182,6 +182,10 @@ func (channel *WhatsappTwilioChannel) SendImage(interaction *Interaction) error 
 }
 
 func (channel *WhatsappTwilioChannel) SendText(interaction *Interaction) error {
+	if interaction.IsEmptyText() {
+		return nil
+	}
+
 	to := interaction.From.WhoID
 	from := interaction.To.WhoID
 
