@@ -1,7 +1,10 @@
 package lowbot
 
 import (
+	"fmt"
+	"io"
 	"mime"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -25,6 +28,7 @@ type File struct {
 	Name      string
 	Bytes     []byte
 	Path      string
+	URL       string
 	Extension string
 	Mime      string
 	Err       error
@@ -45,10 +49,12 @@ var (
 	FILETYPE_VIDEO_EXT = []string{".avi", ".mp4", ".mpeg", ".ogv", ".webm"}
 )
 
-func NewFile(path string) IFile {
+func NewFile(path, url string) IFile {
+	fmt.Println("test", path, url)
 	file := &File{
 		FileID:   uuid.New(),
 		FileType: FILETYPE_DOCUMENT,
+		URL:      url,
 	}
 
 	file.Extension = filepath.Ext(path)
@@ -66,12 +72,26 @@ func (file *File) GetFile() *File {
 }
 
 func (file *File) Read() error {
-	if IsURL(file.Path) {
-		file.Err = ERR_FEATURE_UNIMPLEMENTED
+	fmt.Println("url", file.URL)
+	fmt.Println("path", file.Path)
+	if file.URL == "" && !IsURL(file.URL) {
+		file.Bytes, file.Err = os.ReadFile(file.Path)
 		return file.Err
 	}
 
-	file.Bytes, file.Err = os.ReadFile(file.Path)
+	resp, err := http.Get(file.URL)
+
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("ERROR TO GET FILE: %s", resp.Status)
+	}
+
+	file.Bytes, file.Err = io.ReadAll(resp.Body)
 
 	return file.Err
 }

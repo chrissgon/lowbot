@@ -10,10 +10,10 @@ import (
 )
 
 var (
-	FILE_AUDIO_MOCK    = NewFile("./mocks/music.mp3")
-	FILE_DOCUMENT_MOCK = NewFile("./mocks/features.txt")
-	FILE_IMAGE_MOCK    = NewFile("./mocks/image.jpg")
-	FILE_VIDEO_MOCK    = NewFile("./mocks/video.mp4")
+	FILE_AUDIO_MOCK    = NewFile("./mocks/music.mp3", "")
+	FILE_DOCUMENT_MOCK = NewFile("./mocks/features.txt", "")
+	FILE_IMAGE_MOCK    = NewFile("./mocks/image.jpg", "")
+	FILE_VIDEO_MOCK    = NewFile("./mocks/video.mp4", "")
 )
 
 func TestFile_NewFile(t *testing.T) {
@@ -31,7 +31,7 @@ func TestFile_NewFile(t *testing.T) {
 		Err:       err,
 	}
 
-	have := NewFile(path)
+	have := NewFile(path, "")
 	have.GetFile().FileID = fileID
 
 	if !reflect.DeepEqual(expect, have) {
@@ -40,7 +40,7 @@ func TestFile_NewFile(t *testing.T) {
 }
 
 func TestFile_GetFile(t *testing.T) {
-	expect := NewFile("./mocks/features.txt")
+	expect := NewFile("./mocks/features.txt", "")
 	have := expect.GetFile()
 
 	if expect != have {
@@ -49,7 +49,7 @@ func TestFile_GetFile(t *testing.T) {
 }
 
 func TestFile_Read(t *testing.T) {
-	file := NewFile("./mocks/features.txt")
+	file := NewFile("./mocks/features.txt", "")
 
 	err := file.Read()
 
@@ -61,7 +61,7 @@ func TestFile_Read(t *testing.T) {
 		t.Error(FormatTestError([]byte{}, nil))
 	}
 
-	file = NewFile("https://myurl.com/features.txt")
+	file = NewFile("https://myurl.com/features.txt", "")
 
 	err = file.Read()
 

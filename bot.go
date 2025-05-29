@@ -8,15 +8,15 @@ import (
 
 type Bot struct {
 	BotID    uuid.UUID
-	Consumer IConsumer
+	Flow     *Flow
 	Channels map[uuid.UUID]IChannel
 	Running  bool
 }
 
-func NewBot(consumer IConsumer, channels map[uuid.UUID]IChannel) *Bot {
+func NewBot(flow *Flow, channels map[uuid.UUID]IChannel) *Bot {
 	return &Bot{
 		BotID:    uuid.New(),
-		Consumer: consumer,
+		Flow:     flow,
 		Channels: channels,
 		Running:  false,
 	}
@@ -30,7 +30,7 @@ func (bot *Bot) Start() error {
 			return err
 		}
 
-		go bot.StartConsumerChannel(channel)
+		go bot.StartListenChannel(channel)
 	}
 
 	bot.Running = true
@@ -42,23 +42,51 @@ func (bot *Bot) StartChannel(channel IChannel) error {
 	return channel.Start()
 }
 
-func (bot *Bot) StartConsumerChannel(channel IChannel) {
+func (bot *Bot) StartListenChannel(channel IChannel) {
 	listener := channel.GetChannel().Broadcast.Listen()
 
 	for interaction := range listener {
-		answersInteraction, err := bot.Consumer.Run(interaction)
+		flow, err := FlowPersist.Get(interaction.From.WhoID)
 
-		if answersInteraction == nil {
+		flowNotExistsOrWasFinished := err != nil || flow.Ended()
+
+		if flowNotExistsOrWasFinished {
+			copyFlow := *bot.Flow
+			copyFlow.Start()
+			flow = &copyFlow
+		}
+
+		if flow.Waiting {
 			continue
 		}
+		next := true
 
-		for _, answerInteraction := range answersInteraction {
-			SendInteraction(channel, answerInteraction)
-		}
+		for next {
+			err := flow.Next(interaction)
 
-		// TODO: improve how to receive the consumer errors
-		if err != nil {
-			PrintLog(fmt.Sprintf("%v: WhoID:<%v> ERR: %v\n", bot.Consumer.GetConsumer().Name, interaction.From.WhoID, err))
+			if err != nil {
+				PrintLog(fmt.Sprintf("Channel:<%v> WhoID:<%v> ERR: %v\n", channel.GetChannel().Name, interaction.From.WhoID, err))
+				break
+			}
+
+			next, err = RunNextAction(flow, channel, interaction)
+
+			if err == nil {
+				FlowPersist.Set(interaction.From.WhoID, flow)
+				continue
+			}
+
+			PrintLog(fmt.Sprintf("Channel:<%v> WhoID:<%v> ERR: %v\n", channel.GetChannel().Name, interaction.From.WhoID, err))
+
+			flow.NextError()
+
+			next, err = RunNextAction(flow, channel, interaction)
+
+			if err != nil {
+				PrintLog(fmt.Sprintf("Channel:<%v> WhoID:<%v> ERR: %v\n", channel.GetChannel().Name, interaction.From.WhoID, err))
+			}
+
+			FlowPersist.Set(interaction.From.WhoID, flow)
 		}
 	}
 }

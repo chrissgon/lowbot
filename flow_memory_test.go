@@ -8,11 +8,7 @@ import (
 
 func TestFlowMemory_NewMemoryFlowPersist(t *testing.T) {
 	expect := &MemoryFlowPersist{Sessions: map[any]*Flow{}}
-	have, err := NewMemoryFlowPersist()
-
-	if err != nil {
-		t.Error(FormatTestError(nil, err))
-	}
+	have := NewMemoryFlowPersist()
 
 	if !reflect.DeepEqual(expect, have) {
 		t.Error(FormatTestError(expect, have))
@@ -22,7 +18,7 @@ func TestFlowMemory_NewMemoryFlowPersist(t *testing.T) {
 func TestFlowMemory_Set(t *testing.T) {
 	ID := 1
 	flow := newFlowMock()
-	persist, _ := NewMemoryFlowPersist()
+	persist := NewMemoryFlowPersist()
 
 	err := persist.Set(ID, flow)
 
@@ -34,7 +30,7 @@ func TestFlowMemory_Set(t *testing.T) {
 func TestFlowMemory_Get(t *testing.T) {
 	ID := 1
 	flow := newFlowMock()
-	persist, _ := NewMemoryFlowPersist()
+	persist := NewMemoryFlowPersist()
 
 	_, err := persist.Get(ID)
 

@@ -2,9 +2,7 @@ package lowbot
 
 import (
 	"bytes"
-	"os"
 	"strconv"
-	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/google/uuid"
@@ -30,7 +28,7 @@ func NewDiscordChannel(token string) (IChannel, error) {
 		Channel: &Channel{
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_DISCORD_NAME,
-			Broadcast: NewBroadcast[*Interaction](),
+			Broadcast: NewBroadcast[Interaction](),
 			Running:   false,
 		},
 		conn: conn,
@@ -58,7 +56,10 @@ func (channel *DiscordChannel) Start() error {
 
 		from := NewWho(m.ChannelID, s.State.User.Username)
 
-		channel.Broadcast.Send(NewInteractionMessageText(m.Content).SetFrom(from))
+		answerInteraction := NewInteractionMessageText(m.Content)
+		answerInteraction.SetFrom(from)
+
+		channel.Broadcast.Send(answerInteraction)
 
 	})
 	channel.conn.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -66,7 +67,10 @@ func (channel *DiscordChannel) Start() error {
 
 		from := NewWho(i.ChannelID, s.State.User.Username)
 
-		channel.Broadcast.Send(NewInteractionMessageText(i.Interaction.MessageComponentData().CustomID).SetFrom(from))
+		answerInteraction := NewInteractionMessageText(i.Interaction.MessageComponentData().CustomID)
+		answerInteraction.SetFrom(from)
+
+		channel.Broadcast.Send(answerInteraction)
 	})
 
 	channel.conn.Identify.Intents = discordgo.IntentsGuildMessages
@@ -112,14 +116,13 @@ func (channel *DiscordChannel) RespondInteraction(in *discordgo.Interaction) {
 	)
 }
 
-func (channel *DiscordChannel) SendAudio(interaction *Interaction) error {
+func (channel *DiscordChannel) SendAudio(interaction Interaction) error {
 	sessionID := interaction.From.WhoID
-	path := interaction.Parameters.File.GetFile().Path
 
-	return channel.SendFile(sessionID, interaction.Parameters.Text, path)
+	return channel.SendFile(sessionID, interaction)
 }
 
-func (channel *DiscordChannel) SendButton(interaction *Interaction) error {
+func (channel *DiscordChannel) SendButton(interaction Interaction) error {
 	sessionID := interaction.From.WhoID
 
 	message := &discordgo.MessageSend{
@@ -134,7 +137,7 @@ func (channel *DiscordChannel) SendButton(interaction *Interaction) error {
 	return err
 }
 
-func (*DiscordChannel) getButtons(interaction *Interaction) (buttons []discordgo.MessageComponent) {
+func (*DiscordChannel) getButtons(interaction Interaction) (buttons []discordgo.MessageComponent) {
 	for i, button := range interaction.Parameters.Buttons {
 		buttons = append(buttons, discordgo.Button{
 			Label:    button,
@@ -146,36 +149,17 @@ func (*DiscordChannel) getButtons(interaction *Interaction) (buttons []discordgo
 	return
 }
 
-func (channel *DiscordChannel) SendDocument(interaction *Interaction) error {
+func (channel *DiscordChannel) SendDocument(interaction Interaction) error {
 	sessionID := interaction.From.WhoID
-	path := interaction.Parameters.File.GetFile().Path
-
-	return channel.SendFile(sessionID, interaction.Parameters.Text, path)
+	return channel.SendFile(sessionID, interaction)
 }
 
-func (channel *DiscordChannel) SendImage(interaction *Interaction) error {
+func (channel *DiscordChannel) SendImage(interaction Interaction) error {
 	sessionID := interaction.From.WhoID
-	path := interaction.Parameters.File.GetFile().Path
-
-	if !IsURL(path) {
-		return channel.SendFile(sessionID, interaction.Parameters.Text, path)
-	}
-
-	message := &discordgo.MessageSend{
-		Content: interaction.Parameters.Text,
-		Embed: &discordgo.MessageEmbed{
-			Image: &discordgo.MessageEmbedImage{
-				URL: path,
-			},
-		},
-	}
-
-	_, err := channel.conn.ChannelMessageSendComplex(sessionID, message)
-
-	return err
+	return channel.SendFile(sessionID, interaction)
 }
 
-func (channel *DiscordChannel) SendText(interaction *Interaction) error {
+func (channel *DiscordChannel) SendText(interaction Interaction) error {
 	if interaction.IsEmptyText() {
 		return nil
 	}
@@ -187,43 +171,23 @@ func (channel *DiscordChannel) SendText(interaction *Interaction) error {
 	return err
 }
 
-func (channel *DiscordChannel) SendVideo(interaction *Interaction) error {
+func (channel *DiscordChannel) SendVideo(interaction Interaction) error {
 	sessionID := interaction.From.WhoID
-	path := interaction.Parameters.File.GetFile().Path
-
-	if !IsURL(path) {
-		return channel.SendFile(sessionID, interaction.Parameters.Text, path)
-	}
-
-	message := &discordgo.MessageSend{
-		Content: interaction.Parameters.Text,
-		Embed: &discordgo.MessageEmbed{
-			Video: &discordgo.MessageEmbedVideo{
-				URL: path,
-			},
-		},
-	}
-
-	_, err := channel.conn.ChannelMessageSendComplex(sessionID, message)
-
-	return err
+	return channel.SendFile(sessionID, interaction)
 }
 
-func (channel *DiscordChannel) SendFile(sessionID, text, path string) error {
-	file, err := os.ReadFile(path)
+func (channel *DiscordChannel) SendFile(sessionID string, interaction Interaction) error {
+	err := interaction.Parameters.File.Read()
 
 	if err != nil {
 		return err
 	}
 
-	parts := strings.Split(path, "/")
-	name := parts[len(parts)-1]
-
 	_, err = channel.conn.ChannelMessageSendComplex(sessionID, &discordgo.MessageSend{
-		Content: text,
+		Content: interaction.Parameters.Text,
 		File: &discordgo.File{
-			Name:   name,
-			Reader: bytes.NewReader(file),
+			Name:   interaction.Parameters.File.GetFile().Name,
+			Reader: bytes.NewReader(interaction.Parameters.File.GetFile().Bytes),
 		},
 	})
 

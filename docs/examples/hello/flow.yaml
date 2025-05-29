@@ -16,5 +16,6 @@ steps:
   end:
     action: TextUsername
     parameters:
+      request: ""
       texts:
         - Nice to meet you %v

@@ -19,6 +19,7 @@ var (
 	ERR_UNKNOWN_DEFAULT_STEP        = fmt.Errorf("unknown step: default")
 	ERR_UNKNOWN_INIT_STEP           = fmt.Errorf("unknown step: init")
 	ERR_UNKNOWN_NEXT_STEP           = fmt.Errorf("unknown next step")
+	ERR_INVALID_STEP                = fmt.Errorf("step invalid")
 	ERR_PATTERN_NEXT_STEP           = fmt.Errorf("step pattern invalid")
 	ERR_ENDED_FLOW                  = fmt.Errorf("flow ended")
 	ERR_ROOM_STOPPED_FLOW           = fmt.Errorf("flow finished by room")
@@ -32,9 +33,8 @@ const (
 	CHANNEL_WHATSAPP_TWILIO_NAME = "whatsapp-twilio"
 	CHANNEL_WHATSAPP_DEVICE_NAME = "whatsapp-meow"
 	CHANNEL_DISCORD_NAME         = "discord"
-	CONSUMER_JOURNEY_NAME        = "journey"
-	CONSUMER_CHATGPT_NAME        = "chatgpt"
 	FLOW_INIT_STEP_NAME          = "init"
 	FLOW_END_STEP_NAME           = "end"
 	FLOW_DEFAULT_STEP_NAME       = "default"
+	FLOW_ERROR_STEP_NAME         = "error"
 )

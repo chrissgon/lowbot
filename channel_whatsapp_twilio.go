@@ -57,7 +57,7 @@ func NewWhatsappTwilioChannel(number, token, SID string) (IChannel, error) {
 		Channel: &Channel{
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_WHATSAPP_TWILIO_NAME,
-			Broadcast: NewBroadcast[*Interaction](),
+			Broadcast: NewBroadcast[Interaction](),
 			Running:   false,
 		},
 		conn:   conn,
@@ -114,17 +114,23 @@ func (channel *WhatsappTwilioChannel) Stop() error {
 	return nil
 }
 
-func (channel *WhatsappTwilioChannel) SendAudio(interaction *Interaction) error {
+func (channel *WhatsappTwilioChannel) SendAudio(interaction Interaction) error {
 	return channel.SendDocument(interaction)
 }
 
-func (channel *WhatsappTwilioChannel) SendButton(interaction *Interaction) error {
-	_, contentSIDExists := interaction.Step.Parameters.Custom["contentSID"]
-	_, contentVariablesExists := interaction.Step.Parameters.Custom["contentVariable"]
+func (channel *WhatsappTwilioChannel) SendButton(interaction Interaction) error {
+	step, err := GetCurrentStep(interaction.From.WhoID) 
+
+	if err != nil {
+		return err
+	}
+	
+	_, contentSIDExists := step.Parameters.Custom["contentSID"]
+	_, contentVariablesExists := step.Parameters.Custom["contentVariable"]
 
 	if contentSIDExists && contentVariablesExists {
-		contentSID, _ := interaction.Step.Parameters.Custom["contentSID"].(string)
-		contentVariables, _ := interaction.Step.Parameters.Custom["contentVariable"].(string)
+		contentSID, _ := step.Parameters.Custom["contentSID"].(string)
+		contentVariables, _ := step.Parameters.Custom["contentVariable"].(string)
 
 		to := interaction.From.WhoID
 		from := interaction.To.WhoID
@@ -156,7 +162,7 @@ func (channel *WhatsappTwilioChannel) SendButton(interaction *Interaction) error
 	return channel.SendText(interaction)
 }
 
-func (channel *WhatsappTwilioChannel) SendDocument(interaction *Interaction) error {
+func (channel *WhatsappTwilioChannel) SendDocument(interaction Interaction) error {
 	to := interaction.From.WhoID
 	from := interaction.To.WhoID
 
@@ -177,11 +183,11 @@ func (channel *WhatsappTwilioChannel) SendDocument(interaction *Interaction) err
 	return err
 }
 
-func (channel *WhatsappTwilioChannel) SendImage(interaction *Interaction) error {
+func (channel *WhatsappTwilioChannel) SendImage(interaction Interaction) error {
 	return channel.SendDocument(interaction)
 }
 
-func (channel *WhatsappTwilioChannel) SendText(interaction *Interaction) error {
+func (channel *WhatsappTwilioChannel) SendText(interaction Interaction) error {
 	if interaction.IsEmptyText() {
 		return nil
 	}
@@ -199,6 +205,6 @@ func (channel *WhatsappTwilioChannel) SendText(interaction *Interaction) error {
 	return err
 }
 
-func (channel *WhatsappTwilioChannel) SendVideo(interaction *Interaction) error {
+func (channel *WhatsappTwilioChannel) SendVideo(interaction Interaction) error {
 	return channel.SendDocument(interaction)
 }

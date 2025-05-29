@@ -29,7 +29,7 @@ func NewTelegramChannel(token string) (IChannel, error) {
 		Channel: &Channel{
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_TELEGRAM_NAME,
-			Broadcast: NewBroadcast[*Interaction](),
+			Broadcast: NewBroadcast[Interaction](),
 			Running:   false,
 		},
 	}
@@ -115,7 +115,7 @@ func (channel *TelegramChannel) Stop() error {
 	return nil
 }
 
-func (channel *TelegramChannel) SendAudio(interaction *Interaction) error {
+func (channel *TelegramChannel) SendAudio(interaction Interaction) error {
 	chatID, err := strconv.Atoi(interaction.From.WhoID)
 
 	if err != nil {
@@ -140,7 +140,7 @@ func (channel *TelegramChannel) SendAudio(interaction *Interaction) error {
 	return err
 }
 
-func (channel *TelegramChannel) SendButton(interaction *Interaction) error {
+func (channel *TelegramChannel) SendButton(interaction Interaction) error {
 	chatID, err := strconv.Atoi(interaction.From.WhoID)
 
 	if err != nil {
@@ -163,7 +163,7 @@ func (channel *TelegramChannel) SendButton(interaction *Interaction) error {
 	return err
 }
 
-func (*TelegramChannel) getButtons(interaction *Interaction) (buttons []models.InlineKeyboardButton) {
+func (*TelegramChannel) getButtons(interaction Interaction) (buttons []models.InlineKeyboardButton) {
 	for i, button := range interaction.Parameters.Buttons {
 		buttons = append(buttons, models.InlineKeyboardButton{
 			Text:         button,
@@ -173,7 +173,7 @@ func (*TelegramChannel) getButtons(interaction *Interaction) (buttons []models.I
 	return
 }
 
-func (channel *TelegramChannel) SendDocument(interaction *Interaction) error {
+func (channel *TelegramChannel) SendDocument(interaction Interaction) error {
 	chatID, err := strconv.Atoi(interaction.From.WhoID)
 
 	if err != nil {
@@ -198,7 +198,7 @@ func (channel *TelegramChannel) SendDocument(interaction *Interaction) error {
 	return err
 }
 
-func (channel *TelegramChannel) SendImage(interaction *Interaction) error {
+func (channel *TelegramChannel) SendImage(interaction Interaction) error {
 	chatID, err := strconv.Atoi(interaction.From.WhoID)
 
 	if err != nil {
@@ -223,7 +223,7 @@ func (channel *TelegramChannel) SendImage(interaction *Interaction) error {
 	return err
 }
 
-func (channel *TelegramChannel) SendText(interaction *Interaction) error {
+func (channel *TelegramChannel) SendText(interaction Interaction) error {
 	if interaction.IsEmptyText() {
 		return nil
 	}
@@ -243,7 +243,7 @@ func (channel *TelegramChannel) SendText(interaction *Interaction) error {
 	return err
 }
 
-func (channel *TelegramChannel) SendVideo(interaction *Interaction) error {
+func (channel *TelegramChannel) SendVideo(interaction Interaction) error {
 	chatID, err := strconv.Atoi(interaction.From.WhoID)
 
 	if err != nil {

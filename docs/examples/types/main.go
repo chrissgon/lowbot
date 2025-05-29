@@ -13,16 +13,11 @@ func main() {
 	flow, _ := lowbot.NewFlow("./flow.yaml")
 
 	// make a channel. In this exemple is Telegram
-	channel, _ := lowbot.NewTelegramChannel(os.Getenv("TELEGRAM_TOKEN"))
-
-	// make a persist
-	persist, _ := lowbot.NewMemoryFlowPersist()
-
-	// make consumer
-	consumer := lowbot.NewJourneyConsumer(flow, persist)
+	channel, _ := lowbot.NewDiscordChannel(os.Getenv("DISCORD_TOKEN"))
+	// channel, _ := lowbot.NewTelegramChannel(os.Getenv("TELEGRAM_TOKEN"))
 
 	// make bot
-	bot := lowbot.NewBot(consumer, map[uuid.UUID]lowbot.IChannel{
+	bot := lowbot.NewBot(flow, map[uuid.UUID]lowbot.IChannel{
 		channel.GetChannel().ChannelID: channel,
 	})
 

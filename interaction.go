@@ -1,15 +1,19 @@
 package lowbot
 
-import "strings"
+import (
+	"strings"
+	"time"
+)
 
 type Interaction struct {
+	// FlowID     uuid.UUID
 	To      *Who
 	From    *Who
 	Replier *Who
 
 	Type       InteractionType
 	Parameters InteractionParameters
-	Step       Step
+	Timestamp  int64
 	Custom     map[string]any
 }
 
@@ -26,12 +30,14 @@ type InteractionParameters struct {
 	Buttons []string
 	File    IFile
 	Text    string
-	Custom  map[string]any
+
+	Custom map[string]any
 }
 
-func NewInteractionMessageButton(buttons []string, text string) *Interaction {
-	return &Interaction{
+func NewInteractionMessageButton(buttons []string, text string) Interaction {
+	return Interaction{
 		Type: MESSAGE_BUTTON,
+		Timestamp: time.Now().Unix(),
 		Parameters: InteractionParameters{
 			Text:    text,
 			Buttons: buttons,
@@ -40,20 +46,22 @@ func NewInteractionMessageButton(buttons []string, text string) *Interaction {
 	}
 }
 
-func NewInteractionMessageFile(path string, text string) *Interaction {
-	return &Interaction{
+func NewInteractionMessageFile(text, path, url string) Interaction {
+	return Interaction{
 		Type: MESSAGE_FILE,
+		Timestamp: time.Now().Unix(),
 		Parameters: InteractionParameters{
 			Text: text,
-			File: NewFile(path),
+			File: NewFile(path, url),
 		},
 		Custom: map[string]any{},
 	}
 }
 
-func NewInteractionMessageText(text string) *Interaction {
-	return &Interaction{
+func NewInteractionMessageText(text string) Interaction {
+	return Interaction{
 		Type: MESSAGE_TEXT,
+		Timestamp: time.Now().Unix(),
 		Parameters: InteractionParameters{
 			Text: text,
 		},
@@ -76,10 +84,10 @@ func (interaction *Interaction) SetReplier(replier *Who) *Interaction {
 	return interaction
 }
 
-func (interaction *Interaction) SetStep(step Step) *Interaction {
-	interaction.Step = step
-	return interaction
-}
+// func (interaction *Interaction) SetStep(step Step) *Interaction {
+// 	interaction.Step = step
+// 	return interaction
+// }
 
 func (interaction *Interaction) IsEmptyText() bool {
 	return interaction.Parameters.Text == "" || strings.TrimSpace(interaction.Parameters.Text) == ""

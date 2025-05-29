@@ -13,13 +13,15 @@ func main() {
 
 	// set custom actions
 	lowbot.SetCustomActions(lowbot.ActionsMap{
-		"TextUsername": func(interaction *lowbot.Interaction) (*lowbot.Interaction, bool) {
-			template := lowbot.ParseTemplate(interaction.Step.Parameters.Texts)
+		"TextUsername": func(flow *lowbot.Flow, channel lowbot.IChannel, interaction lowbot.Interaction) (bool, error) {
+			template := lowbot.ParseTemplate(flow.CurrentStep.Parameters.Texts)
 			templateWithUsername := fmt.Sprintf(template, interaction.Parameters.Text)
 			in := lowbot.NewInteractionMessageText(templateWithUsername)
 			in.SetFrom(interaction.From)
 			in.SetTo(interaction.To)
-			return in, true
+
+			err := lowbot.SendInteraction(channel, in)
+			return false, err
 		},
 	})
 
@@ -29,14 +31,8 @@ func main() {
 	// make a channel. In this exemple is Telegram
 	channel, _ := lowbot.NewTelegramChannel(os.Getenv("TELEGRAM_TOKEN"))
 
-	// make a persist
-	persist, _ := lowbot.NewMemoryFlowPersist()
-
-	// make consumer
-	consumer := lowbot.NewJourneyConsumer(flow, persist)
-
 	// make bot
-	bot := lowbot.NewBot(consumer, map[uuid.UUID]lowbot.IChannel{
+	bot := lowbot.NewBot(flow, map[uuid.UUID]lowbot.IChannel{
 		channel.GetChannel().ChannelID: channel,
 	})
 

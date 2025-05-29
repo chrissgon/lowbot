@@ -45,7 +45,7 @@ func TestInteraction_NewInteractionMessageButton(t *testing.T) {
 }
 
 func TestInteraction_NewInteractionMessageFile(t *testing.T) {
-	have := NewInteractionMessageFile(FILE, TEXT)
+	have := NewInteractionMessageFile(FILE, "", TEXT)
 	have.SetFrom(FROM_MOCK)
 	have.SetTo(TO_MOCK)
 

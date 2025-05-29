@@ -28,8 +28,8 @@ steps:
     # O "next" consegue definir a próxima etapa com base na resposta
     # O "default" indica a próxima etapa por padrão
     next:
-      Sim: agradecimento
-      Não: desculpas
+      1: agradecimento
+      2: desculpas
       default: errado
 
   agradecimento:

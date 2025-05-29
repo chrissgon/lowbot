@@ -1,0 +1,39 @@
+name: hello
+
+steps:
+  init:
+    next:
+      default: input
+
+  input:
+    action: Input
+    next:
+      default: webhook
+    parameters:
+      texts:
+        - 👋 Hi. What is your name?
+
+  webhook:
+    action: Webhook
+    next:
+      default: end
+      error: error
+    parameters:
+      url: http://localhost:3333
+      headers:
+        Authorization: "Bearer ..."
+      timeout: 60000
+
+  error:
+    action: Text
+    next:
+      default: input
+    parameters:
+      texts:
+        - Something went wrong :(
+
+  end:
+    action: Text
+    parameters:
+      texts:
+        - Bye bye

@@ -95,7 +95,7 @@ func NewWhatsappMeowChannel(ctx context.Context, JID types.JID, qrcodeChan chan 
 		Channel: &Channel{
 			ChannelID: uuid.New(),
 			Name:      CHANNEL_WHATSAPP_DEVICE_NAME,
-			Broadcast: NewBroadcast[*Interaction](),
+			Broadcast: NewBroadcast[Interaction](),
 			Running:   false,
 		},
 		ctx:       ctx,
@@ -154,7 +154,7 @@ func (channel *WhatsappMeowChannel) Stop() error {
 	return nil
 }
 
-func (channel *WhatsappMeowChannel) SendAudio(interaction *Interaction) error {
+func (channel *WhatsappMeowChannel) SendAudio(interaction Interaction) error {
 	err := channel.SendText(interaction)
 
 	if err != nil {
@@ -196,7 +196,7 @@ func (channel *WhatsappMeowChannel) SendAudio(interaction *Interaction) error {
 	return err
 }
 
-func (channel *WhatsappMeowChannel) SendButton(interaction *Interaction) error {
+func (channel *WhatsappMeowChannel) SendButton(interaction Interaction) error {
 	sb := strings.Builder{}
 
 	sb.WriteString(interaction.Parameters.Text)
@@ -212,7 +212,7 @@ func (channel *WhatsappMeowChannel) SendButton(interaction *Interaction) error {
 	return channel.SendText(interaction)
 }
 
-func (channel *WhatsappMeowChannel) SendDocument(interaction *Interaction) error {
+func (channel *WhatsappMeowChannel) SendDocument(interaction Interaction) error {
 	err := interaction.Parameters.File.Read()
 
 	if err != nil {
@@ -250,7 +250,7 @@ func (channel *WhatsappMeowChannel) SendDocument(interaction *Interaction) error
 	return err
 }
 
-func (channel *WhatsappMeowChannel) SendImage(interaction *Interaction) error {
+func (channel *WhatsappMeowChannel) SendImage(interaction Interaction) error {
 	err := interaction.Parameters.File.Read()
 
 	if err != nil {
@@ -287,7 +287,7 @@ func (channel *WhatsappMeowChannel) SendImage(interaction *Interaction) error {
 	return err
 }
 
-func (channel *WhatsappMeowChannel) SendText(interaction *Interaction) error {
+func (channel *WhatsappMeowChannel) SendText(interaction Interaction) error {
 	if interaction.IsEmptyText() {
 		return nil
 	}
@@ -304,7 +304,7 @@ func (channel *WhatsappMeowChannel) SendText(interaction *Interaction) error {
 	return err
 }
 
-func (channel *WhatsappMeowChannel) SendVideo(interaction *Interaction) error {
+func (channel *WhatsappMeowChannel) SendVideo(interaction Interaction) error {
 	err := interaction.Parameters.File.Read()
 
 	if err != nil {

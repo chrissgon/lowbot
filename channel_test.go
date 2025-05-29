@@ -9,7 +9,7 @@ import (
 var (
 	channelCount                            = 0
 	channelLastMethodCalled                 = ""
-	channelLastInteractionSent *Interaction = nil
+	channelLastInteractionSent Interaction = Interaction{}
 	channelTriggerError                     = true
 
 	ErrMock = fmt.Errorf("error mock")
@@ -29,7 +29,7 @@ func newMockChannel() IChannel {
 		Channel: &Channel{
 			ChannelID: uuid.New(),
 			Name:      "mock channel",
-			Broadcast: NewBroadcast[*Interaction](),
+			Broadcast: NewBroadcast[Interaction](),
 		},
 		startedTimes: 0,
 		stoppedTimes: 0,
@@ -60,35 +60,35 @@ func (m *mockChannel) Start() error {
 func (m *mockChannel) Next() {
 }
 
-func (m *mockChannel) SendAudio(interaction *Interaction) error {
+func (m *mockChannel) SendAudio(interaction Interaction) error {
 	channelLastMethodCalled = "SendAudio"
 	channelCount++
 	channelLastInteractionSent = interaction
 	return nil
 }
 
-func (m *mockChannel) SendButton(interaction *Interaction) error {
+func (m *mockChannel) SendButton(interaction Interaction) error {
 	channelLastMethodCalled = "SendButton"
 	channelCount++
 	channelLastInteractionSent = interaction
 	return nil
 }
 
-func (m *mockChannel) SendDocument(interaction *Interaction) error {
+func (m *mockChannel) SendDocument(interaction Interaction) error {
 	channelLastMethodCalled = "SendDocument"
 	channelCount++
 	channelLastInteractionSent = interaction
 	return nil
 }
 
-func (m *mockChannel) SendImage(interaction *Interaction) error {
+func (m *mockChannel) SendImage(interaction Interaction) error {
 	channelLastMethodCalled = "SendImage"
 	channelCount++
 	channelLastInteractionSent = interaction
 	return nil
 }
 
-func (m *mockChannel) SendText(interaction *Interaction) error {
+func (m *mockChannel) SendText(interaction Interaction) error {
 	channelLastMethodCalled = "SendText"
 	channelCount++
 	channelLastInteractionSent = interaction
@@ -98,7 +98,7 @@ func (m *mockChannel) SendText(interaction *Interaction) error {
 	return nil
 }
 
-func (m *mockChannel) SendVideo(interaction *Interaction) error {
+func (m *mockChannel) SendVideo(interaction Interaction) error {
 	channelLastMethodCalled = "SendVideo"
 	channelCount++
 	channelLastInteractionSent = interaction

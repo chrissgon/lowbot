@@ -4,10 +4,10 @@ type MemoryFlowPersist struct {
 	Sessions map[any]*Flow
 }
 
-func NewMemoryFlowPersist() (FlowPersist, error) {
+func NewMemoryFlowPersist() (IFlowPersist) {
 	memory := &MemoryFlowPersist{Sessions: map[any]*Flow{}}
 
-	return memory, nil
+	return memory
 }
 
 func (memory *MemoryFlowPersist) Set(ID any, flow *Flow) error {
