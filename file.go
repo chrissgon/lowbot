@@ -50,7 +50,6 @@ var (
 )
 
 func NewFile(path, url string) IFile {
-	fmt.Println("test", path, url)
 	file := &File{
 		FileID:   uuid.New(),
 		FileType: FILETYPE_DOCUMENT,
@@ -72,8 +71,6 @@ func (file *File) GetFile() *File {
 }
 
 func (file *File) Read() error {
-	fmt.Println("url", file.URL)
-	fmt.Println("path", file.Path)
 	if file.URL == "" && !IsURL(file.URL) {
 		file.Bytes, file.Err = os.ReadFile(file.Path)
 		return file.Err

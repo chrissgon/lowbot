@@ -9,12 +9,12 @@ import (
 
 func main() {
 	lowbot.DEBUG = true
+
 	// make a flow
 	flow, _ := lowbot.NewFlow("./flow.yaml")
 
 	// make a channel. In this exemple is Telegram
-	channel, _ := lowbot.NewDiscordChannel(os.Getenv("DISCORD_TOKEN"))
-	// channel, _ := lowbot.NewTelegramChannel(os.Getenv("TELEGRAM_TOKEN"))
+	channel, _ := lowbot.NewTelegramChannel(os.Getenv("TELEGRAM_TOKEN"))
 
 	// make bot
 	bot := lowbot.NewBot(flow, map[uuid.UUID]lowbot.IChannel{

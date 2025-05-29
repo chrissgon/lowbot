@@ -3,7 +3,6 @@ package lowbot
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"maps"
 	"net/http"
 	"time"
@@ -69,7 +68,6 @@ func RunActionFile(flow *Flow, channel IChannel, interaction Interaction) (bool,
 
 	text := ParseTemplate(step.Parameters.Texts)
 
-	fmt.Println("RunActionFile", step.Parameters.Path, step.Parameters.URL)
 	answerInteraction := NewInteractionMessageFile(text, step.Parameters.Path, step.Parameters.URL)
 	answerInteraction.SetFrom(interaction.From)
 	answerInteraction.SetTo(interaction.To)

@@ -3,7 +3,7 @@ name: flow
 steps:
   init:
     next:
-      default: document
+      default: button
 
   audio:
     next:
@@ -39,8 +39,7 @@ steps:
       default: text
     action: File
     parameters:
-      path: lion.jpeg
-      url: http://localhost:4566/botfly-bucket/c6502d92-1c92-4ae1-9317-898b654754e1/1748481813273_lion.jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=localstack%2F20250529%2Fsa-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250529T012425Z&X-Amz-Expires=3600&X-Amz-Signature=a24dd66e07562ad8dea0914da178d0414ae4f77ac2dd311346fa07a9f6d29424&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+      path: ../../../mocks/image.jpg
       texts:
         - caption
 
