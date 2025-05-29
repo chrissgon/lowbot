@@ -36,7 +36,7 @@ type InteractionParameters struct {
 
 func NewInteractionMessageButton(buttons []string, text string) Interaction {
 	return Interaction{
-		Type: MESSAGE_BUTTON,
+		Type:      MESSAGE_BUTTON,
 		Timestamp: time.Now().Unix(),
 		Parameters: InteractionParameters{
 			Text:    text,
@@ -48,7 +48,7 @@ func NewInteractionMessageButton(buttons []string, text string) Interaction {
 
 func NewInteractionMessageFile(text, path, url string) Interaction {
 	return Interaction{
-		Type: MESSAGE_FILE,
+		Type:      MESSAGE_FILE,
 		Timestamp: time.Now().Unix(),
 		Parameters: InteractionParameters{
 			Text: text,
@@ -60,7 +60,7 @@ func NewInteractionMessageFile(text, path, url string) Interaction {
 
 func NewInteractionMessageText(text string) Interaction {
 	return Interaction{
-		Type: MESSAGE_TEXT,
+		Type:      MESSAGE_TEXT,
 		Timestamp: time.Now().Unix(),
 		Parameters: InteractionParameters{
 			Text: text,

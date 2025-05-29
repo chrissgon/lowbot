@@ -28,14 +28,14 @@ type Step struct {
 }
 
 type StepParameters struct {
-	Buttons []string `yaml:"buttons" json:"buttons"`
-	Path    string   `yaml:"path" json:"path"`
-	URL    string   `yaml:"url" json:"url"`
-	Text    string   `yaml:"text" json:"text"`
-	Texts   []string `yaml:"texts" json:"texts"`
+	Buttons []string          `yaml:"buttons" json:"buttons"`
+	Path    string            `yaml:"path" json:"path"`
+	URL     string            `yaml:"url" json:"url"`
+	Text    string            `yaml:"text" json:"text"`
+	Texts   []string          `yaml:"texts" json:"texts"`
 	Headers map[string]string `yaml:"headers" json:"headers"`
 	Timeout int               `yaml:"timeout" json:"timeout"`
-	Custom map[string]any `yaml:"custom" json:"custom"`
+	Custom  map[string]any    `yaml:"custom" json:"custom"`
 }
 
 type Steps map[string]Step

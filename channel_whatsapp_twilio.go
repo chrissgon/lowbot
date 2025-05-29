@@ -119,12 +119,12 @@ func (channel *WhatsappTwilioChannel) SendAudio(interaction Interaction) error {
 }
 
 func (channel *WhatsappTwilioChannel) SendButton(interaction Interaction) error {
-	step, err := GetCurrentStep(interaction.From.WhoID) 
+	step, err := GetCurrentStep(interaction.From.WhoID)
 
 	if err != nil {
 		return err
 	}
-	
+
 	_, contentSIDExists := step.Parameters.Custom["contentSID"]
 	_, contentVariablesExists := step.Parameters.Custom["contentVariable"]
 

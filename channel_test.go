@@ -7,10 +7,10 @@ import (
 )
 
 var (
-	channelCount                            = 0
-	channelLastMethodCalled                 = ""
+	channelCount                           = 0
+	channelLastMethodCalled                = ""
 	channelLastInteractionSent Interaction = Interaction{}
-	channelTriggerError                     = true
+	channelTriggerError                    = true
 
 	ErrMock = fmt.Errorf("error mock")
 )

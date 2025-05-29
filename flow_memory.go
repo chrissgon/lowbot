@@ -4,7 +4,7 @@ type MemoryFlowPersist struct {
 	Sessions map[any]*Flow
 }
 
-func NewMemoryFlowPersist() (IFlowPersist) {
+func NewMemoryFlowPersist() IFlowPersist {
 	memory := &MemoryFlowPersist{Sessions: map[any]*Flow{}}
 
 	return memory
