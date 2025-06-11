@@ -3,7 +3,7 @@ name: flow
 steps:
   init:
     next:
-      default: button
+      default: audio
 
   audio:
     next:

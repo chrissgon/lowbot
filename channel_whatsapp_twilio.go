@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -20,23 +21,32 @@ type WhatsappTwilioChannel struct {
 	number string
 }
 
-var whatsappTwilioCallbacks map[string]func(c *gin.Context) error = map[string]func(c *gin.Context) error{}
+type WhatsappTwilioNumbersManager struct {
+	callback   func(c *gin.Context) error
+	statusChan chan string
+}
+
+var whatsappTwilioNumbersManager map[string]WhatsappTwilioNumbersManager = map[string]WhatsappTwilioNumbersManager{}
 var whatsappTwilioCallbacksMutex = sync.Mutex{}
+var WhatsappTwilioReplyDuration time.Duration = 4 * time.Second
+var WhatsappTwilioDefaultPath string = "/runner/whatsapp/twilio"
 
 func InitWhatsappTwilioChannel(webhook *gin.Engine, path string) {
-	webhook.POST(fmt.Sprintf("%s/:ID", path), func(c *gin.Context) {
+	WhatsappTwilioDefaultPath = path
+
+	webhook.POST(fmt.Sprintf("%s/:ID", WhatsappTwilioDefaultPath), func(c *gin.Context) {
 		whatsappTwilioCallbacksMutex.Lock()
 		defer whatsappTwilioCallbacksMutex.Unlock()
 
 		ID := c.Param("ID")
-		callback, exists := whatsappTwilioCallbacks[ID]
+		manager, exists := whatsappTwilioNumbersManager[ID]
 
 		if !exists {
 			c.Status(http.StatusNotFound)
 			return
 		}
 
-		err := callback(c)
+		err := manager.callback(c)
 
 		if err != nil {
 			c.String(http.StatusInternalServerError, err.Error())
@@ -45,6 +55,29 @@ func InitWhatsappTwilioChannel(webhook *gin.Engine, path string) {
 
 		c.Status(http.StatusOK)
 	})
+
+	go func() {
+		webhook.POST(fmt.Sprintf("%s/:ID/status", WhatsappTwilioDefaultPath), func(c *gin.Context) {
+			whatsappTwilioCallbacksMutex.Lock()
+			defer whatsappTwilioCallbacksMutex.Unlock()
+
+			ID := c.Param("ID")
+			manager, exists := whatsappTwilioNumbersManager[ID]
+
+			if !exists {
+				c.Status(http.StatusNotFound)
+				return
+			}
+
+			status := c.PostForm("MessageStatus")
+
+			if status == "delivered" {
+				manager.statusChan <- status
+			}
+
+			c.Status(http.StatusOK)
+		})
+	}()
 }
 
 func NewWhatsappTwilioChannel(number, token, SID string) (IChannel, error) {
@@ -78,19 +111,23 @@ func (channel *WhatsappTwilioChannel) Start() error {
 	whatsappTwilioCallbacksMutex.Lock()
 	defer whatsappTwilioCallbacksMutex.Unlock()
 
-	whatsappTwilioCallbacks[channel.number] = func(c *gin.Context) error {
-		message := c.PostForm("Body")
-		from := c.PostForm("From")
-		to := c.PostForm("To")
+	whatsappTwilioNumbersManager[channel.number] = WhatsappTwilioNumbersManager{
+		statusChan: make(chan string),
 
-		interaction := NewInteractionMessageText(message)
+		callback: func(c *gin.Context) error {
+			message := c.PostForm("Body")
+			from := c.PostForm("From")
+			to := c.PostForm("To")
 
-		interaction.SetFrom(NewWho(from, from))
-		interaction.SetTo(NewWho(to, to))
+			interaction := NewInteractionMessageText(message)
 
-		channel.Broadcast.Send(interaction)
+			interaction.SetFrom(NewWho(from, from))
+			interaction.SetTo(NewWho(to, to))
 
-		return nil
+			channel.Broadcast.Send(interaction)
+
+			return nil
+		},
 	}
 
 	channel.Running = true
@@ -163,24 +200,33 @@ func (channel *WhatsappTwilioChannel) SendButton(interaction Interaction) error 
 }
 
 func (channel *WhatsappTwilioChannel) SendDocument(interaction Interaction) error {
+	err := channel.SendText(interaction)
+
+	if err != nil {
+		return err
+	}
+
 	to := interaction.From.WhoID
 	from := interaction.To.WhoID
 
-	if !IsURL(interaction.Parameters.File.GetFile().Path) {
+	if !IsURL(interaction.Parameters.File.GetFile().URL) {
 		return ERR_FILE_NOT_PUBLIC
 	}
 
 	params := &openapi.CreateMessageParams{}
 	params.SetTo(to)
 	params.SetFrom(from)
-	params.SetBody(interaction.Parameters.Text)
 	params.SetMediaUrl([]string{
-		interaction.Parameters.File.GetFile().Path,
+		interaction.Parameters.File.GetFile().URL,
 	})
 
-	_, err := channel.conn.Api.CreateMessage(params)
+	_, err = channel.conn.Api.CreateMessage(params)
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	return channel.getMessageStatus(interaction)
 }
 
 func (channel *WhatsappTwilioChannel) SendImage(interaction Interaction) error {
@@ -202,9 +248,32 @@ func (channel *WhatsappTwilioChannel) SendText(interaction Interaction) error {
 
 	_, err := channel.conn.Api.CreateMessage(params)
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	return channel.getMessageStatus(interaction)
 }
 
 func (channel *WhatsappTwilioChannel) SendVideo(interaction Interaction) error {
 	return channel.SendDocument(interaction)
+}
+
+func (channel *WhatsappTwilioChannel) getMessageStatus(interaction Interaction) error {
+	from := interaction.To.WhoID
+
+	ID := strings.Split(from, ":")[1]
+	manager, exists := whatsappTwilioNumbersManager[ID]
+
+	if !exists {
+		return fmt.Errorf("unknown number")
+	}
+
+	status := <-manager.statusChan
+
+	if status != "delivered" {
+		return fmt.Errorf("undelivered message")
+	}
+
+	return nil
 }

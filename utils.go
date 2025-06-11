@@ -16,7 +16,7 @@ func ParseTemplate(texts []string) string {
 }
 
 func IsURL(str string) bool {
-	matched, _ := regexp.MatchString(`^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$`, str)
+	matched, _ := regexp.MatchString(`^(?:https?://)?(?:[^/.\s]+\.).*`, str)
 	return matched
 }
 

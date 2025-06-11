@@ -161,6 +161,9 @@ func (channel *WhatsappMeowChannel) SendAudio(interaction Interaction) error {
 		return err
 	}
 
+	// sleep to look like a human reply
+	time.Sleep(WhatsMeowReplyDuration)
+
 	err = interaction.Parameters.File.Read()
 
 	if err != nil {
@@ -186,9 +189,6 @@ func (channel *WhatsappMeowChannel) SendAudio(interaction Interaction) error {
 
 	JID := interaction.From.Custom["JID"].(types.JID)
 
-	// sleep to look like a human reply
-	time.Sleep(WhatsMeowReplyDuration)
-
 	_, err = channel.conn.SendMessage(channel.ctx, JID, &waE2E.Message{
 		AudioMessage: message,
 	})
@@ -213,6 +213,9 @@ func (channel *WhatsappMeowChannel) SendButton(interaction Interaction) error {
 }
 
 func (channel *WhatsappMeowChannel) SendDocument(interaction Interaction) error {
+	// sleep to look like a human reply
+	time.Sleep(WhatsMeowReplyDuration)
+
 	err := interaction.Parameters.File.Read()
 
 	if err != nil {
@@ -229,6 +232,7 @@ func (channel *WhatsappMeowChannel) SendDocument(interaction Interaction) error 
 		Title:    proto.String(interaction.Parameters.File.GetFile().Name),
 		Caption:  proto.String(interaction.Parameters.Text),
 		Mimetype: proto.String(interaction.Parameters.File.GetFile().Mime),
+		FileName: proto.String(interaction.Parameters.File.GetFile().Name),
 
 		URL:           &resp.URL,
 		DirectPath:    &resp.DirectPath,
@@ -240,9 +244,6 @@ func (channel *WhatsappMeowChannel) SendDocument(interaction Interaction) error 
 
 	JID := interaction.From.Custom["JID"].(types.JID)
 
-	// sleep to look like a human reply
-	time.Sleep(WhatsMeowReplyDuration)
-
 	_, err = channel.conn.SendMessage(channel.ctx, JID, &waE2E.Message{
 		DocumentMessage: message,
 	})
@@ -251,6 +252,9 @@ func (channel *WhatsappMeowChannel) SendDocument(interaction Interaction) error 
 }
 
 func (channel *WhatsappMeowChannel) SendImage(interaction Interaction) error {
+	// sleep to look like a human reply
+	time.Sleep(WhatsMeowReplyDuration)
+
 	err := interaction.Parameters.File.Read()
 
 	if err != nil {
@@ -277,9 +281,6 @@ func (channel *WhatsappMeowChannel) SendImage(interaction Interaction) error {
 
 	JID := interaction.From.Custom["JID"].(types.JID)
 
-	// sleep to look like a human reply
-	time.Sleep(WhatsMeowReplyDuration)
-
 	_, err = channel.conn.SendMessage(channel.ctx, JID, &waE2E.Message{
 		ImageMessage: message,
 	})
@@ -288,14 +289,14 @@ func (channel *WhatsappMeowChannel) SendImage(interaction Interaction) error {
 }
 
 func (channel *WhatsappMeowChannel) SendText(interaction Interaction) error {
+	// sleep to look like a human reply
+	time.Sleep(WhatsMeowReplyDuration)
+
 	if interaction.IsEmptyText() {
 		return nil
 	}
 
 	JID := interaction.From.Custom["JID"].(types.JID)
-
-	// sleep to look like a human reply
-	time.Sleep(WhatsMeowReplyDuration)
 
 	_, err := channel.conn.SendMessage(channel.ctx, JID, &waE2E.Message{
 		Conversation: &interaction.Parameters.Text,
@@ -305,6 +306,9 @@ func (channel *WhatsappMeowChannel) SendText(interaction Interaction) error {
 }
 
 func (channel *WhatsappMeowChannel) SendVideo(interaction Interaction) error {
+	// sleep to look like a human reply
+	time.Sleep(WhatsMeowReplyDuration)
+
 	err := interaction.Parameters.File.Read()
 
 	if err != nil {
@@ -330,9 +334,6 @@ func (channel *WhatsappMeowChannel) SendVideo(interaction Interaction) error {
 	}
 
 	JID := interaction.From.Custom["JID"].(types.JID)
-
-	// sleep to look like a human reply
-	time.Sleep(WhatsMeowReplyDuration)
 
 	_, err = channel.conn.SendMessage(channel.ctx, JID, &waE2E.Message{
 		VideoMessage: message,
