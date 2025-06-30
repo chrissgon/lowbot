@@ -3,10 +3,10 @@ package lowbot
 import (
 	"fmt"
 	"io"
-	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"slices"
 
@@ -43,10 +43,87 @@ const (
 	FILETYPE_VIDEO    FileType = "FILETYPE_VIDEO"
 )
 
+var CommonMIMETypes = map[string]string{
+	// Images
+	".jpg":  "image/jpeg",
+	".jpeg": "image/jpeg",
+	".png":  "image/png",
+	".gif":  "image/gif",
+	".bmp":  "image/bmp",
+	".webp": "image/webp",
+	".tiff": "image/tiff",
+	".ico":  "image/x-icon",
+	".svg":  "image/svg+xml",
+	".apng": "image/apng",
+	".avif": "image/avif",
+
+	// Audio
+	".mp3":  "audio/mpeg",
+	".wav":  "audio/wav",
+	".ogg":  "audio/ogg",
+	".oga":  "audio/ogg",
+	".opus": "audio/opus",
+	".aac":  "audio/aac",
+	".m4a":  "audio/mp4",
+	".weba": "audio/webm",
+	".flac": "audio/flac",
+
+	// Video
+	".mp4":  "video/mp4",
+	".mov":  "video/quicktime",
+	".wmv":  "video/x-ms-wmv",
+	".avi":  "video/x-msvideo",
+	".webm": "video/webm",
+	".flv":  "video/x-flv",
+	".mkv":  "video/x-matroska",
+	".mpeg": "video/mpeg",
+	".ogv":  "video/ogg",
+
+	// Documents
+	".pdf":  "application/pdf",
+	".doc":  "application/msword",
+	".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+	".xls":  "application/vnd.ms-excel",
+	".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+	".ppt":  "application/vnd.ms-powerpoint",
+	".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+	".odt":  "application/vnd.oasis.opendocument.text",
+
+	// Text & Code
+	".txt":  "text/plain",
+	".csv":  "text/csv",
+	".html": "text/html",
+	".htm":  "text/html",
+	".css":  "text/css",
+	".js":   "application/javascript",
+	".json": "application/json",
+	".xml":  "application/xml",
+	".yaml": "text/yaml",
+	".yml":  "text/yaml",
+
+	// Archives
+	".zip": "application/zip",
+	".rar": "application/vnd.rar",
+	".tar": "application/x-tar",
+	".gz":  "application/gzip",
+	".7z":  "application/x-7z-compressed",
+
+	// Fonts
+	".ttf":   "font/ttf",
+	".otf":   "font/otf",
+	".woff":  "font/woff",
+	".woff2": "font/woff2",
+
+	// Others
+	".apk": "application/vnd.android.package-archive",
+	".exe": "application/vnd.microsoft.portable-executable",
+	".swf": "application/x-shockwave-flash",
+}
+
 var (
-	FILETYPE_AUDIO_EXT = []string{".aac", ".mp3", ".oga", ".opus", ".wav", ".weba", ".cda"}
-	FILETYPE_IMAGE_EXT = []string{".apng", ".avif", ".gif", ".jpg", ".jpeg", ".png", ".svg", ".webp"}
-	FILETYPE_VIDEO_EXT = []string{".avi", ".mp4", ".mpeg", ".ogv", ".webm"}
+	FILETYPE_AUDIO_EXT = []string{".mp3", ".wav", ".ogg", ".oga", ".opus", ".aac", ".m4a", ".weba", ".flac"}
+	FILETYPE_IMAGE_EXT = []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".tiff", ".ico", ".svg", ".apng", ".avif"}
+	FILETYPE_VIDEO_EXT = []string{".mp4", ".mov", ".wmv", ".avi", ".webm", ".flv", ".mkv", ".mpeg", ".ogv"}
 )
 
 func NewFile(path, url string) IFile {
@@ -58,7 +135,7 @@ func NewFile(path, url string) IFile {
 
 	file.Extension = filepath.Ext(path)
 	file.Name = filepath.Base(path)
-	file.Mime = mime.TypeByExtension(file.Extension)
+	file.Mime = GetMIMEByExtension(path)
 
 	file.SetFilePath(path)
 	file.SetFileType()
@@ -135,4 +212,12 @@ func (file *File) IsImage() bool {
 
 func (file *File) IsVideo() bool {
 	return file.FileType == FILETYPE_VIDEO
+}
+
+func GetMIMEByExtension(filename string) string {
+	ext := strings.ToLower(filepath.Ext(filename))
+	if mime, ok := CommonMIMETypes[ext]; ok {
+		return mime
+	}
+	return "application/octet-stream"
 }
