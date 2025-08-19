@@ -152,6 +152,12 @@ func (channel *WhatsappTwilioChannel) Stop() error {
 }
 
 func (channel *WhatsappTwilioChannel) SendAudio(interaction Interaction) error {
+	err := channel.SendText(interaction)
+
+	if err != nil {
+		return err
+	}
+
 	return channel.SendDocument(interaction)
 }
 
@@ -200,12 +206,6 @@ func (channel *WhatsappTwilioChannel) SendButton(interaction Interaction) error 
 }
 
 func (channel *WhatsappTwilioChannel) SendDocument(interaction Interaction) error {
-	err := channel.SendText(interaction)
-
-	if err != nil {
-		return err
-	}
-
 	to := interaction.From.WhoID
 	from := interaction.To.WhoID
 
@@ -216,11 +216,12 @@ func (channel *WhatsappTwilioChannel) SendDocument(interaction Interaction) erro
 	params := &openapi.CreateMessageParams{}
 	params.SetTo(to)
 	params.SetFrom(from)
+	params.SetBody(interaction.Parameters.Text)
 	params.SetMediaUrl([]string{
 		interaction.Parameters.File.GetFile().URL,
 	})
 
-	_, err = channel.conn.Api.CreateMessage(params)
+	_, err := channel.conn.Api.CreateMessage(params)
 
 	if err != nil {
 		return err

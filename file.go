@@ -162,7 +162,7 @@ func (file *File) Read() error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("ERROR TO GET FILE: %s", resp.Status)
+		return fmt.Errorf("ERROR TO GET FILE: %s: %s", resp.Status, file.URL)
 	}
 
 	file.Bytes, file.Err = io.ReadAll(resp.Body)
